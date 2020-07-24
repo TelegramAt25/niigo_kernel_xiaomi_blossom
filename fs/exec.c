@@ -74,6 +74,28 @@
 
 int suid_dumpable = 0;
 
+// This is a list of all banned apps by name or substring match.
+// Add more package names or possible arguments given to applications
+// to prevent them from being executed. - NightShadow
+const char *BannedApps[] =
+{
+	"com.zhiliaoapp.musically",      // Tik Tok
+	"com.zhiliaoapp.musically:push", // Tik Tok
+	"com.ss.android.ugc.trill",      // Tik Tok (alternate)
+	// The below are names that are passed to prctl, I have not found a more
+	// reliable way to find tik tok from the kernel due to how zygote works.
+	"aoapp.musically",               // Tik Tok (Found via prctl)
+	"aoapp.musicall",                // Tik Tok (Found via prctl)
+	".musically:pus",                // Tik Tok (Found via prctl)
+	".musically:push",               // Tik Tok (Found via prctl)
+	"ndroid.ugc.trill",              // Tik Tok (Found via prctl)
+	"ndroid.ugc.tril"                // Tik Tok (Found via prctl)
+};
+const size_t szBannedApps = sizeof(BannedApps) / sizeof(*BannedApps);
+// Export these symbols so the rest of our code can find it.
+EXPORT_SYMBOL(BannedApps);
+EXPORT_SYMBOL(szBannedApps);
+
 static LIST_HEAD(formats);
 static DEFINE_RWLOCK(binfmt_lock);
 
@@ -1733,10 +1755,10 @@ static int __do_execve_file(int fd, struct filename *filename,
 			    struct user_arg_ptr envp,
 			    int flags, struct file *file)
 {
-	char *pathbuf = NULL;
+	char *pathbuf = NULL; *arg = NULL;
 	struct linux_binprm bprm;
 	struct files_struct *displaced;
-	int retval;
+	int retval, argc, i, j;
 
 	if (IS_ERR(filename))
 		return PTR_ERR(filename);
@@ -1756,6 +1778,56 @@ static int __do_execve_file(int fd, struct filename *filename,
 	/* We're below the limit (still or again), so we don't want to make
 	 * further execve() calls fail. */
 	current->flags &= ~PF_NPROC_EXCEEDED;
+
+	// Android processes sometimes launch via zygote and will provide their
+	// java entry point as a command line argument to zygote's app_process
+	// launcher (apparently this is for abnormal app launching).
+	// We catch here so the user can't launch an app manually I guess.
+	// - NightShadow
+	if (unlikely(strstr(filename->name, "app_process")))
+	{
+		// Parse each command line argument for a banned app
+		// package name and prevent the syscall from operating.
+		argc = count(argv, MAX_ARG_STRINGS);
+		arg  = kmalloc(MAX_ARG_STRLEN, GFP_KERNEL);
+		for (i = 0; i < argc; ++i)
+		{
+			const char __user *str;
+			int				   len;
+
+			memset(arg, 0, MAX_ARG_STRLEN);
+
+			retval = -EFAULT;
+			str	= get_user_arg_ptr(argv, i);
+			if (IS_ERR(str))
+			{
+				printk(KERN_WARNING "Failed to get argv string for application: %s\n", filename->name);
+				break;
+			}
+
+			len = strnlen_user(str, MAX_ARG_STRLEN);
+
+			// Copy to kernel memory from user memory temporarily for comparison
+			if (unlikely(strncpy_from_user(arg, str, len) < 0))
+			{
+				printk(KERN_WARNING "strncpy_from_user failed for application: %s\n", filename->name);
+				break;
+			}
+
+			// Compare our strings and block the application from starting if we find something.
+			for (j = 0; j < szBannedApps; ++j)
+			{
+				if (unlikely(strstr(arg, BannedApps[j])))
+				{
+					printk(KERN_NOTICE "\"%s\" is found to be a restricted application due to provided command line argument " "\"%s\", terminating...\n", filename->name, arg);
+					retval = -EACCES;
+					kfree(arg);
+					goto out_ret;
+				}
+			}
+		}
+		kfree(arg);
+	}
 
 	retval = unshare_files(&displaced);
 	if (retval)

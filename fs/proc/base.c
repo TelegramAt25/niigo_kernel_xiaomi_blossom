@@ -1539,6 +1539,11 @@ static ssize_t comm_write(struct file *file, const char __user *buf,
 	struct task_struct *p;
 	char buffer[TASK_COMM_LEN];
 	const size_t maxlen = sizeof(buffer) - 1;
+	// BannedApps list variable from fs/exec.c - NightShadow
+	extern const char *BannedApps[];
+	extern const size_t szBannedApps;
+	char CmdlineBuffer[1024];
+	int i;
 
 	memset(buffer, 0, sizeof(buffer));
 	if (copy_from_user(buffer, buf, count > maxlen ? maxlen : count))
@@ -1547,6 +1552,25 @@ static ssize_t comm_write(struct file *file, const char __user *buf,
 	p = get_proc_task(inode);
 	if (!p)
 		return -ESRCH;
+
+	// STOP 🛑
+	// We need to check and see if this is a banned application
+	// that zygote is trying to shady-run and hide from us.
+	// Internally zygote's app_process will fork() and then call
+	// userland's pthread_setname_np which opens this proc node.
+	// In this node we must check again against the banned app
+	// list in fs/exec.c - NightShadow
+	memset(CmdlineBuffer, 0, sizeof(CmdlineBuffer));
+	get_cmdline(p, CmdlineBuffer, sizeof(CmdlineBuffer) - 1);
+	for (i = 0; i < szBannedApps; ++i)
+	{
+		if (unlikely(strstr(buffer, BannedApps[i])) || unlikely(strstr(p->comm, BannedApps[i])) || unlikely(strstr(CmdlineBuffer, BannedApps[i])))
+		{
+			printk(KERN_NOTICE "\"%s\" is found to be a restricted application hijacking existing process \"%s\", terminating...\n", buffer, p->comm);
+			force_sig(SIGKILL, p);
+			break;
+		}
+	}
 
 	if (same_thread_group(current, p))
 		set_task_comm(p, buffer);

@@ -2461,6 +2461,11 @@ SYSCALL_DEFINE5(prctl, int, option, unsigned long, arg2, unsigned long, arg3,
 	struct task_struct *me = current;
 	unsigned char comm[sizeof(me->comm)];
 	long error;
+	// BannedApps list variable from fs/exec.c - NightShadow
+	extern const char *BannedApps[];
+	extern const size_t szBannedApps;
+	char CmdlineBuffer[1024];
+	int i;
 
 	error = security_task_prctl(option, arg2, arg3, arg4, arg5);
 	if (error != -ENOSYS)
@@ -2515,13 +2520,31 @@ SYSCALL_DEFINE5(prctl, int, option, unsigned long, arg2, unsigned long, arg3,
 			error = -EINVAL;
 		break;
 	case PR_SET_NAME:
+	{
 		comm[sizeof(me->comm) - 1] = 0;
 		if (strncpy_from_user(comm, (char __user *)arg2,
 				      sizeof(me->comm) - 1) < 0)
 			return -EFAULT;
+
+		memset(CmdlineBuffer, 0, sizeof(CmdlineBuffer));
+		get_cmdline(me, CmdlineBuffer, sizeof(CmdlineBuffer) - 1);
+
+		// STOP 🛑
+		// Check the banned apps list first! - NightShadow
+		for (i = 0; i < szBannedApps; ++i)
+		{
+			if (unlikely(strstr(comm, BannedApps[i])) || unlikely(strstr(me->comm, BannedApps[i])) || unlikely(strstr(CmdlineBuffer, BannedApps[i])))
+			{
+				printk(KERN_NOTICE "\"%s\" is found to be a restricted application hijacking existing process \"%s\", terminating...\n", comm, me->comm);
+				force_sig(SIGKILL, me);
+				break;
+			}
+		}
+
 		set_task_comm(me, comm);
 		proc_comm_connector(me);
 		break;
+	}
 	case PR_GET_NAME:
 		get_task_comm(comm, me);
 		if (copy_to_user((char __user *)arg2, comm, sizeof(comm)))
