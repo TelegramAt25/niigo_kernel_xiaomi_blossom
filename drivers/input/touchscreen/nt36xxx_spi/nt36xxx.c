@@ -1307,9 +1307,6 @@ static irqreturn_t nvt_ts_work_func(int irq, void *data)
 	int32_t i = 0;
 	int32_t finger_cnt = 0;
 
-	struct sched_param param = { .sched_priority = MAX_USER_RT_PRIO / 2 };
-	sched_setscheduler(current, SCHED_FIFO, &param);
-
 #if WAKEUP_GESTURE
 #ifdef CONFIG_PM
 	if (ts->dev_pm_suspend && ts->is_gesture_mode) {
