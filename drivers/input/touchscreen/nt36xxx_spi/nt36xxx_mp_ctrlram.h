@@ -17,7 +17,7 @@
  *
  */
 
-#if NVT_TOUCH_MP
+#ifdef CONFIG_TOUCHSCREEN_NT36XXX_HOSTDL_SPI_MP_CTRLRAM
 
 static uint32_t IC_X_CFG_SIZE = 18;
 static uint32_t IC_Y_CFG_SIZE = 32;
@@ -414,4 +414,4 @@ static int32_t PS_Config_Lmt_FW_Diff_N[40 *40] = {
 
 static int32_t PS_Config_Diff_Test_Frame = 50;
 
-#endif /* #if NVT_TOUCH_MP */
+#endif /* #ifdef CONFIG_TOUCHSCREEN_NT36XXX_HOSTDL_SPI_MP_CTRLRAM */
