@@ -440,7 +440,7 @@ int rpmh_rsc_send_data(struct rsc_drv *drv, const struct tcs_request *msg)
 	do {
 		ret = tcs_write(drv, msg);
 		if (ret == -EBUSY) {
-			pr_info_ratelimited("TCS Busy, retrying RPMH message send: addr=%#x\n",
+			pr_debug("TCS Busy, retrying RPMH message send: addr=%#x\n",
 					    msg->cmds[0].addr);
 			udelay(10);
 		}
