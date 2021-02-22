@@ -67,7 +67,9 @@ obj-y += mmdvfs/
 obj-$(CONFIG_MTK_IOMMU_MISC) += iommu/
 obj-$(CONFIG_INTERCONNECT_MTK_MMQOS_COMMON) += mmqos/
 obj-$(CONFIG_MTK_PERF_COMMON) += perf_common/
+ifneq ($(CONFIG_MTK_SYSTRACKER_DISABLE),y)
 obj-$(CONFIG_MTK_SYSTRACKER_V2) += systracker/
+endif
 obj-$(CONFIG_MTK_HANG_DETECT) += monitor_hang/
 obj-$(CONFIG_MTK_POWER_THROTTLING_COMMON) += power_throttling/
 
