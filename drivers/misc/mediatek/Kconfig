@@ -23,6 +23,7 @@ config FPGA_EARLY_PORTING
 
 config MTK_ENG_BUILD
 	bool "MTK Engineer Build"
+	default n
 	help
 	  This is an option for developers. Say Y here for MTK engineering
 	  mode, which will have more debugging features built-in.
