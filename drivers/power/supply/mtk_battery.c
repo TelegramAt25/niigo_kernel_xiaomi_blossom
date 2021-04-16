@@ -2375,20 +2375,6 @@ void fg_drv_update_hw_status(struct mtk_battery *gm)
 	hrtimer_start(&gm->fg_hrtimer, ktime, HRTIMER_MODE_REL);
 }
 
-int battery_update_routine(void *arg)
-{
-	struct mtk_battery *gm = (struct mtk_battery *)arg;
-
-	battery_update_psd(gm);
-	while (1) {
-		bm_err("%s\n", __func__);
-		wait_event(gm->wait_que, (gm->fg_update_flag > 0));
-		gm->fg_update_flag = 0;
-
-		fg_drv_update_hw_status(gm);
-	}
-}
-
 void fg_update_routine_wakeup(struct mtk_battery *gm)
 {
 	bm_err("%s\n", __func__);
@@ -3141,7 +3127,6 @@ int battery_init(struct platform_device *pdev)
 	INIT_WORK(&gm->sw_uisoc_timer_work, sw_uisoc_timer_work_handler);
 
 
-	kthread_run(battery_update_routine, gm, "battery_thread");
 	fg_drv_thread_hrtimer_init(gm);
 	battery_sysfs_create_group(gm->bs_data.psy);
 	gm->is_probe_done = true;
