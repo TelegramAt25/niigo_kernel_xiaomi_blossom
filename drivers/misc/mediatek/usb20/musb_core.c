@@ -2545,6 +2545,8 @@ static int musb_init_controller
 #endif
 
 	status = musb_gadget_setup(musb);
+	if (status < 0)
+		goto fail3;
 
 	/* only enable on iddig mode */
 #ifndef CONFIG_MTK_USB_TYPEC
@@ -2556,9 +2558,6 @@ static int musb_init_controller
 	/*initial done, turn off usb */
 	musb_platform_disable(musb);
 	musb_platform_unprepare_clk(musb);
-
-	if (status < 0)
-		goto fail3;
 
 #ifdef CONFIG_DEBUG_FS
 	status = musb_init_debugfs(musb);
