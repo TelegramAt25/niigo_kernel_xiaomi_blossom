@@ -34,27 +34,27 @@ char __attribute__((weak)) *spm_vcorefs_dump_dvfs_regs(char *p)
 
 void __attribute__((weak)) mt_cirq_clone_gic(void)
 {
-	printk_deferred("[name:spm&][SPM] NO %s !!!\n", __func__);
+	pr_debug("[name:spm&][SPM] NO %s !!!\n", __func__);
 }
 
 void __attribute__((weak)) mt_cirq_enable(void)
 {
-	printk_deferred("[name:spm&][SPM] NO %s !!!\n", __func__);
+	pr_debug("[name:spm&][SPM] NO %s !!!\n", __func__);
 }
 
 void __attribute__((weak)) mt_cirq_flush(void)
 {
-	printk_deferred("[name:spm&][SPM] NO %s !!!\n", __func__);
+	pr_debug("[name:spm&][SPM] NO %s !!!\n", __func__);
 }
 
 void __attribute__((weak)) mt_cirq_disable(void)
 {
-	printk_deferred("[name:spm&][SPM] NO %s !!!\n", __func__);
+	pr_debug("[name:spm&][SPM] NO %s !!!\n", __func__);
 }
 
 void __attribute__((weak)) set_wakeup_sources(u32 *list, u32 num_events)
 {
-	printk_deferred("[name:spm&]NO %s !!!\n", __func__);
+	pr_debug("[name:spm&]NO %s !!!\n", __func__);
 }
 
 /***************************************************

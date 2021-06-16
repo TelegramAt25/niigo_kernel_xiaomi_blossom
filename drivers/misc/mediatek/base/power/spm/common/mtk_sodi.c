@@ -48,7 +48,7 @@ void mtk_sodi_disable(void)
 /* for display use, abandoned 'spm_enable_sodi' */
 void mtk_idle_disp_is_ready(bool enable)
 {
-	printk_deferred("[name:spm&]Power/swap - %s not support anymore!\n"
+	pr_debug("[name:spm&]Power/swap - %s not support anymore!\n"
 			, __func__);
 }
 
