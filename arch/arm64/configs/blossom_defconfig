@@ -1,6 +1,6 @@
 #
 # Automatically generated file; DO NOT EDIT.
-# Linux/arm64 4.19.275 Kernel Configuration
+# Linux/arm64 4.19.279 Kernel Configuration
 #
 
 #
@@ -1221,7 +1221,6 @@ CONFIG_NET_SCH_INGRESS=y
 #
 CONFIG_NET_CLS=y
 # CONFIG_NET_CLS_BASIC is not set
-# CONFIG_NET_CLS_TCINDEX is not set
 # CONFIG_NET_CLS_ROUTE4 is not set
 CONFIG_NET_CLS_FW=y
 CONFIG_NET_CLS_U32=y
@@ -3267,7 +3266,6 @@ CONFIG_DRM_PANEL_BRIDGE=y
 # CONFIG_DRM_HISI_HIBMC is not set
 # CONFIG_DRM_HISI_KIRIN is not set
 # CONFIG_DRM_MEDIATEK is not set
-# CONFIG_DRM_MXSFB is not set
 # CONFIG_DRM_TINYDRM is not set
 # CONFIG_DRM_PL111 is not set
 # CONFIG_DRM_LEGACY is not set
@@ -5076,13 +5074,7 @@ CONFIG_PSTORE_PMSG=y
 CONFIG_PSTORE_RAM=y
 # CONFIG_SYSV_FS is not set
 # CONFIG_UFS_FS is not set
-CONFIG_NETWORK_FILESYSTEMS=y
-# CONFIG_NFS_FS is not set
-# CONFIG_NFSD is not set
-# CONFIG_CEPH_FS is not set
-# CONFIG_CIFS is not set
-# CONFIG_CODA_FS is not set
-# CONFIG_AFS_FS is not set
+# CONFIG_NETWORK_FILESYSTEMS is not set
 CONFIG_NLS=y
 CONFIG_NLS_DEFAULT="iso8859-1"
 CONFIG_NLS_CODEPAGE_437=y
