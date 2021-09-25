@@ -13,9 +13,9 @@ int register_udc_func_deflateInit2(deflateInit2_cb_func_t func)
 
 	if (udc_func_table.deflateInit2 == NULL) {
 		udc_func_table.deflateInit2 = func;
-		pr_notice("%s success\n", __func__);
+		pr_debug("%s success\n", __func__);
 	} else {
-		pr_notice("%s fail: registered!\n", __func__);
+		pr_err("%s fail: registered!\n", __func__);
 		ret = -1;
 	}
 
@@ -36,7 +36,7 @@ int deflateInit2_cb(struct z_stream_s *strm,
 				ZLIB_VERSION, (int)sizeof(struct z_stream_s));
 	} else {
 		ret = -1;/* E_NO_EXIST */
-		pr_notice("exec %s fail: not register!\n", __func__);
+		pr_err("exec %s fail: not register!\n", __func__);
 	}
 	return ret;
 }
@@ -48,9 +48,9 @@ int register_udc_func_deflateSetDict(
 
 	if (udc_func_table.deflateSetDict == NULL) {
 		udc_func_table.deflateSetDict = func;
-		pr_notice("%s success\n", __func__);
+		pr_debug("%s success\n", __func__);
 	} else {
-		pr_notice("%s fail: registered!\n", __func__);
+		pr_err("%s fail: registered!\n", __func__);
 		ret = -1;
 	}
 
@@ -68,7 +68,7 @@ int deflateSetDictionary_cb(struct z_stream_s *strm,
 		ret = func(strm, dictionary, dictLength);
 	} else {
 		ret = -1;/* E_NO_EXIST */
-		pr_notice("exec %s fail: not register!\n", __func__);
+		pr_err("exec %s fail: not register!\n", __func__);
 	}
 	return ret;
 }
@@ -79,9 +79,9 @@ int register_udc_func_deflate(deflate_cb_func_t func)
 
 	if (udc_func_table.deflate == NULL) {
 		udc_func_table.deflate = func;
-		pr_notice("%s success\n", __func__);
+		pr_debug("%s success\n", __func__);
 	} else {
-		pr_notice("%s fail: registered!\n", __func__);
+		pr_err("%s fail: registered!\n", __func__);
 		ret = -1;
 	}
 
@@ -98,7 +98,7 @@ int deflate_cb(struct z_stream_s *strm, int flush)
 		ret = func(strm, flush);
 	} else {
 		ret = -1;//E_NO_EXIST
-		pr_notice("exec %s fail: not register!\n", __func__);
+		pr_err("exec %s fail: not register!\n", __func__);
 	}
 	return ret;
 }
@@ -109,9 +109,9 @@ int register_udc_func_deflateEnd(deflateEnd_cb_func_t func)
 
 	if (udc_func_table.deflateEnd == NULL) {
 		udc_func_table.deflateEnd = func;
-		pr_notice("%s success\n", __func__);
+		pr_debug("%s success\n", __func__);
 	} else {
-		pr_notice("%s fail: registered!\n", __func__);
+		pr_err("%s fail: registered!\n", __func__);
 		ret = -1;
 	}
 
@@ -128,7 +128,7 @@ int deflateEnd_cb(struct z_stream_s *strm)
 		ret = func(strm);
 	} else {
 		ret = -1;//E_NO_EXIST
-		pr_notice("exec %s fail: not register!\n", __func__);
+		pr_err("exec %s fail: not register!\n", __func__);
 	}
 	return ret;
 }
@@ -139,9 +139,9 @@ int register_udc_func_deflateReset(deflateReset_cb_func_t func)
 
 	if (udc_func_table.deflateReset == NULL) {
 		udc_func_table.deflateReset = func;
-		pr_notice("%s success\n", __func__);
+		pr_debug("%s success\n", __func__);
 	} else {
-		pr_notice("%s fail: registered!\n", __func__);
+		pr_err("%s fail: registered!\n", __func__);
 		ret = -1;
 	}
 
@@ -158,7 +158,7 @@ int deflateReset_cb(struct z_stream_s *strm)
 		ret = func(strm);
 	} else {
 		ret = -1;//E_NO_EXIST
-		pr_notice("exec %s fail: not register!\n", __func__);
+		pr_err("exec %s fail: not register!\n", __func__);
 	}
 	return ret;
 }
@@ -169,9 +169,9 @@ int register_udc_func_deflateBound(deflateBound_cb_func_t func)
 
 	if (udc_func_table.deflateBound == NULL) {
 		udc_func_table.deflateBound = func;
-		pr_notice("%s success\n", __func__);
+		pr_debug("%s success\n", __func__);
 	} else {
-		pr_notice("%s fail: registered!\n", __func__);
+		pr_err("%s fail: registered!\n", __func__);
 		ret = -1;
 	}
 
@@ -188,7 +188,7 @@ int deflateBound_cb(struct z_stream_s *strm, unsigned long sourceLen)
 		ret = func(strm, sourceLen);
 	} else {
 		ret = -1;//E_NO_EXIST
-		pr_notice("exec %s fail: not register!\n", __func__);
+		pr_err("exec %s fail: not register!\n", __func__);
 	}
 	return ret;
 }
@@ -199,9 +199,9 @@ int register_udc_func_udc_chksum(udc_chksum_cb_func_t func)
 
 	if (udc_func_table.udc_chksum == NULL) {
 		udc_func_table.udc_chksum = func;
-		pr_notice("%s success\n", __func__);
+		pr_debug("%s success\n", __func__);
 	} else {
-		pr_notice("%s fail: registered!\n", __func__);
+		pr_err("%s fail: registered!\n", __func__);
 		ret = -1;
 	}
 
@@ -218,7 +218,7 @@ int udc_chksum_cb(struct z_stream_s *strm)
 		ret = func(strm);
 	} else {
 		ret = -1;//E_NO_EXIST
-		pr_notice("exec %s fail: not register!\n", __func__);
+		pr_err("exec %s fail: not register!\n", __func__);
 	}
 	return ret;
 }
@@ -229,9 +229,9 @@ int register_udc_func_udc_QueryPara(udc_QueryPara_cb_func_t func)
 
 	if (udc_func_table.udc_QueryPara == NULL) {
 		udc_func_table.udc_QueryPara = func;
-		pr_notice("%s success\n", __func__);
+		pr_debug("%s success\n", __func__);
 	} else {
-		pr_notice("%s fail: registered!\n", __func__);
+		pr_err("%s fail: registered!\n", __func__);
 		ret = -1;
 	}
 
@@ -248,7 +248,7 @@ int udc_QueryPara_cb(struct z_stream_s *strm, int id, void *param)
 		ret = func(strm, id, param);
 	} else {
 		ret = -1;//E_NO_EXIST
-		pr_notice("exec %s fail: not register!\n", __func__);
+		pr_err("exec %s fail: not register!\n", __func__);
 	}
 	return ret;
 }
@@ -259,9 +259,9 @@ int register_udc_func_udc_GetCmpLen(udc_GetCmpLen_cb_func_t func)
 
 	if (udc_func_table.udc_GetCmpLen == NULL) {
 		udc_func_table.udc_GetCmpLen = func;
-		pr_notice("%s success\n", __func__);
+		pr_debug("%s success\n", __func__);
 	} else {
-		pr_notice("%s fail: registered!\n", __func__);
+		pr_err("%s fail: registered!\n", __func__);
 		ret = -1;
 	}
 
@@ -279,7 +279,7 @@ int udc_GetCmpLen_cb(struct z_stream_s *strm,
 		ret = func(strm, start, end);
 	} else {
 		ret = -1;//E_NO_EXIST
-		pr_notice("exec %s fail: not register!\n", __func__);
+		pr_err("exec %s fail: not register!\n", __func__);
 	}
 	return ret;
 }
@@ -351,7 +351,7 @@ int register_udc_functions(unsigned int id, void *f)
 		return register_udc_func_udc_GetCmpLen(func);
 	}
 	default:
-		pr_notice("udc func id %d not found\n", id);
+		pr_err("udc func id %d not found\n", id);
 		return -1;
 	}
 }

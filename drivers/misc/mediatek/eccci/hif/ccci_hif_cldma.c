@@ -1842,7 +1842,7 @@ static void cldma_irq_work(struct work_struct *work)
 
 void __weak dump_emi_latency(void)
 {
-	pr_notice("[ccci/dummy] %s is not supported!\n", __func__);
+	pr_err("[ccci/dummy] %s is not supported!\n", __func__);
 }
 
 static int cldma_stop(unsigned char hif_id)
