@@ -698,10 +698,14 @@ KBUILD_CFLAGS	+= $(call cc-disable-warning, int-in-bool-context)
 KBUILD_CFLAGS	+= $(call cc-disable-warning, address-of-packed-member)
 
 ifdef CONFIG_CC_OPTIMIZE_FOR_SIZE
-KBUILD_CFLAGS   += -Os
+KBUILD_CFLAGS	+= -Os
 else
-KBUILD_CFLAGS   += -O3
+OPT_FLAGS	:= -O3 -march=armv8-a+crc+crypto
+OPT_FLAGS	+= -mtune=cortex-a53
 endif
+
+KBUILD_CFLAGS	+= $(OPT_FLAGS)
+KBUILD_AFLAGS	+= $(OPT_FLAGS)
 
 # Tell gcc to never replace conditional load with a non-conditional one
 KBUILD_CFLAGS	+= $(call cc-option,--param=allow-store-data-races=0)
