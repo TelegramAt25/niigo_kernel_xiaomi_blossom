@@ -87,7 +87,7 @@
 
 /* To enable debug log: */
 /* # echo aal_dbg:1 > /sys/kernel/debug/dispsys */
-int aal_dbg_en;
+int aal_dbg_en = 0;
 
 #define AAL_ERR(fmt, arg...) pr_notice("[AAL] %s: " fmt "\n", __func__, ##arg)
 #define AAL_NOTICE(fmt, arg...) pr_info("[AAL] %s: " fmt "\n", __func__, ##arg)
