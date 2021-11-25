@@ -8,4 +8,6 @@ ccflags-y += \
 	-I$(srctree)/drivers/misc/mediatek/include/mt-plat/	\
 	-I$(srctree)/drivers/misc/mediatek/include/mt-plat/$(MTK_PLATFORM)/include/mach/	\
 
+ccflags-y += -Wno-fortify-source
+
 obj-y += mtk_udi.o
