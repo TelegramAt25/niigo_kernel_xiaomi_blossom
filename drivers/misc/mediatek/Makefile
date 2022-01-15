@@ -38,6 +38,7 @@ obj-y += devinfo/
 obj-y += subpmic/
 obj-$(CONFIG_MTK_TINYSYS_MCUPM_SUPPORT) += mcupm/
 obj-$(CONFIG_MTK_MET) += met_drv/
+obj-y += met_drv_v2/
 obj-$(CONFIG_MTK_BASE_POWER) += base/
 obj-$(CONFIG_MTK_SERIAL)	+= uart/
 obj-$(CONFIG_MTK_PWM)	    += pwm/
