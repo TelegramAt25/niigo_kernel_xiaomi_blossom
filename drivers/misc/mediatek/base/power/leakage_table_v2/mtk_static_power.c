@@ -493,7 +493,7 @@ int mt_spower_init(void)
 		err_flag = 1;
 		goto efuse_end;
 	}
-	pdev = of_platform_device_create(node, NULL, NULL);
+	pdev = of_device_alloc(node, NULL, NULL);
 	if (pdev == NULL) {
 		pr_notice("%s fail to create pdev\n", __func__);
 		err_flag = 2;
