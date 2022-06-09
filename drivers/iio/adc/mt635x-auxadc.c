@@ -24,7 +24,7 @@
 #include <dt-bindings/iio/mt635x-auxadc.h>
 #include <mt-plat/aee.h>
 
-#define AUXADC_DEBUG			1
+#define AUXADC_DEBUG			0
 #define AUXADC_RDY_BIT			BIT(15)
 
 #define AUXADC_DEF_R_RATIO		1
@@ -319,26 +319,6 @@ static void auxadc_reset(struct mt635x_auxadc_device *adc_dev)
 	dev_info(adc_dev->dev, "reset AUXADC done\n");
 }
 
-static void auxadc_debug_dump(struct mt635x_auxadc_device *adc_dev,
-			      int timeout_times)
-{
-	int i = 0, len = 0;
-	unsigned char reg_log[631] = "", reg_str[21] = "";
-	unsigned int reg_val = 0;
-
-	for (i = 0; i < adc_dev->info->num_dbg_regs; i++) {
-		regmap_read(adc_dev->regmap,
-			    adc_dev->info->dbg_regs[i], &reg_val);
-		len += snprintf(reg_str, 20, "Reg[0x%x]=0x%x,",
-				adc_dev->info->dbg_regs[i], reg_val);
-		strncat(reg_log, reg_str, ARRAY_SIZE(reg_log) - 1);
-	}
-	if (len)
-		dev_notice(adc_dev->dev,
-			   "(%s)Time out!(%d) %s\n"
-			   , __func__, timeout_times, reg_log);
-}
-
 static void imp_timeout_handler(struct mt635x_auxadc_device *adc_dev,
 				bool is_timeout)
 {
@@ -349,7 +329,6 @@ static void imp_timeout_handler(struct mt635x_auxadc_device *adc_dev,
 		return;
 	}
 	timeout_times++;
-	auxadc_debug_dump(adc_dev, timeout_times);
 	if (timeout_times == 5)
 		auxadc_reset(adc_dev);
 #if IS_ENABLED(CONFIG_MTK_AEE_FEATURE)
@@ -368,7 +347,6 @@ static void auxadc_timeout_handler(struct mt635x_auxadc_device *adc_dev,
 		return;
 	}
 	timeout_times++;
-	auxadc_debug_dump(adc_dev, timeout_times);
 	if (timeout_times == 11)
 		auxadc_reset(adc_dev);
 }
@@ -951,7 +929,6 @@ static int wk_bat_temp_dbg(struct mt635x_auxadc_device *adc_dev,
 	pr_notice("BAT_TEMP_PREV:%d,BAT_TEMP:%d,VBIF28:%d\n",
 		bat_temp_prev, bat_temp, vbif28);
 	if (bat_temp < 200 || abs(bat_temp_prev - bat_temp) > 100) {
-		auxadc_debug_dump(adc_dev, 0);
 		for (i = 0; i < 5; i++) {
 			arr_bat_temp[i] =
 				auxadc_priv_read_channel(adc_dev,
