@@ -3017,14 +3017,12 @@ void DSI_PHY_TIMCONFIG(enum DISP_MODULE_ENUM module,
 {
 	int i = 0;
 
-	DDPDUMP("===>%s start\n", __func__);
 	for (i = DSI_MODULE_BEGIN(module); i <= DSI_MODULE_END(module); i++) {
 		if (_dsi_context[i].dsi_params.IsCphy)
 			DSI_CPHY_TIMCONFIG(module, cmdq, dsi_params);
 		else
 			DSI_DPHY_TIMCONFIG(module, cmdq, dsi_params);
 	}
-	DDPDUMP("<===%s done\n", __func__);
 }
 
 
