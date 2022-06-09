@@ -771,7 +771,6 @@ static int mt635x_auxadc_read_raw(struct iio_dev *indio_dev,
 	const struct auxadc_channels *auxadc_chan;
 	int auxadc_out = 0;
 	int ret;
-	static DEFINE_RATELIMIT_STATE(ratelimit, 1 * HZ, 5);
 
 	mutex_lock(&adc_dev->lock);
 	pm_stay_awake(adc_dev->dev);
