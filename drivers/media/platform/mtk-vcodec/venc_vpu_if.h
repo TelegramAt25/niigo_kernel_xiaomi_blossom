@@ -1,16 +1,6 @@
+/* SPDX-License-Identifier: GPL-2.0 */
 /*
- * Copyright (c) 2016 MediaTek Inc.
- * Author: PoChun Lin <pochun.lin@mediatek.com>
- *
- * This program is free software; you can redistribute it and/or
- * modify
- * it under the terms of the GNU General Public License version 2 as
- * published by the Free Software Foundation.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * Copyright (c) 2019 MediaTek Inc.
  */
 
 #ifndef _VENC_VPU_IF_H_
@@ -29,7 +19,7 @@
  * @is_key_frm: key frame flag
  * @inst_addr: VPU instance addr
  * @vsi: driver structure allocated by VPU side and shared to AP side for
- *	 control and info share
+ *       control and info share
  * @id: the id of inter-processor interrupt
  * @ctx: context for v4l2 layer integration
  * @dev: device for v4l2 layer integration
@@ -50,12 +40,12 @@ struct venc_vpu_inst {
 
 int vpu_enc_init(struct venc_vpu_inst *vpu);
 int vpu_enc_set_param(struct venc_vpu_inst *vpu,
-		      enum venc_set_param_type id,
-		      struct venc_enc_param *param);
+					  enum venc_set_param_type id,
+					  struct venc_enc_param *param);
 int vpu_enc_encode(struct venc_vpu_inst *vpu, unsigned int bs_mode,
-		   struct venc_frm_buf *frm_buf,
-		   struct mtk_vcodec_mem *bs_buf,
-		   unsigned int *bs_size);
+				   struct venc_frm_buf *frm_buf,
+				   struct mtk_vcodec_mem *bs_buf,
+				   unsigned int *bs_size);
 int vpu_enc_deinit(struct venc_vpu_inst *vpu);
 
 #endif

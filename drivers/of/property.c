@@ -1357,6 +1357,7 @@ static int of_link_to_suppliers(struct device *dev,
 	return ret;
 }
 
+
 static bool of_devlink = true;
 core_param(of_devlink, of_devlink, bool, 0);
 
