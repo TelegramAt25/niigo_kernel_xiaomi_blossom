@@ -1572,3 +1572,18 @@ bool snd_usb_registration_quirk(struct snd_usb_audio *chip, int iface)
 	/* Register as normal */
 	return false;
 }
+
+bool snd_usb_support_autosuspend_quirk(struct usb_device *dev)
+{
+	struct snd_usb_audio *chip = dev_get_drvdata(&dev->dev);
+
+	if (!chip)
+		return false;
+
+	switch (chip->usb_id) {
+	case USB_ID(0x1963, 0x0020):
+		dev_info(&dev->dev, "snd device not support autosuspend");
+		return false;
+	}
+	return true;
+}

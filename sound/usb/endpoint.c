@@ -418,7 +418,8 @@ static void snd_complete_urb(struct urb *urb)
 	if (err == 0)
 		return;
 
-	usb_audio_err(ep->chip, "cannot submit urb (err = %d)\n", err);
+	usb_audio_err_ratelimited(ep->chip,
+		   "cannot submit urb (err = %d)\n", err);
 	if (ep->data_subs && ep->data_subs->pcm_substream) {
 		substream = ep->data_subs->pcm_substream;
 		snd_pcm_stop_xrun(substream);
@@ -470,7 +471,7 @@ struct snd_usb_endpoint *snd_usb_add_endpoint(struct snd_usb_audio *chip,
 		}
 	}
 
-	usb_audio_dbg(chip, "Creating new %s %s endpoint #%x\n",
+	usb_audio_info(chip, "Creating new %s %s endpoint #%x\n",
 		    is_playback ? "playback" : "capture",
 		    type == SND_USB_ENDPOINT_TYPE_DATA ? "data" : "sync",
 		    ep_num);
@@ -626,6 +627,7 @@ static int data_ep_set_params(struct snd_usb_endpoint *ep,
 	unsigned int max_packs_per_period, urbs_per_period, urb_packs;
 	unsigned int max_urbs, i;
 	int frame_bits = snd_pcm_format_physical_width(pcm_format) * channels;
+	unsigned int max_queue;
 	int tx_length_quirk = (ep->chip->tx_length_quirk &&
 			       usb_pipeout(ep->pipe));
 
@@ -697,9 +699,11 @@ static int data_ep_set_params(struct snd_usb_endpoint *ep,
 	if (snd_usb_get_speed(ep->chip->dev) != USB_SPEED_FULL) {
 		packs_per_ms = 8 >> ep->datainterval;
 		max_packs_per_urb = MAX_PACKS_HS;
+		max_queue = MAX_QUEUE_HS;
 	} else {
 		packs_per_ms = 1;
 		max_packs_per_urb = MAX_PACKS;
+		max_queue = MAX_QUEUE;
 	}
 	if (sync_ep && !snd_usb_endpoint_implicit_feedback_sink(ep))
 		max_packs_per_urb = min(max_packs_per_urb,
@@ -737,6 +741,13 @@ static int data_ep_set_params(struct snd_usb_endpoint *ep,
 			urb_packs >>= 1;
 		ep->nurbs = MAX_URBS;
 
+		usb_audio_info(ep->chip,
+			"in: frames_per_period=%d, packs_per_ms=%d\n",
+			frames_per_period, packs_per_ms);
+		usb_audio_info(ep->chip,
+			"in: nurbs=%d, urb_packs=%d, periods_per_buffer=%d\n",
+			ep->nurbs, urb_packs, periods_per_buffer);
+
 	/*
 	 * Playback endpoints without implicit sync are adjusted so that
 	 * a period fits as evenly as possible in the smallest number of
@@ -755,6 +766,13 @@ static int data_ep_set_params(struct snd_usb_endpoint *ep,
 		/* how many packets will contain an entire ALSA period? */
 		max_packs_per_period = DIV_ROUND_UP(period_bytes, minsize);
 
+		/* This is a special case for latency requirement.*/
+		/* Limit the max packets and max queuein a single URB */
+		if (periods_per_buffer == 4) {
+			max_packs_per_urb = packs_per_ms;
+			max_queue = LOW_LATENCY_MAX_QUEUE;
+		}
+
 		/* how many URBs will contain a period? */
 		urbs_per_period = DIV_ROUND_UP(max_packs_per_period,
 				max_packs_per_urb);
@@ -767,8 +785,21 @@ static int data_ep_set_params(struct snd_usb_endpoint *ep,
 
 		/* try to use enough URBs to contain an entire ALSA buffer */
 		max_urbs = min((unsigned) MAX_URBS,
-				MAX_QUEUE * packs_per_ms / urb_packs);
+				max_queue * packs_per_ms / urb_packs);
 		ep->nurbs = min(max_urbs, urbs_per_period * periods_per_buffer);
+
+		if (ep->nurbs <= 2)
+			ep->nurbs++;
+
+		usb_audio_info(ep->chip,
+			"interval=%d, frames_per_period=%d, urbs_per_period=%d\n",
+			ep->datainterval, frames_per_period, urbs_per_period);
+		usb_audio_info(ep->chip,
+			"max_packs_per_period=%d, max_packs_per_urb=%d\n",
+			max_packs_per_period, max_packs_per_urb);
+		usb_audio_info(ep->chip,
+			"nurbs=%d, urbs_per_period=%d, periods_per_buffer=%d\n",
+			ep->nurbs, urbs_per_period, periods_per_buffer);
 	}
 
 	/* allocate and initialize data urbs */
@@ -992,6 +1023,11 @@ int snd_usb_endpoint_start(struct snd_usb_endpoint *ep)
 		set_bit(i, &ep->active_mask);
 	}
 
+	usb_audio_info(ep->chip, "start %s %s endpoint #%x\n",
+		    usb_pipeout(ep->pipe) ? "out" : "in",
+		    ep->type == SND_USB_ENDPOINT_TYPE_DATA ? "data" : "sync",
+		    ep->ep_num);
+
 	return 0;
 
 __error:
@@ -1026,6 +1062,11 @@ void snd_usb_endpoint_stop(struct snd_usb_endpoint *ep)
 	if (--ep->use_count == 0) {
 		deactivate_urbs(ep, false);
 		set_bit(EP_FLAG_STOPPING, &ep->flags);
+
+		usb_audio_info(ep->chip, "stop %s %s endpoint #%x\n",
+		    usb_pipeout(ep->pipe) ? "out" : "in",
+		    ep->type == SND_USB_ENDPOINT_TYPE_DATA ? "data" : "sync",
+		    ep->ep_num);
 	}
 }
 
