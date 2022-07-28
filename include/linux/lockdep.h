@@ -261,6 +261,14 @@ struct held_lock {
 	unsigned int hardirqs_off:1;
 	unsigned int references:12;					/* 32 bits */
 	unsigned int pin_count;
+
+	/* MTK_LOCK_DEBUG_HELD_LOCK */
+#define HELD_LOCK_STACK_TRACE_DEPTH 20
+	struct stack_trace trace;
+	unsigned long entries[HELD_LOCK_STACK_TRACE_DEPTH];
+	/* MTK_LOCK_MONITOR */
+	unsigned long long timestamp;
+	bool acquired;
 };
 
 /*
@@ -476,7 +484,7 @@ static inline void lockdep_invariant_state(bool force) {}
 static inline void lockdep_init_task(struct task_struct *task) {}
 static inline void lockdep_free_task(struct task_struct *task) {}
 
-#ifdef CONFIG_LOCK_STAT
+#if defined(CONFIG_LOCK_STAT) || defined(CONFIG_DEBUG_LOCK_ALLOC)
 
 extern void lock_contended(struct lockdep_map *lock, unsigned long ip);
 extern void lock_acquired(struct lockdep_map *lock, unsigned long ip);
@@ -617,9 +625,25 @@ do {									\
 
 #ifdef CONFIG_LOCKDEP
 void lockdep_rcu_suspicious(const char *file, const int line, const char *s);
+extern unsigned long long debug_locks_off_ts;
 #else
 static inline void
 lockdep_rcu_suspicious(const char *file, const int line, const char *s)
+{
+}
+#endif
+
+#ifdef CONFIG_LOCKDEP
+void check_held_locks(int force);
+void mt_aee_dump_held_locks(void);
+#else
+static inline void
+check_held_locks(int force)
+{
+}
+
+static inline void
+mt_aee_dump_held_locks(void)
 {
 }
 #endif

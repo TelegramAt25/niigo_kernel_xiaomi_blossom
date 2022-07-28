@@ -64,6 +64,83 @@
 #define V4L2_CTRL_CLASS_RF_TUNER	0x00a20000	/* RF tuner controls */
 #define V4L2_CTRL_CLASS_DETECT		0x00a30000	/* Detection controls */
 
+/* Mediatek control IDs */
+#define V4L2_CID_MPEG_MTK_BASE \
+	(V4L2_CTRL_CLASS_MPEG | 0x2000)
+#define V4L2_CID_MPEG_MTK_FRAME_INTERVAL \
+	(V4L2_CID_MPEG_MTK_BASE+0)
+#define V4L2_CID_MPEG_MTK_ERRORMB_MAP \
+	(V4L2_CID_MPEG_MTK_BASE+1)
+#define V4L2_CID_MPEG_MTK_DECODE_MODE \
+	(V4L2_CID_MPEG_MTK_BASE+2)
+#define V4L2_CID_MPEG_MTK_FRAME_SIZE \
+	(V4L2_CID_MPEG_MTK_BASE+3)
+#define V4L2_CID_MPEG_MTK_FIXED_MAX_FRAME_BUFFER \
+	(V4L2_CID_MPEG_MTK_BASE+4)
+#define V4L2_CID_MPEG_MTK_CRC_PATH \
+	(V4L2_CID_MPEG_MTK_BASE+5)
+#define V4L2_CID_MPEG_MTK_GOLDEN_PATH \
+	(V4L2_CID_MPEG_MTK_BASE+6)
+#define V4L2_CID_MPEG_MTK_COLOR_DESC \
+	(V4L2_CID_MPEG_MTK_BASE+7)
+#define V4L2_CID_MPEG_MTK_ASPECT_RATIO \
+	(V4L2_CID_MPEG_MTK_BASE+8)
+#define V4L2_CID_MPEG_MTK_SET_WAIT_KEY_FRAME \
+	(V4L2_CID_MPEG_MTK_BASE+9)
+#define V4L2_CID_MPEG_MTK_SET_NAL_SIZE_LENGTH \
+	(V4L2_CID_MPEG_MTK_BASE+10)
+#define V4L2_CID_MPEG_MTK_SEC_DECODE \
+	(V4L2_CID_MPEG_MTK_BASE+11)
+#define V4L2_CID_MPEG_MTK_FIX_BUFFERS \
+	(V4L2_CID_MPEG_MTK_BASE+12)
+#define V4L2_CID_MPEG_MTK_FIX_BUFFERS_SVP \
+	(V4L2_CID_MPEG_MTK_BASE+13)
+#define V4L2_CID_MPEG_MTK_INTERLACING \
+	(V4L2_CID_MPEG_MTK_BASE+14)
+#define V4L2_CID_MPEG_MTK_CODEC_TYPE \
+	(V4L2_CID_MPEG_MTK_BASE+15)
+#define V4L2_CID_MPEG_MTK_OPERATING_RATE \
+	(V4L2_CID_MPEG_MTK_BASE+16)
+#define V4L2_CID_MPEG_MTK_SEC_ENCODE \
+	(V4L2_CID_MPEG_MTK_BASE+17)
+#define V4L2_CID_MPEG_MTK_QUEUED_FRAMEBUF_COUNT \
+	(V4L2_CID_MPEG_MTK_BASE+18)
+#define V4L2_CID_MPEG_MTK_UFO_MODE \
+	(V4L2_CID_MPEG_MTK_BASE+19)
+#define V4L2_CID_MPEG_MTK_ENCODE_SCENARIO \
+	(V4L2_CID_MPEG_MTK_BASE+20)
+#define V4L2_CID_MPEG_MTK_ENCODE_NONREFP \
+	(V4L2_CID_MPEG_MTK_BASE+21)
+#define V4L2_CID_MPEG_MTK_ENCODE_DETECTED_FRAMERATE \
+	(V4L2_CID_MPEG_MTK_BASE+22)
+#define V4L2_CID_MPEG_MTK_ENCODE_RFS_ON \
+	(V4L2_CID_MPEG_MTK_BASE+23)
+#define V4L2_CID_MPEG_MTK_ENCODE_OPERATION_RATE \
+	(V4L2_CID_MPEG_MTK_BASE+24)
+#define V4L2_CID_MPEG_MTK_ENCODE_ROI_RC_QP \
+	(V4L2_CID_MPEG_MTK_BASE+25)
+#define V4L2_CID_MPEG_MTK_ENCODE_ROI_ON \
+	(V4L2_CID_MPEG_MTK_BASE+26)
+#define V4L2_CID_MPEG_MTK_ENCODE_GRID_SIZE \
+	(V4L2_CID_MPEG_MTK_BASE+27)
+#define V4L2_CID_MPEG_MTK_RESOLUTION_CHANGE \
+	(V4L2_CID_MPEG_MTK_BASE+28)
+#define V4L2_CID_MPEG_MTK_MAX_WIDTH \
+	(V4L2_CID_MPEG_MTK_BASE+29)
+#define V4L2_CID_MPEG_MTK_MAX_HEIGHT \
+	(V4L2_CID_MPEG_MTK_BASE+30)
+#define V4L2_CID_MPEG_MTK_ENCODE_RC_I_FRAME_QP \
+	(V4L2_CID_MPEG_MTK_BASE+31)
+#define V4L2_CID_MPEG_MTK_ENCODE_RC_P_FRAME_QP \
+	(V4L2_CID_MPEG_MTK_BASE+32)
+#define V4L2_CID_MPEG_MTK_ENCODE_RC_B_FRAME_QP \
+	(V4L2_CID_MPEG_MTK_BASE+33)
+
+#define V4L2_CID_MPEG_VIDEO_ENABLE_TSVC \
+	(V4L2_CID_MPEG_MTK_BASE+34)
+#define V4L2_CID_MPEG_MTK_ENCODE_NONREFP_FREQ \
+	(V4L2_CID_MPEG_MTK_BASE+35)
+
 /* User-class control IDs */
 
 #define V4L2_CID_BASE			(V4L2_CTRL_CLASS_USER | 0x900)
@@ -367,6 +444,7 @@ enum v4l2_mpeg_video_aspect {
 enum v4l2_mpeg_video_bitrate_mode {
 	V4L2_MPEG_VIDEO_BITRATE_MODE_VBR = 0,
 	V4L2_MPEG_VIDEO_BITRATE_MODE_CBR = 1,
+	V4L2_MPEG_VIDEO_BITRATE_MODE_CQ = 2,
 };
 #define V4L2_CID_MPEG_VIDEO_BITRATE		(V4L2_CID_MPEG_BASE+207)
 #define V4L2_CID_MPEG_VIDEO_BITRATE_PEAK	(V4L2_CID_MPEG_BASE+208)
@@ -536,7 +614,13 @@ enum v4l2_mpeg_video_h264_hierarchical_coding_type {
 };
 #define V4L2_CID_MPEG_VIDEO_H264_HIERARCHICAL_CODING_LAYER	(V4L2_CID_MPEG_BASE+381)
 #define V4L2_CID_MPEG_VIDEO_H264_HIERARCHICAL_CODING_LAYER_QP	(V4L2_CID_MPEG_BASE+382)
-#define V4L2_CID_MPEG_VIDEO_H264_CHROMA_QP_INDEX_OFFSET		(V4L2_CID_MPEG_BASE+384)
+#define V4L2_CID_MPEG_VIDEO_H264_SPS       (V4L2_CID_MPEG_BASE+383)
+#define V4L2_CID_MPEG_VIDEO_H264_PPS       (V4L2_CID_MPEG_BASE+384)
+#define V4L2_CID_MPEG_VIDEO_H264_SCALING_MATRIX    (V4L2_CID_MPEG_BASE+385)
+#define V4L2_CID_MPEG_VIDEO_H264_SLICE_PARAM   (V4L2_CID_MPEG_BASE+386)
+#define V4L2_CID_MPEG_VIDEO_H264_DECODE_PARAM  (V4L2_CID_MPEG_BASE+387)
+#define V4L2_CID_MPEG_VIDEO_H264_SPS_PPS_BEFORE_IDR		(V4L2_CID_MPEG_BASE+388)
+#define V4L2_CID_MPEG_VIDEO_H264_CHROMA_QP_INDEX_OFFSET		(V4L2_CID_MPEG_BASE+389)
 #define V4L2_CID_MPEG_VIDEO_MPEG4_I_FRAME_QP	(V4L2_CID_MPEG_BASE+400)
 #define V4L2_CID_MPEG_VIDEO_MPEG4_P_FRAME_QP	(V4L2_CID_MPEG_BASE+401)
 #define V4L2_CID_MPEG_VIDEO_MPEG4_B_FRAME_QP	(V4L2_CID_MPEG_BASE+402)
@@ -593,8 +677,9 @@ enum v4l2_vp8_golden_frame_sel {
 #define V4L2_CID_MPEG_VIDEO_VPX_MAX_QP			(V4L2_CID_MPEG_BASE+508)
 #define V4L2_CID_MPEG_VIDEO_VPX_I_FRAME_QP		(V4L2_CID_MPEG_BASE+509)
 #define V4L2_CID_MPEG_VIDEO_VPX_P_FRAME_QP		(V4L2_CID_MPEG_BASE+510)
+#define V4L2_CID_MPEG_VIDEO_VP8_PROFILE                 (V4L2_CID_MPEG_BASE+511)
+#define V4L2_CID_MPEG_VIDEO_VP9_PROFILE			(V4L2_CID_MPEG_BASE+512)
 
-#define V4L2_CID_MPEG_VIDEO_VP8_PROFILE			(V4L2_CID_MPEG_BASE+511)
 enum v4l2_mpeg_video_vp8_profile {
 	V4L2_MPEG_VIDEO_VP8_PROFILE_0				= 0,
 	V4L2_MPEG_VIDEO_VP8_PROFILE_1				= 1,
@@ -603,15 +688,13 @@ enum v4l2_mpeg_video_vp8_profile {
 };
 /* Deprecated alias for compatibility reasons. */
 #define V4L2_CID_MPEG_VIDEO_VPX_PROFILE	V4L2_CID_MPEG_VIDEO_VP8_PROFILE
-#define V4L2_CID_MPEG_VIDEO_VP9_PROFILE			(V4L2_CID_MPEG_BASE+512)
+
 enum v4l2_mpeg_video_vp9_profile {
 	V4L2_MPEG_VIDEO_VP9_PROFILE_0				= 0,
 	V4L2_MPEG_VIDEO_VP9_PROFILE_1				= 1,
 	V4L2_MPEG_VIDEO_VP9_PROFILE_2				= 2,
 	V4L2_MPEG_VIDEO_VP9_PROFILE_3				= 3,
 };
-
-/* CIDs for HEVC encoding. */
 
 #define V4L2_CID_MPEG_VIDEO_HEVC_MIN_QP		(V4L2_CID_MPEG_BASE + 600)
 #define V4L2_CID_MPEG_VIDEO_HEVC_MAX_QP		(V4L2_CID_MPEG_BASE + 601)
@@ -987,6 +1070,7 @@ enum v4l2_jpeg_chroma_subsampling {
 #define	V4L2_CID_JPEG_COMPRESSION_QUALITY	(V4L2_CID_JPEG_CLASS_BASE + 3)
 
 #define	V4L2_CID_JPEG_ACTIVE_MARKER		(V4L2_CID_JPEG_CLASS_BASE + 4)
+#define	V4L2_CID_JPEG_ENABLE_EXIF		(V4L2_CID_JPEG_CLASS_BASE + 5)
 #define	V4L2_JPEG_ACTIVE_MARKER_APP0		(1 << 0)
 #define	V4L2_JPEG_ACTIVE_MARKER_APP1		(1 << 1)
 #define	V4L2_JPEG_ACTIVE_MARKER_COM		(1 << 16)
@@ -1097,5 +1181,154 @@ enum v4l2_detect_md_mode {
 #define V4L2_CID_DETECT_MD_GLOBAL_THRESHOLD	(V4L2_CID_DETECT_CLASS_BASE + 2)
 #define V4L2_CID_DETECT_MD_THRESHOLD_GRID	(V4L2_CID_DETECT_CLASS_BASE + 3)
 #define V4L2_CID_DETECT_MD_REGION_GRID		(V4L2_CID_DETECT_CLASS_BASE + 4)
+
+
+/* Complex controls */
+
+#define V4L2_H264_SPS_CONSTRAINT_SET0_FLAG			0x01
+#define V4L2_H264_SPS_CONSTRAINT_SET1_FLAG			0x02
+#define V4L2_H264_SPS_CONSTRAINT_SET2_FLAG			0x04
+#define V4L2_H264_SPS_CONSTRAINT_SET3_FLAG			0x08
+#define V4L2_H264_SPS_CONSTRAINT_SET4_FLAG			0x10
+#define V4L2_H264_SPS_CONSTRAINT_SET5_FLAG			0x20
+
+#define V4L2_H264_SPS_FLAG_SEPARATE_COLOUR_PLANE		0x01
+#define V4L2_H264_SPS_FLAG_QPPRIME_Y_ZERO_TRANSFORM_BYPASS	0x02
+#define V4L2_H264_SPS_FLAG_DELTA_PIC_ORDER_ALWAYS_ZERO		0x04
+#define V4L2_H264_SPS_FLAG_GAPS_IN_FRAME_NUM_VALUE_ALLOWED	0x08
+#define V4L2_H264_SPS_FLAG_FRAME_MBS_ONLY			0x10
+#define V4L2_H264_SPS_FLAG_MB_ADAPTIVE_FRAME_FIELD		0x20
+#define V4L2_H264_SPS_FLAG_DIRECT_8X8_INFERENCE			0x40
+struct v4l2_ctrl_h264_sps {
+	__u8 profile_idc;
+	__u8 constraint_set_flags;
+	__u8 level_idc;
+	__u8 seq_parameter_set_id;
+	__u8 chroma_format_idc;
+	__u8 bit_depth_luma_minus8;
+	__u8 bit_depth_chroma_minus8;
+	__u8 log2_max_frame_num_minus4;
+	__u8 pic_order_cnt_type;
+	__u8 log2_max_pic_order_cnt_lsb_minus4;
+	__s32 offset_for_non_ref_pic;
+	__s32 offset_for_top_to_bottom_field;
+	__u8 num_ref_frames_in_pic_order_cnt_cycle;
+	__s32 offset_for_ref_frame[255];
+	__u8 max_num_ref_frames;
+	__u16 pic_width_in_mbs_minus1;
+	__u16 pic_height_in_map_units_minus1;
+	__u8 flags;
+};
+
+#define V4L2_H264_PPS_FLAG_ENTROPY_CODING_MODE				0x0001
+#define V4L2_H264_PPS_FLAG_BOTTOM_FIELD_PIC_ORDER_IN_FRAME_PRESENT	0x0002
+#define V4L2_H264_PPS_FLAG_WEIGHTED_PRED				0x0004
+#define V4L2_H264_PPS_FLAG_DEBLOCKING_FILTER_CONTROL_PRESENT		0x0008
+#define V4L2_H264_PPS_FLAG_CONSTRAINED_INTRA_PRED			0x0010
+#define V4L2_H264_PPS_FLAG_REDUNDANT_PIC_CNT_PRESENT			0x0020
+#define V4L2_H264_PPS_FLAG_TRANSFORM_8X8_MODE				0x0040
+#define V4L2_H264_PPS_FLAG_PIC_SCALING_MATRIX_PRESENT			0x0080
+struct v4l2_ctrl_h264_pps {
+	__u8 pic_parameter_set_id;
+	__u8 seq_parameter_set_id;
+	__u8 num_slice_groups_minus1;
+	__u8 num_ref_idx_l0_default_active_minus1;
+	__u8 num_ref_idx_l1_default_active_minus1;
+	__u8 weighted_bipred_idc;
+	__s8 pic_init_qp_minus26;
+	__s8 pic_init_qs_minus26;
+	__s8 chroma_qp_index_offset;
+	__s8 second_chroma_qp_index_offset;
+	__u8 flags;
+};
+
+struct v4l2_ctrl_h264_scaling_matrix {
+	__u8 scaling_list_4x4[6][16];
+	__u8 scaling_list_8x8[6][64];
+};
+
+struct v4l2_h264_weight_factors {
+	__s8 luma_weight[32];
+	__s8 luma_offset[32];
+	__s8 chroma_weight[32][2];
+	__s8 chroma_offset[32][2];
+};
+
+struct v4l2_h264_pred_weight_table {
+	__u8 luma_log2_weight_denom;
+	__u8 chroma_log2_weight_denom;
+	struct v4l2_h264_weight_factors weight_factors[2];
+};
+
+#define V4L2_SLICE_FLAG_FIELD_PIC		0x01
+#define V4L2_SLICE_FLAG_BOTTOM_FIELD		0x02
+#define V4L2_SLICE_FLAG_DIRECT_SPATIAL_MV_PRED	0x04
+#define V4L2_SLICE_FLAG_SP_FOR_SWITCH		0x08
+struct v4l2_ctrl_h264_slice_param {
+	/* Size in bytes, including header */
+	__u32 size;
+	/* Offset in bits to slice_data() from the beginning of this slice. */
+	__u32 header_bit_size;
+
+	__u16 first_mb_in_slice;
+	__u8 slice_type;
+	__u8 pic_parameter_set_id;
+	__u8 colour_plane_id;
+	__u16 frame_num;
+	__u16 idr_pic_id;
+	__u16 pic_order_cnt_lsb;
+	__s32 delta_pic_order_cnt_bottom;
+	__s32 delta_pic_order_cnt0;
+	__s32 delta_pic_order_cnt1;
+	__u8 redundant_pic_cnt;
+
+	struct v4l2_h264_pred_weight_table pred_weight_table;
+	/* Size in bits of dec_ref_pic_marking() syntax element. */
+	__u32 dec_ref_pic_marking_bit_size;
+	/* Size in bits of pic order count syntax. */
+	__u32 pic_order_cnt_bit_size;
+
+	__u8 cabac_init_idc;
+	__s8 slice_qp_delta;
+	__s8 slice_qs_delta;
+	__u8 disable_deblocking_filter_idc;
+	__s8 slice_alpha_c0_offset_div2;
+	__s8 slice_beta_offset_div2;
+	__u32 slice_group_change_cycle;
+
+	__u8 num_ref_idx_l0_active_minus1;
+	__u8 num_ref_idx_l1_active_minus1;
+	/*  Entries on each list are indices
+	 *  into v4l2_ctrl_h264_decode_param.dpb[]. */
+	__u8 ref_pic_list0[32];
+	__u8 ref_pic_list1[32];
+
+	__u8 flags;
+};
+
+/* If not set, this entry is unused for reference. */
+#define V4L2_H264_DPB_ENTRY_FLAG_ACTIVE		0x01
+#define V4L2_H264_DPB_ENTRY_FLAG_LONG_TERM	0x02
+struct v4l2_h264_dpb_entry {
+	__u32 buf_index; /* v4l2_buffer index */
+	__u16 frame_num;
+	__u16 pic_num;
+	/* Note that field is indicated by v4l2_buffer.field */
+	__s32 top_field_order_cnt;
+	__s32 bottom_field_order_cnt;
+	__u8 flags; /* V4L2_H264_DPB_ENTRY_FLAG_* */
+};
+
+struct v4l2_ctrl_h264_decode_param {
+	__u32 num_slices;
+	__u8 idr_pic_flag;
+	__u8 nal_ref_idc;
+	__s32 top_field_order_cnt;
+	__s32 bottom_field_order_cnt;
+	__u8 ref_pic_list_p0[32];
+	__u8 ref_pic_list_b0[32];
+	__u8 ref_pic_list_b1[32];
+	struct v4l2_h264_dpb_entry dpb[16];
+};
 
 #endif
