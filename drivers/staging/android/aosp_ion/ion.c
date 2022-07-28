@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0
 /*
- * drivers/staging/android/ion/ion.c
+ * drivers/staging/android/aosp_ion/ion.c
  *
  * Copyright (C) 2011 Google, Inc.
  */
@@ -32,6 +32,7 @@
 #define CREATE_TRACE_POINTS
 #include "ion_trace.h"
 #include "ion.h"
+#include "mtk_ion.h"
 
 static struct ion_device *internal_dev;
 static int heap_id;
@@ -212,6 +213,31 @@ static struct sg_table *dup_sg_table(struct sg_table *table)
 	return new_table;
 }
 
+static struct sg_table *dup_sec_sg_table(struct sg_table *table)
+{
+	struct sg_table *new_table;
+	int ret, i;
+	struct scatterlist *sg, *new_sg;
+
+	new_table = kzalloc(sizeof(*new_table), GFP_KERNEL);
+	if (!new_table)
+		return ERR_PTR(-ENOMEM);
+
+	ret = sg_alloc_table(new_table, table->nents, GFP_KERNEL);
+	if (ret) {
+		kfree(new_table);
+		return ERR_PTR(-ENOMEM);
+	}
+
+	new_sg = new_table->sgl;
+	for_each_sg(table->sgl, sg, table->nents, i) {
+		memcpy(new_sg, sg, sizeof(*sg));
+		new_sg = sg_next(new_sg);
+	}
+
+	return new_table;
+}
+
 static void free_duped_table(struct sg_table *table)
 {
 	sg_free_table(table);
@@ -235,7 +261,10 @@ static int ion_dma_buf_attach(struct dma_buf *dmabuf,
 	if (!a)
 		return -ENOMEM;
 
-	table = dup_sg_table(buffer->sg_table);
+	if (buffer->heap->type == ION_HEAP_TYPE_CUSTOM)
+		table = dup_sec_sg_table(buffer->sg_table);
+	else
+		table = dup_sg_table(buffer->sg_table);
 	if (IS_ERR(table)) {
 		kfree(a);
 		return -ENOMEM;
@@ -273,6 +302,11 @@ static struct sg_table *ion_map_dma_buf(struct dma_buf_attachment *attachment,
 {
 	struct ion_dma_buf_attachment *a = attachment->priv;
 	struct sg_table *table;
+	struct ion_buffer *buffer =
+		(struct ion_buffer *)attachment->dmabuf->priv;
+
+	if (buffer->heap->type == ION_HEAP_TYPE_CUSTOM)
+		return buffer->sg_table;
 
 	table = a->table;
 
@@ -287,6 +321,12 @@ static void ion_unmap_dma_buf(struct dma_buf_attachment *attachment,
 			      struct sg_table *table,
 			      enum dma_data_direction direction)
 {
+	struct ion_buffer *buffer =
+		(struct ion_buffer *)attachment->dmabuf->priv;
+
+	if (buffer->heap->type == ION_HEAP_TYPE_CUSTOM)
+		return;
+
 	dma_unmap_sg(attachment->dev, table->sgl, table->nents, direction);
 }
 
@@ -401,6 +441,35 @@ static const struct dma_buf_ops dma_buf_ops = {
 	.unmap = ion_dma_buf_kunmap,
 };
 
+struct ion_buffer *ion_drv_file_to_buffer(struct file *file)
+{
+	struct dma_buf *dmabuf;
+	struct ion_buffer *buffer = NULL;
+	const char *pathname = NULL;
+
+	if (!file)
+		goto file2buf_exit;
+	if (!(file->f_path.dentry))
+		goto file2buf_exit;
+
+	pathname = file->f_path.dentry->d_name.name;
+	if (!pathname)
+		goto file2buf_exit;
+
+	if (strstr(pathname, "dmabuf")) {
+		dmabuf = file->private_data;
+		if (dmabuf->ops == &dma_buf_ops)
+			buffer = dmabuf->priv;
+	}
+
+file2buf_exit:
+
+	if (buffer)
+		return buffer;
+	else
+		return ERR_PTR(-EINVAL);
+}
+
 int ion_alloc(size_t len, unsigned int heap_id_mask, unsigned int flags)
 {
 	struct ion_device *dev = internal_dev;
@@ -485,7 +554,6 @@ int ion_query_heaps(struct ion_heap_query *query)
 		hdata.name[sizeof(hdata.name) - 1] = '\0';
 		hdata.type = heap->type;
 		hdata.heap_id = heap->id;
-
 		if (copy_to_user(&buffer[cnt], &hdata, sizeof(hdata))) {
 			ret = -EFAULT;
 			goto out;
@@ -546,8 +614,21 @@ static int debug_shrink_get(void *data, u64 *val)
 DEFINE_SIMPLE_ATTRIBUTE(debug_shrink_fops, debug_shrink_get,
 			debug_shrink_set, "%llu\n");
 
+static int ion_debug_heap_open(struct inode *inode, struct file *file)
+{
+	return single_open(file, ion_sys_heap_debug_show, inode->i_private);
+}
+
+static const struct file_operations debug_heap_fops = {
+	.open = ion_debug_heap_open,
+	.read = seq_read,
+	.llseek = seq_lseek,
+	.release = single_release,
+};
+
 void ion_device_add_heap(struct ion_heap *heap)
 {
+	struct dentry *debug_file;
 	struct ion_device *dev = internal_dev;
 	int ret;
 
@@ -576,7 +657,17 @@ void ion_device_add_heap(struct ion_heap *heap)
 	 */
 	plist_node_init(&heap->node, -heap->id);
 	plist_add(&heap->node, &dev->heaps);
+	debug_file = debugfs_create_file(heap->name, 0664,
+					 dev->debug_root, heap,
+					 &debug_heap_fops);
 
+	if (!debug_file) {
+		char buf[256], *path;
+
+		path = dentry_path(dev->debug_root, buf, 256);
+		pr_err("Failed to create heap debugfs at %s/%s\n",
+		       path, heap->name);
+	}
 	if (heap->shrinker.count_objects && heap->shrinker.scan_objects) {
 		char debug_name[64];
 

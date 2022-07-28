@@ -1,6 +1,6 @@
 /* SPDX-License-Identifier: GPL-2.0 */
 /*
- * drivers/staging/android/ion/ion.h
+ * drivers/staging/android/aosp_ion/ion.h
  *
  * Copyright (C) 2011 Google, Inc.
  */
@@ -19,8 +19,11 @@
 #include <linux/types.h>
 #include <linux/miscdevice.h>
 
-#include "../uapi/ion.h"
-
+#ifdef CONFIG_MTK_ION
+#include "../uapi/mtk_ion/ion.h"
+#else
+#include "../uapi/aosp_ion/ion.h"
+#endif
 /**
  * struct ion_platform_heap - defines a heap in the given platform
  * @type:	type of the heap from ion_heap_type enum
@@ -336,9 +339,12 @@ long ion_ioctl(struct file *filp, unsigned int cmd, unsigned long arg);
 
 int ion_query_heaps(struct ion_heap_query *query);
 
+struct ion_buffer *ion_drv_file_to_buffer(struct file *file);
+
 #ifdef CONFIG_ION_MODULE
 int ion_add_cma_heaps(void);
 int ion_system_heap_create(void);
 int ion_system_contig_heap_create(void);
 #endif
+
 #endif /* _ION_H */
