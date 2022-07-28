@@ -359,6 +359,11 @@ config MARVELL_10G_PHY
 	---help---
 	  Support for the Marvell Alaska MV88X3310 and compatible PHYs.
 
+config MARVELL_88Q_PHY
+	tristate "Marvell 88Q PHYs"
+	help
+	  Currently supports the 88Q2110 PHYs.
+
 config MESON_GXL_PHY
 	tristate "Amlogic Meson GXL Internal PHY"
 	depends on ARCH_MESON || COMPILE_TEST
@@ -389,6 +394,11 @@ config NATIONAL_PHY
 	tristate "National Semiconductor PHYs"
 	---help---
 	  Currently supports the DP83865 PHY.
+
+config NXP_TJA1100_PHY
+	tristate "NXP TJA1100 PHY"
+	help
+	  Currently supports the TJA1100 PHY.
 
 config QSEMI_PHY
 	tristate "Quality Semiconductor PHYs"
@@ -437,6 +447,7 @@ config XILINX_GMII2RGMII
 	  the Reduced Gigabit Media Independent Interface(RGMII) between
 	  Ethernet physical media devices and the Gigabit Ethernet controller.
 
+source "drivers/net/phy/mtk/mt753x/Kconfig"
 endif # PHYLIB
 
 config MICREL_KS8995MA
