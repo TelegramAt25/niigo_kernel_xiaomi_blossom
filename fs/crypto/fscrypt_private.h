@@ -249,6 +249,12 @@ struct fscrypt_info {
 
 	/* Hashed inode number.  Only set for IV_INO_LBLK_32 */
 	u32 ci_hashed_ino;
+	/*
+	 * This design for eMMC + F2FS security OTA,
+	 * we don't used  "ci_hashed_ino" but a special
+	 * one - "ci_hashed_info" to avoid using confusion.
+	 */
+	u32 ci_hashed_info;
 };
 
 typedef enum {
@@ -623,4 +629,5 @@ int fscrypt_policy_from_context(union fscrypt_policy *policy_u,
 				const union fscrypt_context *ctx_u,
 				int ctx_size);
 
+extern int is_emmc_type(void);
 #endif /* _FSCRYPT_PRIVATE_H */
