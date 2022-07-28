@@ -12,16 +12,32 @@
  * GNU General Public License for more details.
  */
 
+#include <linux/clkdev.h>
+#include <linux/delay.h>
+#include <linux/io.h>
+#include <linux/module.h>
 #include <linux/of.h>
 #include <linux/of_address.h>
-
-#include <linux/io.h>
 #include <linux/slab.h>
-#include <linux/delay.h>
-#include <linux/clkdev.h>
 
 #include "clk-mtk.h"
 #include "clk-gate.h"
+
+static int is_subsys_pwr_on(struct mtk_clk_gate *cg)
+{
+	struct pwr_status *pwr = cg->pwr_stat;
+	u32 val = 0, val2 = 0;
+
+	if (pwr != NULL && cg->pwr_regmap != NULL) {
+		regmap_read(cg->pwr_regmap, pwr->pwr_ofs, &val);
+		regmap_read(cg->pwr_regmap, pwr->pwr2_ofs, &val2);
+
+		if ((val & pwr->mask) == 0 || (val2 & pwr->mask) == 0)
+			return false;
+	}
+
+	return true;
+}
 
 static int mtk_cg_bit_is_cleared(struct clk_hw *hw)
 {
@@ -45,6 +61,26 @@ static int mtk_cg_bit_is_set(struct clk_hw *hw)
 	val &= BIT(cg->bit);
 
 	return val != 0;
+}
+
+static int mtk_cg_is_enabled(struct clk_hw *hw)
+{
+	struct mtk_clk_gate *cg = to_mtk_clk_gate(hw);
+
+	if (!is_subsys_pwr_on(cg))
+		return 0;
+
+	return mtk_cg_bit_is_cleared(hw);
+}
+
+static int mtk_en_is_enabled(struct clk_hw *hw)
+{
+	struct mtk_clk_gate *cg = to_mtk_clk_gate(hw);
+
+	if (!is_subsys_pwr_on(cg))
+		return 0;
+
+	return mtk_cg_bit_is_set(hw);
 }
 
 static void mtk_cg_set_bit(struct clk_hw *hw)
@@ -126,28 +162,44 @@ static void mtk_cg_disable_inv_no_setclr(struct clk_hw *hw)
 }
 
 const struct clk_ops mtk_clk_gate_ops_setclr = {
-	.is_enabled	= mtk_cg_bit_is_cleared,
+	.is_enabled	= mtk_cg_is_enabled,
 	.enable		= mtk_cg_enable,
 	.disable	= mtk_cg_disable,
 };
+EXPORT_SYMBOL(mtk_clk_gate_ops_setclr);
+
+const struct clk_ops mtk_clk_gate_ops_setclr_dummy = {
+	.is_enabled = mtk_cg_is_enabled,
+	.enable = mtk_cg_enable,
+};
+EXPORT_SYMBOL(mtk_clk_gate_ops_setclr_dummy);
 
 const struct clk_ops mtk_clk_gate_ops_setclr_inv = {
-	.is_enabled	= mtk_cg_bit_is_set,
+	.is_enabled	= mtk_en_is_enabled,
 	.enable		= mtk_cg_enable_inv,
 	.disable	= mtk_cg_disable_inv,
 };
+EXPORT_SYMBOL(mtk_clk_gate_ops_setclr_inv);
+
+const struct clk_ops mtk_clk_gate_ops_setclr_inv_dummy = {
+	.is_enabled	= mtk_en_is_enabled,
+	.enable		= mtk_cg_enable_inv,
+};
+EXPORT_SYMBOL(mtk_clk_gate_ops_setclr_inv_dummy);
 
 const struct clk_ops mtk_clk_gate_ops_no_setclr = {
-	.is_enabled	= mtk_cg_bit_is_cleared,
+	.is_enabled	= mtk_cg_is_enabled,
 	.enable		= mtk_cg_enable_no_setclr,
 	.disable	= mtk_cg_disable_no_setclr,
 };
+EXPORT_SYMBOL(mtk_clk_gate_ops_no_setclr);
 
 const struct clk_ops mtk_clk_gate_ops_no_setclr_inv = {
-	.is_enabled	= mtk_cg_bit_is_set,
+	.is_enabled	= mtk_en_is_enabled,
 	.enable		= mtk_cg_enable_inv_no_setclr,
 	.disable	= mtk_cg_disable_inv_no_setclr,
 };
+EXPORT_SYMBOL(mtk_clk_gate_ops_no_setclr_inv);
 
 struct clk *mtk_clk_register_gate(
 		const char *name,
@@ -157,7 +209,10 @@ struct clk *mtk_clk_register_gate(
 		int clr_ofs,
 		int sta_ofs,
 		u8 bit,
-		const struct clk_ops *ops)
+		const struct clk_ops *ops,
+		unsigned long flags,
+		struct pwr_status *pwr_stat,
+		struct regmap *pwr_regmap)
 {
 	struct mtk_clk_gate *cg;
 	struct clk *clk;
@@ -168,7 +223,7 @@ struct clk *mtk_clk_register_gate(
 		return ERR_PTR(-ENOMEM);
 
 	init.name = name;
-	init.flags = CLK_SET_RATE_PARENT;
+	init.flags = flags | CLK_SET_RATE_PARENT;
 	init.parent_names = parent_name ? &parent_name : NULL;
 	init.num_parents = parent_name ? 1 : 0;
 	init.ops = ops;
@@ -178,6 +233,8 @@ struct clk *mtk_clk_register_gate(
 	cg->clr_ofs = clr_ofs;
 	cg->sta_ofs = sta_ofs;
 	cg->bit = bit;
+	cg->pwr_stat = pwr_stat;
+	cg->pwr_regmap = pwr_regmap;
 
 	cg->hw.init = &init;
 
@@ -187,3 +244,9 @@ struct clk *mtk_clk_register_gate(
 
 	return clk;
 }
+EXPORT_SYMBOL(mtk_clk_register_gate);
+
+MODULE_LICENSE("GPL");
+MODULE_DESCRIPTION("MediaTek GATE");
+MODULE_AUTHOR("MediaTek Inc.");
+

@@ -12,12 +12,14 @@
  * GNU General Public License for more details.
  */
 
-#include <linux/of.h>
-#include <linux/of_address.h>
-#include <linux/io.h>
-#include <linux/slab.h>
 #include <linux/clkdev.h>
 #include <linux/delay.h>
+#include <linux/io.h>
+#include <linux/math64.h>
+#include <linux/module.h>
+#include <linux/of.h>
+#include <linux/of_address.h>
+#include <linux/slab.h>
 
 #include "clk-mtk.h"
 
@@ -27,7 +29,7 @@
 #define CON0_BASE_EN		BIT(0)
 #define CON0_PWR_ON		BIT(0)
 #define CON0_ISO_EN		BIT(1)
-#define CON0_PCW_CHG		BIT(31)
+#define PCW_CHG_MASK		BIT(31)
 
 #define AUDPLL_TUNER_EN		BIT(31)
 
@@ -49,8 +51,13 @@ struct mtk_clk_pll {
 	void __iomem	*tuner_addr;
 	void __iomem	*tuner_en_addr;
 	void __iomem	*pcw_addr;
+	void __iomem	*pcw_chg_addr;
 	const struct mtk_pll_data *data;
 };
+
+bool (*mtk_fh_set_rate)(int pll_id, unsigned long dds, int postdiv) = NULL;
+EXPORT_SYMBOL(mtk_fh_set_rate);
+
 
 static inline struct mtk_clk_pll *to_mtk_clk_pll(struct clk_hw *hw)
 {
@@ -68,12 +75,15 @@ static unsigned long __mtk_pll_recalc_rate(struct mtk_clk_pll *pll, u32 fin,
 		u32 pcw, int postdiv)
 {
 	int pcwbits = pll->data->pcwbits;
-	int pcwfbits;
+	int pcwfbits = 0;
+	int ibits;
 	u64 vco;
 	u8 c = 0;
 
 	/* The fractional part of the PLL divider. */
-	pcwfbits = pcwbits > INTEGER_BITS ? pcwbits - INTEGER_BITS : 0;
+	ibits = pll->data->pcwibits ? pll->data->pcwibits : INTEGER_BITS;
+	if (pcwbits > ibits)
+		pcwfbits = pcwbits - ibits;
 
 	vco = (u64)fin * pcw;
 
@@ -117,10 +127,7 @@ static void __mtk_pll_tuner_disable(struct mtk_clk_pll *pll)
 static void mtk_pll_set_rate_regs(struct mtk_clk_pll *pll, u32 pcw,
 		int postdiv)
 {
-	u32 con1, val;
-	int pll_en;
-
-	pll_en = readl(pll->base_addr + REG_CON0) & CON0_BASE_EN;
+	u32 chg, val;
 
 	/* disable tuner */
 	__mtk_pll_tuner_disable(pll);
@@ -141,21 +148,15 @@ static void mtk_pll_set_rate_regs(struct mtk_clk_pll *pll, u32 pcw,
 			pll->data->pcw_shift);
 	val |= pcw << pll->data->pcw_shift;
 	writel(val, pll->pcw_addr);
-
-	con1 = readl(pll->base_addr + REG_CON1);
-
-	if (pll_en)
-		con1 |= CON0_PCW_CHG;
-
-	writel(con1, pll->base_addr + REG_CON1);
+	chg = readl(pll->pcw_chg_addr) | PCW_CHG_MASK;
+	writel(chg, pll->pcw_chg_addr);
 	if (pll->tuner_addr)
-		writel(con1 + 1, pll->tuner_addr);
+		writel(val + 1, pll->tuner_addr);
 
 	/* restore tuner_en */
 	__mtk_pll_tuner_enable(pll);
 
-	if (pll_en)
-		udelay(20);
+	udelay(20);
 }
 
 /*
@@ -170,9 +171,10 @@ static void mtk_pll_set_rate_regs(struct mtk_clk_pll *pll, u32 pcw,
 static void mtk_pll_calc_values(struct mtk_clk_pll *pll, u32 *pcw, u32 *postdiv,
 		u32 freq, u32 fin)
 {
-	unsigned long fmin = 1000 * MHZ;
+	unsigned long fmin = pll->data->fmin ? pll->data->fmin : (1000 * MHZ);
 	const struct mtk_pll_div_table *div_table = pll->data->div_table;
 	u64 _pcw;
+	int ibits;
 	u32 val;
 
 	if (freq > pll->data->fmax)
@@ -196,8 +198,10 @@ static void mtk_pll_calc_values(struct mtk_clk_pll *pll, u32 *pcw, u32 *postdiv,
 	}
 
 	/* _pcw = freq * postdiv / fin * 2^pcwfbits */
-	_pcw = ((u64)freq << val) << (pll->data->pcwbits - INTEGER_BITS);
-	do_div(_pcw, fin);
+	ibits = pll->data->pcwibits ? pll->data->pcwibits : INTEGER_BITS;
+	_pcw = ((u64)freq << val) << (pll->data->pcwbits - ibits);
+	if (fin != 0)
+		_pcw = div_u64(_pcw, fin);
 
 	*pcw = (u32)_pcw;
 }
@@ -210,7 +214,9 @@ static int mtk_pll_set_rate(struct clk_hw *hw, unsigned long rate,
 	u32 postdiv;
 
 	mtk_pll_calc_values(pll, &pcw, &postdiv, rate, parent_rate);
-	mtk_pll_set_rate_regs(pll, pcw, postdiv);
+
+	if (!mtk_fh_set_rate || !mtk_fh_set_rate(pll->data->id, pcw, postdiv))
+		mtk_pll_set_rate_regs(pll, pcw, postdiv);
 
 	return 0;
 }
@@ -297,6 +303,16 @@ static void mtk_pll_unprepare(struct clk_hw *hw)
 	writel(r, pll->pwr_addr);
 }
 
+#if (defined(CONFIG_MACH_MT6779))
+static const struct clk_ops mtk_pll_ops = {
+	.is_enabled	= mtk_pll_is_prepared,
+	.enable		= mtk_pll_prepare,
+	.disable	= mtk_pll_unprepare,
+	.recalc_rate	= mtk_pll_recalc_rate,
+	.round_rate	= mtk_pll_round_rate,
+	.set_rate	= mtk_pll_set_rate,
+};
+#else
 static const struct clk_ops mtk_pll_ops = {
 	.is_prepared	= mtk_pll_is_prepared,
 	.prepare	= mtk_pll_prepare,
@@ -305,6 +321,7 @@ static const struct clk_ops mtk_pll_ops = {
 	.round_rate	= mtk_pll_round_rate,
 	.set_rate	= mtk_pll_set_rate,
 };
+#endif
 
 static struct clk *mtk_clk_register_pll(const struct mtk_pll_data *data,
 		void __iomem *base)
@@ -322,6 +339,10 @@ static struct clk *mtk_clk_register_pll(const struct mtk_pll_data *data,
 	pll->pwr_addr = base + data->pwr_reg;
 	pll->pd_addr = base + data->pd_reg;
 	pll->pcw_addr = base + data->pcw_reg;
+	if (data->pcw_chg_reg)
+		pll->pcw_chg_addr = base + data->pcw_chg_reg;
+	else
+		pll->pcw_chg_addr = pll->base_addr + REG_CON1;
 	if (data->tuner_reg)
 		pll->tuner_addr = base + data->tuner_reg;
 	if (data->tuner_en_reg)
@@ -347,7 +368,8 @@ static struct clk *mtk_clk_register_pll(const struct mtk_pll_data *data,
 }
 
 void mtk_clk_register_plls(struct device_node *node,
-		const struct mtk_pll_data *plls, int num_plls, struct clk_onecell_data *clk_data)
+		const struct mtk_pll_data *plls, int num_plls,
+		struct clk_onecell_data *clk_data)
 {
 	void __iomem *base;
 	int i;
@@ -373,3 +395,8 @@ void mtk_clk_register_plls(struct device_node *node,
 		clk_data->clks[pll->id] = clk;
 	}
 }
+EXPORT_SYMBOL(mtk_clk_register_plls);
+
+MODULE_LICENSE("GPL");
+MODULE_DESCRIPTION("MediaTek PLL");
+MODULE_AUTHOR("MediaTek Inc.");
