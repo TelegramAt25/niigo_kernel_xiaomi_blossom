@@ -1,7 +1,10 @@
 # SPDX-License-Identifier: GPL-2.0
+ccflags-y += -Wno-constant-logical-operand
+
 ifdef CONFIG_FUNCTION_TRACER
 CFLAGS_REMOVE_clock.o = $(CC_FLAGS_FTRACE)
 endif
+ccflags-$(CONFIG_MTK_PERF_COMMON) += -I$(srctree)/drivers/misc/mediatek/include
 
 # These files are disabled because they produce non-interesting flaky coverage
 # that is not a function of syscall inputs. E.g. involuntary context switches.
@@ -32,3 +35,6 @@ obj-$(CONFIG_CPU_FREQ_GOV_SCHEDUTIL) += cpufreq_schedutil.o
 obj-$(CONFIG_MEMBARRIER) += membarrier.o
 obj-$(CONFIG_CPU_ISOLATION) += isolation.o
 obj-$(CONFIG_PSI) += psi.o
+
+obj-y += extension/
+

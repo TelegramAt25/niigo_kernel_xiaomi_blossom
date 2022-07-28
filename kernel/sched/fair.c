@@ -260,7 +260,6 @@ const struct sched_class fair_sched_class;
 #ifdef CONFIG_FAIR_GROUP_SCHED
 static inline struct task_struct *task_of(struct sched_entity *se)
 {
-	SCHED_WARN_ON(!entity_is_task(se));
 	return container_of(se, struct task_struct, se);
 }
 
@@ -5279,6 +5278,7 @@ static inline void update_overutilized_status(struct rq *rq)
 		trace_sched_overutilized(1);
 	}
 }
+
 #else
 static inline void update_overutilized_status(struct rq *rq) { }
 #endif
@@ -6022,6 +6022,17 @@ static unsigned long capacity_spare_without(int cpu, struct task_struct *p)
 	return max_t(long, capacity_of(cpu) - cpu_util_without(cpu, p), 0);
 }
 
+#ifdef CONFIG_MTK_SCHED_INTEROP
+#define MT_RT_LOAD (2*1023*NICE_0_LOAD)
+static inline unsigned long mt_rt_load(int cpu)
+{
+	if (likely(!is_rt_throttle(cpu)))
+		return cpu_rq(cpu)->rt.rt_nr_running * MT_RT_LOAD;
+
+	return 0;
+}
+#endif
+
 /*
  * find_idlest_group finds and returns the least busy CPU group within the
  * domain.
@@ -6078,6 +6089,10 @@ find_idlest_group(struct sched_domain *sd, struct task_struct *p,
 			runnable_load += load;
 
 			avg_load += cfs_rq_load_avg(&cpu_rq(i)->cfs);
+
+#ifdef CONFIG_MTK_SCHED_INTEROP
+			avg_load += mt_rt_load(i);
+#endif
 
 			spare_cap = capacity_spare_without(i, p);
 
@@ -6190,6 +6205,9 @@ find_idlest_group_cpu(struct sched_group *group, struct task_struct *p, int this
 		if (available_idle_cpu(i)) {
 			struct rq *rq = cpu_rq(i);
 			struct cpuidle_state *idle = idle_get_state(rq);
+
+			if (cpu_isolated(i))
+				continue;
 			if (idle && idle->exit_latency < min_exit_latency) {
 				/*
 				 * We give priority to a CPU whose idle state
@@ -6211,6 +6229,9 @@ find_idlest_group_cpu(struct sched_group *group, struct task_struct *p, int this
 			}
 		} else if (shallowest_idle_cpu == -1) {
 			load = weighted_cpuload(cpu_rq(i));
+#ifdef CONFIG_MTK_SCHED_INTEROP
+			load += mt_rt_load(i);
+#endif
 			if (load < min_load) {
 				min_load = load;
 				least_loaded_cpu = i;
@@ -6698,6 +6719,7 @@ static void find_best_target(struct sched_domain *sd, cpumask_t *cpus,
 	do {
 		for_each_cpu_and(i, &p->cpus_allowed, sched_group_span(sg)) {
 			unsigned long capacity_curr = capacity_curr_of(i);
+			unsigned long capacity = capacity_of(i);
 			unsigned long capacity_orig = capacity_orig_of(i);
 			unsigned long wake_util, new_util;
 			long spare_cap;
@@ -6705,6 +6727,15 @@ static void find_best_target(struct sched_domain *sd, cpumask_t *cpus,
 
 			if (!cpu_online(i))
 				continue;
+
+			if (cpu_isolated(i))
+				continue;
+
+#ifdef CONFIG_MTK_SCHED_INTEROP
+			if (cpu_rq(i)->rt.rt_nr_running &&
+				likely(!is_rt_throttle(i)))
+				continue;
+#endif
 
 			/*
 			 * p's blocked utilization is still accounted for on prev_cpu
@@ -6720,7 +6751,7 @@ static void find_best_target(struct sched_domain *sd, cpumask_t *cpus,
 			 * than the one required to boost the task.
 			 */
 			new_util = max(min_util, new_util);
-			if (new_util > capacity_orig)
+			if (new_util > capacity)
 				continue;
 
 			/*
@@ -6728,7 +6759,7 @@ static void find_best_target(struct sched_domain *sd, cpumask_t *cpus,
 			 * to have available on this CPU once the task is
 			 * enqueued here.
 			 */
-			spare_cap = capacity_orig - new_util;
+			spare_cap = capacity - new_util;
 
 			if (idle_cpu(i))
 				idle_idx = idle_get_state_idx(cpu_rq(i));
@@ -7116,6 +7147,13 @@ static void select_cpu_candidates(struct sched_domain *sd, cpumask_t *cpus,
 		for_each_cpu_and(cpu, perf_domain_span(pd), sched_domain_span(sd)) {
 			if (!cpumask_test_cpu(cpu, &p->cpus_allowed))
 				continue;
+			if (cpu_isolated(cpu))
+				continue;
+#ifdef CONFIG_MTK_SCHED_INTEROP
+			if (cpu_rq(cpu)->rt.rt_nr_running &&
+				likely(!is_rt_throttle(cpu)))
+				continue;
+#endif
 
 			util = cpu_util_next(cpu, p, cpu);
 			cpu_cap = capacity_of(cpu);
@@ -7150,6 +7188,7 @@ static void select_cpu_candidates(struct sched_domain *sd, cpumask_t *cpus,
 					continue;
 				if (!boosted && cpu_cap > target_cap)
 					continue;
+
 				idle = idle_get_state(cpu_rq(cpu));
 				if (idle && idle->exit_latency > min_exit_lat &&
 						cpu_cap == target_cap)
@@ -7232,7 +7271,8 @@ static int find_energy_efficient_cpu(struct task_struct *p, int prev_cpu, int sy
 
 	if (sysctl_sched_sync_hint_enable && sync) {
 		cpu = smp_processor_id();
-		if (cpumask_test_cpu(cpu, &p->cpus_allowed))
+		if (cpumask_test_cpu(cpu, &p->cpus_allowed) &&
+			!cpu_isolated(cpu))
 			return cpu;
 	}
 
@@ -7271,11 +7311,13 @@ static int find_energy_efficient_cpu(struct task_struct *p, int prev_cpu, int sy
 
 	/* If there is only one sensible candidate, select it now. */
 	cpu = cpumask_first(candidates);
-	if (weight == 1 && ((uclamp_latency_sensitive(p) && idle_cpu(cpu)) ||
-			    (cpu == prev_cpu))) {
-		best_energy_cpu = cpu;
-		goto unlock;
-	}
+	if (!cpu_isolated(cpu))
+		if (weight == 1 && ((schedtune_prefer_idle(p)
+				&& idle_cpu(cpu)) ||
+				(cpu == prev_cpu))) {
+			best_energy_cpu = cpu;
+			goto unlock;
+		}
 
 	if (cpumask_test_cpu(prev_cpu, &p->cpus_allowed))
 		prev_energy = best_energy = compute_energy(p, prev_cpu, pd);
@@ -7286,6 +7328,10 @@ static int find_energy_efficient_cpu(struct task_struct *p, int prev_cpu, int sy
 	for_each_cpu(cpu, candidates) {
 		if (cpu == prev_cpu)
 			continue;
+
+		if (cpu_isolated(cpu))
+			continue;
+
 		cur_energy = compute_energy(p, cpu, pd);
 		if (cur_energy < best_energy) {
 			best_energy = cur_energy;
@@ -7302,8 +7348,23 @@ unlock:
 	if (prev_energy == ULONG_MAX)
 		return best_energy_cpu;
 
+#ifdef CONFIG_MTK_SCHED_LB_ENHANCEMENT
+	if (prev_energy > best_energy)
+		return best_energy_cpu;
+
+	/* aovid round off or the task util is too small */
+	if (prev_energy == best_energy) {
+		int best_cpu_cap = capacity_orig_of(best_energy_cpu);
+		int prev_cpu_cap = capacity_orig_of(prev_cpu);
+
+		if (best_cpu_cap < prev_cpu_cap)
+			return best_energy_cpu;
+
+	}
+#else
 	if ((prev_energy - best_energy) > (prev_energy >> 4))
 		return best_energy_cpu;
+#endif
 
 	return prev_cpu;
 
@@ -7326,14 +7387,16 @@ fail:
  * preempt must be disabled.
  */
 static int
-select_task_rq_fair(struct task_struct *p, int prev_cpu, int sd_flag, int wake_flags,
-		    int sibling_count_hint)
+SELECT_TASK_RQ_FAIR(struct task_struct *p, int prev_cpu, int sd_flag,
+		int wake_flags, int sibling_count_hint)
+
 {
 	struct sched_domain *tmp, *sd = NULL;
 	int cpu = smp_processor_id();
 	int new_cpu = prev_cpu;
 	int want_affine = 0;
 	int sync = (wake_flags & WF_SYNC) && !(current->flags & PF_EXITING);
+	int select_reason = LB_PREV;
 
 	if (sd_flag & SD_BALANCE_WAKE) {
 		record_wakee(p);
@@ -7344,7 +7407,8 @@ select_task_rq_fair(struct task_struct *p, int prev_cpu, int sd_flag, int wake_f
 
 			new_cpu = find_energy_efficient_cpu(p, prev_cpu, sync);
 			if (new_cpu >= 0)
-				return new_cpu;
+				return LB_EAS | new_cpu;
+
 			new_cpu = prev_cpu;
 		}
 
@@ -7365,9 +7429,10 @@ sd_loop:
 		 */
 		if (want_affine && (tmp->flags & SD_WAKE_AFFINE) &&
 		    cpumask_test_cpu(prev_cpu, sched_domain_span(tmp))) {
-			if (cpu != prev_cpu)
+			if (cpu != prev_cpu) {
 				new_cpu = wake_affine(tmp, p, cpu, prev_cpu, sync);
-
+				select_reason = LB_WAKE_AFFINE;
+			}
 			sd = NULL; /* Prefer wake_affine over balance flags */
 			break;
 		}
@@ -7381,17 +7446,41 @@ sd_loop:
 	if (unlikely(sd)) {
 		/* Slow path */
 		new_cpu = find_idlest_cpu(sd, p, cpu, prev_cpu, sd_flag);
+		select_reason = LB_IDLEST;
 	} else if (sd_flag & SD_BALANCE_WAKE) { /* XXX always ? */
 		/* Fast path */
 
 		new_cpu = select_idle_sibling(p, prev_cpu, new_cpu);
+		select_reason = LB_IDLE_SIBLING;
 
 		if (want_affine)
 			current->recent_used_cpu = cpu;
 	}
 	rcu_read_unlock();
 
-	return new_cpu;
+	return select_reason | new_cpu;
+}
+
+static inline int
+select_task_rq_fair(struct task_struct *p, int prev_cpu, int sd_flag,
+	int wake_flags, int sibling_count_hint)
+{
+	int result = 0;
+	int cpu;
+
+	result = SELECT_TASK_RQ_FAIR(p, prev_cpu, sd_flag, wake_flags,
+		sibling_count_hint);
+#ifdef CONFIG_MTK_SCHED_CPU_PREFER
+	select_task_prefer_cpu_fair(p, &result);
+#endif
+	cpu = (result & LB_CPU_MASK);
+
+#ifdef CONFIG_MTK_SCHED_EXTENSION
+	trace_sched_select_task_rq(p, result, prev_cpu, cpu,
+		task_util(p), uclamp_task_util(p),
+		(schedtune_prefer_idle(p) > 0), wake_flags);
+#endif
+	return cpu;
 }
 
 static void detach_entity_cfs_rq(struct sched_entity *se);
@@ -8199,11 +8288,29 @@ static struct task_struct *detach_one_task(struct lb_env *env)
 
 	list_for_each_entry_reverse(p,
 			&env->src_rq->cfs_tasks, se.group_node) {
+#ifdef CONFIG_MTK_SCHED_EXTENSION
+		int src_cpu = cpu_of(env->src_rq);
+		struct task_struct *pm;
+
+		pm = per_cpu(migrate_task, src_cpu);
+		if (pm) {
+			if (p != pm)
+				continue;
+
+			per_cpu(migrate_task, src_cpu) = NULL;
+
+			if (!cpumask_test_cpu(env->dst_cpu, &p->cpus_allowed))
+				return NULL;
+
+		} else if (!can_migrate_task(p, env)) {
+			continue;
+		}
+#else
 		if (!can_migrate_task(p, env))
 			continue;
+#endif
 
 		detach_task(p, env);
-
 		/*
 		 * Right now, this is only the second place where
 		 * lb_gained[env->idle] is updated (other is detach_tasks)
@@ -8474,8 +8581,11 @@ static void update_cfs_rq_h_load(struct cfs_rq *cfs_rq)
 {
 	struct rq *rq = rq_of(cfs_rq);
 	struct sched_entity *se = cfs_rq->tg->se[cpu_of(rq)];
-	unsigned long now = jiffies;
+	u64 now = sched_clock_cpu(cpu_of(rq));
 	unsigned long load;
+
+	/* sched: change to jiffies */
+	now = now * HZ >> 30;
 
 	if (cfs_rq->last_h_load_update == now)
 		return;
@@ -8643,6 +8753,12 @@ static unsigned long scale_rt_capacity(int cpu, unsigned long max)
 		return 1;
 
 	used = READ_ONCE(rq->avg_rt.util_avg);
+#ifdef CONFIG_MTK_SCHED_INTEROP
+	if (unlikely(is_rt_throttle(cpu)) || !(rq->rt.rt_nr_running)) {
+		/* mtk: don't reduce capacity when rt task throttle or sleep*/
+		used = 0;
+	}
+#endif
 	used += READ_ONCE(rq->avg_dl.util_avg);
 
 	if (unlikely(used >= max))
@@ -8733,6 +8849,10 @@ void update_group_capacity(struct sched_domain *sd, int cpu)
 		for_each_cpu(cpu, sched_group_span(sdg)) {
 			struct sched_group_capacity *sgc;
 			struct rq *rq = cpu_rq(cpu);
+#ifdef CONFIG_MTK_SCHED_EXTENSION
+			if (cpumask_test_cpu(cpu, cpu_isolated_mask))
+				continue;
+#endif
 
 			/*
 			 * build_sched_domains() -> init_sched_groups_capacity()
@@ -8764,8 +8884,12 @@ void update_group_capacity(struct sched_domain *sd, int cpu)
 		group = child->groups;
 		do {
 			struct sched_group_capacity *sgc = group->sgc;
-
-			capacity += sgc->capacity;
+#ifdef CONFIG_MTK_SCHED_EXTENSION
+			cpumask_t *cpus = sched_group_cpus(group);
+			/* Revisit this later. This won't work for MT domain */
+			if (!cpu_isolated(cpumask_first(cpus)))
+#endif
+				capacity += sgc->capacity;
 			min_capacity = min(sgc->min_capacity, min_capacity);
 			max_capacity = max(sgc->max_capacity, max_capacity);
 			group = group->next;
@@ -8950,7 +9074,8 @@ static inline void update_sg_lb_stats(struct lb_env *env,
 
 	for_each_cpu_and(i, sched_group_span(group), env->cpus) {
 		struct rq *rq = cpu_rq(i);
-
+		if (cpu_isolated(i))
+			continue;
 		if ((env->flags & LBF_NOHZ_STATS) && update_nohz_stats(rq, false))
 			env->flags |= LBF_NOHZ_AGAIN;
 
@@ -8959,6 +9084,9 @@ static inline void update_sg_lb_stats(struct lb_env *env,
 			load = target_load(i, load_idx);
 		else
 			load = source_load(i, load_idx);
+#ifdef CONFIG_MTK_SCHED_INTEROP
+		load  += mt_rt_load(i);
+#endif
 
 		sgs->group_load += load;
 		sgs->group_util += cpu_util(i);
@@ -8990,8 +9118,25 @@ static inline void update_sg_lb_stats(struct lb_env *env,
 	}
 
 	/* Adjust by relative CPU capacity of the group */
-	sgs->group_capacity = group->sgc->capacity;
-	sgs->avg_load = (sgs->group_load*SCHED_CAPACITY_SCALE) / sgs->group_capacity;
+#ifdef CONFIG_MTK_SCHED_EXTENSION
+		/* Isolated CPU has no weight */
+	if (!group->group_weight) {
+		sgs->group_capacity = 0;
+		sgs->avg_load = 0;
+		sgs->group_no_capacity = 1;
+		sgs->group_type = group_other;
+		sgs->group_weight = group->group_weight;
+	} else {
+#endif
+		sgs->group_capacity = group->sgc->capacity;
+		sgs->avg_load = (sgs->group_load*SCHED_CAPACITY_SCALE) /
+				sgs->group_capacity;
+#ifdef CONFIG_MTK_SCHED_EXTENSION
+		sgs->group_weight = group->group_weight;
+		sgs->group_no_capacity = group_is_overloaded(env, sgs);
+		sgs->group_type = group_classify(group, sgs);
+	}
+#endif
 
 	if (sgs->sum_nr_running)
 		sgs->load_per_task = sgs->sum_weighted_load / sgs->sum_nr_running;
@@ -9208,14 +9353,13 @@ next_group:
 		/* update overload indicator if we are at root domain */
 		WRITE_ONCE(rd->overload, sg_status & SG_OVERLOAD);
 
-		/* Update over-utilization (tipping point, U >= 0) indicator */
+		/* Updateover-utilization (tipping point, U >= 0) indicator */
 		WRITE_ONCE(rd->overutilized, sg_status & SG_OVERUTILIZED);
 		trace_sched_overutilized(!!(sg_status & SG_OVERUTILIZED));
 	} else if (sg_status & SG_OVERUTILIZED) {
 		WRITE_ONCE(env->dst_rq->rd->overutilized, SG_OVERUTILIZED);
 		trace_sched_overutilized(1);
 	}
-
 }
 
 /**
@@ -9469,9 +9613,25 @@ static struct sched_group *find_busiest_group(struct lb_env *env)
 
 	if (static_branch_unlikely(&sched_energy_present)) {
 		struct root_domain *rd = env->dst_rq->rd;
+#ifdef CONFIG_MTK_SCHED_LB_ENHANCEMENT
+		int intra = 0;
+
+		if (sds.busiest) {
+			int local_cpu, busiest_cpu;
+
+			local_cpu = env->dst_cpu;
+			busiest_cpu = group_first_cpu(sds.busiest);
+			intra = is_intra_domain(local_cpu, busiest_cpu);
+		}
 
 		if (rcu_dereference(rd->pd) && !READ_ONCE(rd->overutilized))
+			if (!sched_feat(SCHED_MTK_EAS) ||
+				(sched_feat(SCHED_MTK_EAS) && !intra))
+				goto out_balanced;
+#else
+		if (rcu_dereference(rd->pd) && !READ_ONCE(rd->overutilized))
 			goto out_balanced;
+#endif
 	}
 
 	local = &sds.local_stat;
@@ -9622,6 +9782,10 @@ static struct rq *find_busiest_queue(struct lb_env *env,
 
 		wl = weighted_cpuload(rq);
 
+#ifdef CONFIG_MTK_SCHED_INTEROP
+		wl += mt_rt_load(i);
+#endif
+
 		/*
 		 * When comparing with imbalance, use weighted_cpuload()
 		 * which is not scaled with the CPU capacity.
@@ -9704,7 +9868,22 @@ static int need_active_balance(struct lb_env *env)
 	return unlikely(sd->nr_balance_failed > sd->cache_nice_tries+2);
 }
 
+#ifndef CONFIG_MTK_SCHED_EXTENSION
 static int active_load_balance_cpu_stop(void *data);
+#else
+int active_load_balance_cpu_stop(void *data);
+#endif
+
+#ifdef CONFIG_MTK_SCHED_EXTENSION
+static int group_balance_cpu_not_isolated(struct sched_group *sg)
+{
+	cpumask_t cpus;
+
+	cpumask_and(&cpus, sched_group_cpus(sg), sched_group_mask(sg));
+	cpumask_andnot(&cpus, &cpus, cpu_isolated_mask);
+	return cpumask_first(&cpus);
+}
+#endif
 
 static int should_we_balance(struct lb_env *env)
 {
@@ -9730,12 +9909,19 @@ static int should_we_balance(struct lb_env *env)
 		if (!idle_cpu(cpu))
 			continue;
 
+		if (!cpu_isolated(cpu))
+			continue;
+
 		balance_cpu = cpu;
 		break;
 	}
 
 	if (balance_cpu == -1)
+#ifdef CONFIG_MTK_SCHED_EXTENSION
+		balance_cpu = group_balance_cpu_not_isolated(sg);
+#else
 		balance_cpu = group_balance_cpu(sg);
+#endif
 
 	/*
 	 * First idle CPU or the first CPU(busiest) in this sched group
@@ -9939,12 +10125,22 @@ more_balance:
 				goto out_one_pinned;
 			}
 
+#ifdef CONFIG_MTK_SCHED_CPU_PREFER
+			if (task_prefer_fit(busiest->curr, cpu_of(busiest))) {
+				raw_spin_unlock_irqrestore(&busiest->lock,
+							    flags);
+				env.flags |= LBF_ALL_PINNED;
+				goto out_one_pinned;
+			}
+#endif
+
 			/*
 			 * ->active_balance synchronizes accesses to
 			 * ->active_balance_work.  Once set, it's cleared
 			 * only after active load balance is finished.
 			 */
-			if (!busiest->active_balance) {
+			if (!busiest->active_balance &&
+				!cpu_isolated(cpu_of(busiest))) {
 				busiest->active_balance = 1;
 				busiest->push_cpu = this_cpu;
 				active_balance = 1;
@@ -10051,6 +10247,7 @@ update_next_balance(struct sched_domain *sd, unsigned long *next_balance)
 		*next_balance = next;
 }
 
+#ifndef CONFIG_MTK_SCHED_EXTENSION
 /*
  * active_load_balance_cpu_stop is run by the CPU stopper. It pushes
  * running tasks off the busiest CPU onto idle CPUs. It requires at
@@ -10058,6 +10255,9 @@ update_next_balance(struct sched_domain *sd, unsigned long *next_balance)
  * avoids physical / logical imbalances.
  */
 static int active_load_balance_cpu_stop(void *data)
+#else
+int active_load_balance_cpu_stop(void *data)
+#endif
 {
 	struct rq *busiest_rq = data;
 	int busiest_cpu = cpu_of(busiest_rq);
@@ -10075,7 +10275,11 @@ static int active_load_balance_cpu_stop(void *data)
 	 */
 	if (!cpu_active(busiest_cpu) || !cpu_active(target_cpu))
 		goto out_unlock;
-
+#ifdef CONFIG_MTK_SCHED_EXTENSION
+	if (!cpu_online(busiest_cpu) || !cpu_online(target_cpu) ||
+		cpu_isolated(busiest_cpu) || cpu_isolated(target_cpu))
+		goto out_unlock;
+#endif
 	/* Make sure the requested CPU hasn't gone down in the meantime: */
 	if (unlikely(busiest_cpu != smp_processor_id() ||
 		     !busiest_rq->active_balance))
@@ -10150,7 +10354,16 @@ static DEFINE_SPINLOCK(balancing);
  */
 void update_max_interval(void)
 {
+#ifdef CONFIG_MTK_SCHED_EXTENSION
+	cpumask_t avail_mask;
+	unsigned int available_cpus;
+
+	cpumask_andnot(&avail_mask, cpu_online_mask, cpu_isolated_mask);
+	available_cpus = cpumask_weight(&avail_mask);
+	max_load_balance_interval = HZ*available_cpus/10;
+#else
 	max_load_balance_interval = HZ*num_online_cpus()/10;
+#endif
 }
 
 /*
@@ -10428,6 +10641,16 @@ unlock:
 	rcu_read_unlock();
 }
 
+#ifdef CONFIG_MTK_SCHED_EXTENSION
+void nohz_balance_clear_nohz_mask(int cpu)
+{
+	if (likely(cpumask_test_cpu(cpu, nohz.idle_cpus_mask))) {
+		cpumask_clear_cpu(cpu, nohz.idle_cpus_mask);
+		atomic_dec(&nohz.nr_cpus);
+	}
+}
+#endif
+
 void nohz_balance_exit_idle(struct rq *rq)
 {
 	SCHED_WARN_ON(rq != this_rq());
@@ -10436,8 +10659,12 @@ void nohz_balance_exit_idle(struct rq *rq)
 		return;
 
 	rq->nohz_tick_stopped = 0;
+#ifdef CONFIG_MTK_SCHED_EXTENSION
+	nohz_balance_clear_nohz_mask(cpu_of(rq));
+#else
 	cpumask_clear_cpu(rq->cpu, nohz.idle_cpus_mask);
 	atomic_dec(&nohz.nr_cpus);
+#endif
 
 	set_cpu_sd_state_busy(rq->cpu);
 }
@@ -10470,6 +10697,9 @@ void nohz_balance_enter_idle(int cpu)
 
 	/* If this CPU is going down, then nothing needs to be done: */
 	if (!cpu_active(cpu))
+		return;
+
+	if (cpu_isolated(cpu))
 		return;
 
 	/* Spare idle load balancing on CPUs that don't want to be disturbed: */
@@ -10559,7 +10789,8 @@ static bool _nohz_idle_balance(struct rq *this_rq, unsigned int flags,
 	for_each_cpu(balance_cpu, nohz.idle_cpus_mask) {
 		if (balance_cpu == this_cpu || !idle_cpu(balance_cpu))
 			continue;
-
+		if (cpu_isolated(balance_cpu))
+			continue;
 		/*
 		 * If this CPU gets work to do, stop the load balancing
 		 * work being done for other CPUs. Next load
@@ -10711,6 +10942,8 @@ static int idle_balance(struct rq *this_rq, struct rq_flags *rf)
 	int pulled_task = 0;
 	u64 curr_cost = 0;
 
+	if (cpu_isolated(this_cpu))
+		return 0;
 	/*
 	 * We must set idle_stamp _before_ calling idle_balance(), such that we
 	 * measure the duration of idle_balance() as idle time.
@@ -10739,7 +10972,12 @@ static int idle_balance(struct rq *this_rq, struct rq_flags *rf)
 		if (sd)
 			update_next_balance(sd, &next_balance);
 		rcu_read_unlock();
-
+#ifdef CONFIG_MTK_IDLE_BALANCE_ENHANCEMENT
+		if (!this_rq->rd->overload) {
+			raw_spin_unlock(&this_rq->lock);
+			goto hinted_idle_pull;
+		}
+#endif
 		nohz_newidle_balance(this_rq);
 
 		goto out;
@@ -10785,6 +11023,13 @@ static int idle_balance(struct rq *this_rq, struct rq_flags *rf)
 			break;
 	}
 	rcu_read_unlock();
+
+#ifdef CONFIG_MTK_IDLE_BALANCE_ENHANCEMENT
+hinted_idle_pull:
+	/* We could not pull task to this_cpu when this_rq offline */
+	if (this_rq->online && !pulled_task)
+		pulled_task = aggressive_idle_pull(this_cpu);
+#endif
 
 	raw_spin_lock(&this_rq->lock);
 
@@ -10848,7 +11093,7 @@ static __latent_entropy void run_rebalance_domains(struct softirq_action *h)
 void trigger_load_balance(struct rq *rq)
 {
 	/* Don't need to rebalance while attached to NULL domain */
-	if (unlikely(on_null_domain(rq)))
+	if (unlikely(on_null_domain(rq)) || cpu_isolated(cpu_of(rq)))
 		return;
 
 	if (time_after_eq(jiffies, rq->next_balance))
@@ -10871,6 +11116,196 @@ static void rq_offline_fair(struct rq *rq)
 	/* Ensure any throttled groups are reachable by pick_next_task */
 	unthrottle_offline_cfs_rqs(rq);
 }
+
+#ifdef CONFIG_MTK_SCHED_BIG_TASK_MIGRATE
+void task_check_for_rotation(struct rq *src_rq)
+{
+	u64 wait, max_wait = 0, run, max_run = 0;
+	int deserved_cpu = nr_cpu_ids, dst_cpu = nr_cpu_ids;
+	int i, src_cpu = cpu_of(src_rq);
+	struct rq *dst_rq;
+	struct task_rotate_work *wr = NULL;
+	int heavy_task = 0;
+	int force = 0;
+
+	if (!big_task_rotation_enable)
+		return;
+
+	if (is_max_capacity_cpu(src_cpu))
+		return;
+
+	for_each_possible_cpu(i) {
+		struct rq *rq = cpu_rq(i);
+		struct task_struct *curr_task = rq->curr;
+
+		if (curr_task &&
+			!task_fits_capacity(curr_task, capacity_of(i)))
+			heavy_task += 1;
+	}
+
+	if (heavy_task < HEAVY_TASK_NUM)
+		return;
+
+	for_each_possible_cpu(i) {
+		struct rq *rq = cpu_rq(i);
+
+		if (!is_min_capacity_cpu(i))
+			continue;
+
+		if (is_reserved(i))
+			continue;
+
+		if (!rq->misfit_task_load || rq->curr->sched_class !=
+						&fair_sched_class)
+			continue;
+
+		wait = (rq->curr->se.sum_exec_runtime) -
+			(rq->curr->se.prev_sum_exec_runtime);
+
+		if (wait > max_wait) {
+			max_wait = wait;
+			deserved_cpu = i;
+		}
+	}
+
+	if (deserved_cpu != src_cpu)
+		return;
+
+	for_each_possible_cpu(i) {
+		struct rq *rq = cpu_rq(i);
+
+		if (capacity_orig_of(i) <= capacity_orig_of(src_cpu))
+			continue;
+
+		if (is_reserved(i))
+			continue;
+
+		if (rq->curr->sched_class != &fair_sched_class)
+			continue;
+
+		if (rq->nr_running > 1)
+			continue;
+
+		run = (rq->curr->se.sum_exec_runtime) -
+			(rq->curr->se.prev_sum_exec_runtime);
+
+		if (run < TASK_ROTATION_THRESHOLD_NS)
+			continue;
+
+		if (run > max_run) {
+			max_run = run;
+			dst_cpu = i;
+		}
+	}
+
+	if (dst_cpu == nr_cpu_ids)
+		return;
+
+	dst_rq = cpu_rq(dst_cpu);
+
+	double_rq_lock(src_rq, dst_rq);
+	if (dst_rq->curr->sched_class == &fair_sched_class) {
+		if (!cpumask_test_cpu(dst_cpu,
+					&(src_rq->curr)->cpus_allowed) ||
+			!cpumask_test_cpu(src_cpu,
+					&(dst_rq->curr)->cpus_allowed)) {
+			double_rq_unlock(src_rq, dst_rq);
+			return;
+		}
+
+		if (!src_rq->active_balance && !dst_rq->active_balance) {
+			src_rq->active_balance = MIGR_ROTATION;
+			dst_rq->active_balance = MIGR_ROTATION;
+
+			get_task_struct(src_rq->curr);
+			get_task_struct(dst_rq->curr);
+
+			wr = &per_cpu(task_rotate_works, src_cpu);
+
+			wr->src_task = src_rq->curr;
+			wr->dst_task = dst_rq->curr;
+
+			wr->src_cpu = src_rq->cpu;
+			wr->dst_cpu = dst_rq->cpu;
+			force = 1;
+		}
+	}
+	double_rq_unlock(src_rq, dst_rq);
+
+	if (force) {
+		queue_work_on(src_cpu, system_highpri_wq, &wr->w);
+		trace_sched_big_task_rotation(wr->src_cpu, wr->dst_cpu,
+					wr->src_task->pid, wr->dst_task->pid,
+					false, set_uclamp);
+	}
+}
+
+static DEFINE_RAW_SPINLOCK(migration_lock);
+static bool big_task_migration_enable = true;
+void check_for_migration(struct task_struct *p)
+{
+	int new_cpu;
+	int cpu = task_cpu(p);
+	struct rq *rq = cpu_rq(cpu);
+	int i, heavy_task = 0;
+	struct task_rotate_reset_uclamp_work *wr = NULL;
+
+	for_each_possible_cpu(i) {
+		struct rq *rq = cpu_rq(i);
+		struct task_struct *curr_task = rq->curr;
+
+		if (curr_task &&
+			!task_fits_capacity(curr_task, capacity_of(i)))
+			heavy_task += 1;
+	}
+
+	if (heavy_task < HEAVY_TASK_NUM && set_uclamp) {
+		wr = &task_rotate_reset_uclamp_works;
+		if (wr) {
+			queue_work_on(cpu, system_highpri_wq, &wr->w);
+		}
+	}
+
+	if (rq->misfit_task_load) {
+		if (rq->curr->state != TASK_RUNNING ||
+			rq->curr->nr_cpus_allowed == 1)
+			return;
+
+		raw_spin_lock(&migration_lock);
+		rcu_read_lock();
+		new_cpu = select_task_rq_fair(p, cpu, SD_BALANCE_WAKE, 0, 1);
+		rcu_read_unlock();
+
+		if (capacity_orig_of(new_cpu) > capacity_orig_of(cpu)) {
+			if (!big_task_migration_enable) {
+				raw_spin_unlock(&migration_lock);
+				return;
+			}
+
+			/*
+			 * If p make new CPU overutil,
+			 * we should not migrate p to new CPU.
+			 */
+			if ((capacity_of(new_cpu) * 1024) <
+				max(cpu_util(new_cpu) + task_util_est(p),
+					(unsigned long)uclamp_task(p)) * capacity_margin) {
+				raw_spin_unlock(&migration_lock);
+				return;
+			}
+
+			raw_spin_unlock(&migration_lock);
+			get_task_struct(p);
+			migrate_running_task(new_cpu, p, rq);
+			put_task_struct(p);
+			trace_sched_big_task_migration(p->pid, cpu, new_cpu);
+			return;
+		}
+
+		task_check_for_rotation(rq);
+		raw_spin_unlock(&migration_lock);
+	}
+}
+#endif /* CONFIG_MTK_SCHED_BIG_TASK_MIGRATE */
 
 #endif /* CONFIG_SMP */
 
