@@ -1,9 +1,7 @@
+// SPDX-License-Identifier: (GPL-2.0 OR MIT)
 /*
- * Copyright (c) 2017 MediaTek Inc.
- * Author: Ming Huang <ming.huang@mediatek.com>
- *	   Sean Wang <sean.wang@mediatek.com>
- *
- * SPDX-License-Identifier: (GPL-2.0 OR MIT)
+ * Copyright (c) 2018 MediaTek Inc.
+ * Author: Ryder Lee <ryder.lee@mediatek.com>
  */
 
 /dts-v1/;
@@ -14,16 +12,11 @@
 #include "mediatek/mt6380.dtsi"
 
 / {
-	model = "MediaTek MT7622 RFB1 board";
-	compatible = "mediatek,mt7622-rfb1", "mediatek,mt7622";
-
-	aliases {
-		serial0 = &uart0;
-	};
+	model = "Bananapi BPI-R64";
+	compatible = "bananapi,bpi-r64", "mediatek,mt7622";
 
 	chosen {
-		stdout-path = "serial0:115200n8";
-		bootargs = "earlycon=uart8250,mmio32,0x11002000 swiotlb=512";
+		bootargs = "earlycon=uart8250,mmio32,0x11002000 console=ttyS0,115200n1 swiotlb=512";
 	};
 
 	cpus {
@@ -40,23 +33,45 @@
 
 	gpio-keys {
 		compatible = "gpio-keys";
-		poll-interval = <100>;
 
 		factory {
 			label = "factory";
 			linux,code = <BTN_0>;
-			gpios = <&pio 0 0>;
+			gpios = <&pio 0 GPIO_ACTIVE_HIGH>;
 		};
 
 		wps {
 			label = "wps";
 			linux,code = <KEY_WPS_BUTTON>;
-			gpios = <&pio 102 0>;
+			gpios = <&pio 102 GPIO_ACTIVE_HIGH>;
+		};
+	};
+
+	gsw: gsw@0 {
+		compatible = "mediatek,mt753x";
+		mediatek,ethsys = <&ethsys>;
+		#address-cells = <1>;
+		#size-cells = <0>;
+	};
+
+	leds {
+		compatible = "gpio-leds";
+
+		green {
+			label = "bpi-r64:pio:green";
+			gpios = <&pio 89 GPIO_ACTIVE_HIGH>;
+			default-state = "off";
+		};
+
+		red {
+			label = "bpi-r64:pio:red";
+			gpios = <&pio 88 GPIO_ACTIVE_HIGH>;
+			default-state = "off";
 		};
 	};
 
 	memory {
-		reg = <0 0x40000000 0 0x20000000>;
+		reg = <0 0x40000000 0 0x40000000>;
 	};
 
 	reg_1p8v: regulator-1p8v {
@@ -101,23 +116,59 @@
 };
 
 &eth {
-	pinctrl-names = "default";
-	pinctrl-0 = <&eth_pins>;
 	status = "okay";
-
+	gmac0: mac@0 {
+		compatible = "mediatek,eth-mac";
+		reg = <0>;
+		phy-mode = "sgmii";
+		fixed-link {
+			speed = <1000>;
+			full-duplex;
+			pause;
+		};
+	};
 	gmac1: mac@1 {
 		compatible = "mediatek,eth-mac";
 		reg = <1>;
-		phy-handle = <&phy5>;
+		phy-mode = "rgmii";
+		fixed-link {
+			speed = <1000>;
+			full-duplex;
+			pause;
+		};
 	};
-
-	mdio-bus {
+	mdio: mdio-bus {
 		#address-cells = <1>;
 		#size-cells = <0>;
+	};
+};
 
-		phy5: ethernet-phy@5 {
-			reg = <5>;
-			phy-mode = "sgmii";
+&gsw {
+	mediatek,mdio = <&mdio>;
+	mediatek,portmap = "wllll";
+	mediatek,mdio_master_pinmux = <0>;
+	reset-gpios = <&pio 54 0>;
+	interrupt-parent = <&pio>;
+	interrupts = <53 IRQ_TYPE_LEVEL_HIGH>;
+	status = "okay";
+
+	port5: port@5 {
+		compatible = "mediatek,mt753x-port";
+		reg = <5>;
+		phy-mode = "rgmii";
+		fixed-link {
+			speed = <1000>;
+			full-duplex;
+		};
+	};
+
+	port6: port@6 {
+		compatible = "mediatek,mt753x-port";
+		reg = <6>;
+		phy-mode = "sgmii";
+		fixed-link {
+			speed = <2500>;
+			full-duplex;
 		};
 	};
 };
@@ -185,15 +236,28 @@
 
 &pcie {
 	pinctrl-names = "default";
-	pinctrl-0 = <&pcie0_pins>;
+	pinctrl-0 = <&pcie0_pins>, <&pcie1_pins>;
 	status = "okay";
 
 	pcie@0,0 {
 		status = "okay";
 	};
+
+	pcie@1,0 {
+		status = "okay";
+	};
 };
 
 &pio {
+	/* Attention: GPIO 90 is used to switch between PCIe@1,0 and
+	 * SATA functions. i.e. output-high: PCIe, output-low: SATA
+	 */
+	asm_sel {
+		gpio-hog;
+		gpios = <90 GPIO_ACTIVE_HIGH>;
+		output-high;
+	};
+
 	/* eMMC is shared pin with parallel NAND */
 	emmc_pins_default: emmc-pins-default {
 		mux {
@@ -460,11 +524,11 @@
 };
 
 &sata {
-	status = "okay";
+	status = "disable";
 };
 
 &sata_phy {
-	status = "okay";
+	status = "disable";
 };
 
 &spi0 {
