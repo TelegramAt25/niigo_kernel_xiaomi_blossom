@@ -1134,7 +1134,6 @@ config SCHED_AUTOGROUP
 
 config SCHED_TUNE
 	bool "Boosting for CFS tasks (EXPERIMENTAL)"
-	depends on !UCLAMP_TASK
 	depends on SMP
 	help
 	  This option enables support for task classification using a new
@@ -1587,7 +1586,7 @@ config KALLSYMS_ABSOLUTE_PERCPU
 	default X86_64 && SMP
 
 config KALLSYMS_BASE_RELATIVE
-	bool
+	bool "Enable KALLSYMS_BASE_RELATIVE or not"
 	depends on KALLSYMS
 	default !IA64
 	help
@@ -1694,6 +1693,11 @@ config PC104
 	  Expose PC/104 form factor device drivers and options available for
 	  selection and configuration. Enable this option if your target
 	  machine has a PC/104 bus.
+
+
+menu "Extension scheduler feature"
+source "kernel/sched/extension/Kconfig"
+endmenu
 
 menu "Kernel Performance Events And Counters"
 

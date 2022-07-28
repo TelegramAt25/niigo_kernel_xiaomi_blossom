@@ -91,6 +91,7 @@
 #include <linux/cache.h>
 #include <linux/rodata_test.h>
 #include <linux/jump_label.h>
+#include <linux/bootprof.h>
 
 #include <asm/io.h>
 #include <asm/setup.h>
@@ -892,17 +893,24 @@ static inline void do_trace_initcall_finish(initcall_t fn, int ret)
 }
 #endif /* !TRACEPOINTS_ENABLED */
 
+
 int __init_or_module do_one_initcall(initcall_t fn)
 {
 	int count = preempt_count();
 	char msgbuf[64];
 	int ret;
+#ifdef CONFIG_MTPROF
+	unsigned long long ts;
+#endif
 
 	if (initcall_blacklisted(fn))
 		return -EPERM;
 
 	do_trace_initcall_start(fn);
+	BOOTPROF_TIME_LOG_START(ts);
 	ret = fn();
+	BOOTPROF_TIME_LOG_END(ts);
+	bootprof_initcall(fn, ts);
 	do_trace_initcall_finish(fn, ret);
 
 	msgbuf[0] = 0;
@@ -1100,6 +1108,8 @@ static int __ref kernel_init(void *unused)
 	numa_default_policy();
 
 	rcu_end_inkernel_boot();
+
+	bootprof_log_boot("Kernel_init_done");
 
 	if (ramdisk_execute_command) {
 		ret = run_init_process(ramdisk_execute_command);
