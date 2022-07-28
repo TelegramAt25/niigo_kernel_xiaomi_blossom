@@ -207,6 +207,20 @@ void do_bad_area(unsigned long addr, unsigned int fsr, struct pt_regs *regs)
 #define VM_FAULT_BADMAP		0x010000
 #define VM_FAULT_BADACCESS	0x020000
 
+#ifdef CONFIG_SPECULATIVE_PAGE_FAULT
+bool __access_error(unsigned long fsr, unsigned long vma_flags)
+{
+	unsigned int mask = VM_READ | VM_WRITE | VM_EXEC;
+
+	if ((fsr & FSR_WRITE) && !(fsr & FSR_CM))
+		mask = VM_WRITE;
+	if (fsr & FSR_LNX_PF)
+		mask = VM_EXEC;
+
+	return vma_flags & mask ? false : true;
+}
+#endif
+
 /*
  * Check that the permissions on the VMA allow for the fault which occurred.
  * If we encountered a write fault, we must have write permission, otherwise
@@ -291,6 +305,14 @@ do_page_fault(unsigned long addr, unsigned int fsr, struct pt_regs *regs)
 		flags |= FAULT_FLAG_WRITE;
 
 	/*
+	 * let's try a speculative page fault without grabbing the
+	 * mmap_sem.
+	 */
+	fault = handle_speculative_fault(mm, addr, flags, (unsigned long)fsr);
+	if (fault != VM_FAULT_RETRY)
+		goto done;
+
+	/*
 	 * As per x86, we may deadlock here.  However, since the kernel only
 	 * validly references user space from well defined areas of the code,
 	 * we can bug out early if this is from code which shouldn't.
@@ -354,6 +376,7 @@ retry:
 
 	up_read(&mm->mmap_sem);
 
+done:
 	/*
 	 * Handle the "normal" case first - VM_FAULT_MAJOR
 	 */

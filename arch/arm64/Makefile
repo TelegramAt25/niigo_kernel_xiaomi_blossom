@@ -134,6 +134,9 @@ KBUILD_IMAGE	:= $(boot)/Image.gz
 KBUILD_DTBS	:= dtbs
 
 all:	Image.gz $(KBUILD_DTBS)
+MTK_PLATFORM := $(CONFIG_MTK_PLATFORM:"%"=%)
+MTK_PROJECT := $(CONFIG_ARCH_MTK_PROJECT:"%"=%)
+export MTK_PLATFORM MTK_PROJECT
 
 
 Image: vmlinux

@@ -426,7 +426,7 @@ int unwind_frame(struct stackframe *frame)
 
 	idx = unwind_find_idx(frame->pc);
 	if (!idx) {
-		pr_warn("unwind: Index not found %08lx\n", frame->pc);
+		/* pr_warn("unwind: Index not found %08lx\n", frame->pc); */
 		return -URC_FAILURE;
 	}
 
@@ -487,6 +487,9 @@ int unwind_frame(struct stackframe *frame)
 	frame->sp = ctrl.vrs[SP];
 	frame->lr = ctrl.vrs[LR];
 	frame->pc = ctrl.vrs[PC];
+
+	if (!kernel_text_address(frame->pc))
+		return -URC_FAILURE;
 
 	return URC_OK;
 }
