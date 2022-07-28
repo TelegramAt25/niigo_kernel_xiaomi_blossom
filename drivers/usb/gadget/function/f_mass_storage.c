@@ -224,6 +224,7 @@
 #include <linux/nospec.h>
 
 #include "configfs.h"
+#include "usb_boost.h"
 
 
 /*------------------------------------------------------------------------*/
@@ -314,6 +315,14 @@ struct fsg_common {
 	void			*private_data;
 
 	char inquiry_string[INQUIRY_STRING_LEN];
+
+	/* For build-in CDROM */
+	u8 bicr;
+
+	/* For Fast META */
+#ifdef CONFIG_USB_CONFIGFS_MTK_FASTMETA
+	char name[FSG_MAX_LUNS][LUN_NAME_LEN];
+#endif
 };
 
 struct fsg_dev {
@@ -368,6 +377,10 @@ static void set_bulk_out_req_length(struct fsg_common *common,
 	if (rem > 0)
 		length += common->bulk_out_maxpacket - rem;
 	bh->outreq->length = length;
+
+	/* some USB 2.0 hardware requires this setting */
+	if (common->bicr)
+		bh->outreq->short_not_ok = 1;
 }
 
 
@@ -526,7 +539,16 @@ static int fsg_setup(struct usb_function *f,
 				w_length != 1)
 			return -EDOM;
 		VDBG(fsg, "get max LUN\n");
-		*(u8 *)req->buf = _fsg_common_get_max_lun(fsg->common);
+		if (IS_ENABLED(USB_CONFIGFS_BICR) && fsg->common->bicr) {
+			/*
+			 * When Built-In CDROM is enabled,
+			 * we share only one LUN.
+			 */
+			*(u8 *)req->buf = 0;
+		} else {
+			*(u8 *)req->buf = _fsg_common_get_max_lun(fsg->common);
+		}
+		INFO(fsg, "get max LUN = %d\n", *(u8 *)req->buf);
 
 		/* Respond with data/status */
 		req->length = min((u16)1, w_length);
@@ -706,6 +728,7 @@ static int do_read(struct fsg_common *common)
 		}
 
 		/* Perform the read */
+		usb_boost();
 		file_offset_tmp = file_offset;
 		nread = kernel_read(curlun->filp, bh->buf, amount,
 				&file_offset_tmp);
@@ -902,6 +925,7 @@ static int do_write(struct fsg_common *common)
 			goto empty_write;
 
 		/* Perform the write */
+		usb_boost();
 		file_offset_tmp = file_offset;
 		nwritten = kernel_write(curlun->filp, bh->buf, amount,
 				&file_offset_tmp);
@@ -1342,7 +1366,7 @@ static int do_start_stop(struct fsg_common *common)
 	}
 
 	/* Are we allowed to unload the media? */
-	if (curlun->prevent_medium_removal) {
+	if (!curlun->nofua && curlun->prevent_medium_removal) {
 		LDBG(curlun, "unload attempt prevented\n");
 		curlun->sense_data = SS_MEDIUM_REMOVAL_PREVENTED;
 		return -EINVAL;
@@ -2439,6 +2463,10 @@ static void handle_exception(struct fsg_common *common)
 
 	case FSG_STATE_CONFIG_CHANGE:
 		do_set_interface(common, new_fsg);
+		/*
+		 * Wait for composite_setup to complete
+		 */
+		mdelay(100);
 		if (new_fsg)
 			usb_composite_setup_continue(common->cdev);
 		break;
@@ -2701,6 +2729,7 @@ int fsg_common_set_cdev(struct fsg_common *common,
 	common->ep0 = cdev->gadget->ep0;
 	common->ep0req = cdev->req;
 	common->cdev = cdev;
+	common->bicr = 0;
 
 	us = usb_gstrings_attach(cdev, fsg_strings_array,
 				 ARRAY_SIZE(fsg_strings));
@@ -2904,6 +2933,90 @@ static void fsg_common_release(struct fsg_common *common)
 		kfree(common);
 }
 
+#ifdef CONFIG_USB_CONFIGFS_BICR
+ssize_t fsg_bicr_show(struct fsg_common *common, char *buf)
+{
+	return sprintf(buf, "%d\n", common->bicr);
+}
+
+ssize_t fsg_bicr_store(struct fsg_common *common, const char *buf, size_t size)
+{
+	int ret;
+
+	ret = kstrtou8(buf, 10, &common->bicr);
+	if (ret)
+		return -EINVAL;
+
+	/* Set Lun[0] is a CDROM when enable bicr.*/
+	if (!strcmp(buf, "1"))
+		common->luns[0]->cdrom = 1;
+	else {
+		common->luns[0]->cdrom = 0;
+		common->luns[0]->blkbits = 0;
+		common->luns[0]->blksize = 0;
+		common->luns[0]->num_sectors = 0;
+	}
+
+	return size;
+}
+#endif
+
+#ifdef CONFIG_USB_CONFIGFS_MTK_FASTMETA
+ssize_t fsg_inquiry_show(struct fsg_common *common, char *buf)
+{
+	return snprintf(buf, PAGE_SIZE, "%s\n", common->inquiry_string);
+}
+
+ssize_t fsg_inquiry_store(struct fsg_common *common,
+		const char *buf, size_t size)
+{
+	if (size >= sizeof(common->inquiry_string))
+		return -EINVAL;
+
+	if (sscanf(buf, "%28s", common->inquiry_string) != 1)
+		return -EINVAL;
+	return size;
+}
+
+int fsg_sysfs_update(struct fsg_common *common, struct device *dev, bool create)
+{
+	int ret = 0, i, nluns;
+
+	nluns = _fsg_common_get_max_lun(common) + 1;
+
+	pr_info("%s(): nluns:%d\n", __func__, nluns);
+	if (create) {
+		for (i = 0; i < nluns; i++) {
+			if (i == 0)
+				snprintf(common->name[i], 8, "lun");
+			else
+				snprintf(common->name[i], 8, "lun%d", i-1);
+			ret = sysfs_create_link(&dev->kobj,
+					&common->luns[i]->dev.kobj,
+					common->name[i]);
+			if (ret) {
+				pr_info("%s(): failed creating sysfs:%d %s)\n",
+						__func__, i, common->name[i]);
+				goto remove_sysfs;
+			}
+		}
+	} else {
+		i = nluns;
+		goto remove_sysfs;
+	}
+
+	return 0;
+
+remove_sysfs:
+	for (; i > 0; i--) {
+		pr_info("%s(): delete sysfs for lun(id:%d)(name:%s)\n",
+					__func__, i, common->name[i-1]);
+		sysfs_remove_link(&dev->kobj, common->name[i-1]);
+	}
+
+	return ret;
+}
+#endif
 
 /*-------------------------------------------------------------------------*/
 
@@ -3472,6 +3585,7 @@ void fsg_config_from_params(struct fsg_config *cfg,
 		lun->ro = !!params->ro[i];
 		lun->cdrom = !!params->cdrom[i];
 		lun->removable = !!params->removable[i];
+		lun->nofua = !!params->nofua[i];
 		lun->filename =
 			params->file_count > i && params->file[i][0]
 			? params->file[i]

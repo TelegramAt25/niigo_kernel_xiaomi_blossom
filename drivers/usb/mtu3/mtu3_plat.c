@@ -16,6 +16,7 @@
 
 #include "mtu3.h"
 #include "mtu3_dr.h"
+#include "mtu3_debug.h"
 
 /* u2-port0 should be powered on and enabled; */
 int ssusb_check_clocks(struct ssusb_mtk *ssusb, u32 ex_clks)
@@ -27,11 +28,13 @@ int ssusb_check_clocks(struct ssusb_mtk *ssusb, u32 ex_clks)
 	check_val = ex_clks | SSUSB_SYS125_RST_B_STS | SSUSB_SYSPLL_STABLE |
 			SSUSB_REF_RST_B_STS;
 
-	ret = readl_poll_timeout(ibase + U3D_SSUSB_IP_PW_STS1, value,
+	if (ssusb->u3d->max_speed > USB_SPEED_HIGH) {
+		ret = readl_poll_timeout(ibase + U3D_SSUSB_IP_PW_STS1, value,
 			(check_val == (value & check_val)), 100, 20000);
-	if (ret) {
-		dev_err(ssusb->dev, "clks of sts1 are not stable!\n");
-		return ret;
+		if (ret) {
+			dev_err(ssusb->dev, "clks of sts1 are not stable!\n");
+			return ret;
+		}
 	}
 
 	ret = readl_poll_timeout(ibase + U3D_SSUSB_IP_PW_STS2, value,
@@ -42,6 +45,27 @@ int ssusb_check_clocks(struct ssusb_mtk *ssusb, u32 ex_clks)
 	}
 
 	return 0;
+}
+
+void ssusb_set_force_vbus(struct ssusb_mtk *ssusb, bool vbus_on)
+{
+	u32 u2ctl;
+	u32 misc;
+
+	if (!ssusb->force_vbus)
+		return;
+
+	u2ctl = mtu3_readl(ssusb->ippc_base, SSUSB_U2_CTRL(0));
+	misc = mtu3_readl(ssusb->mac_base, U3D_MISC_CTRL);
+	if (vbus_on) {
+		u2ctl &= ~SSUSB_U2_PORT_OTG_SEL;
+		misc |= VBUS_FRC_EN | VBUS_ON;
+	} else {
+		u2ctl |= SSUSB_U2_PORT_OTG_SEL;
+		misc &= ~(VBUS_FRC_EN | VBUS_ON);
+	}
+	mtu3_writel(ssusb->ippc_base, SSUSB_U2_CTRL(0), u2ctl);
+	mtu3_writel(ssusb->mac_base, U3D_MISC_CTRL, misc);
 }
 
 static int ssusb_phy_init(struct ssusb_mtk *ssusb)
@@ -73,7 +97,7 @@ static int ssusb_phy_exit(struct ssusb_mtk *ssusb)
 	return 0;
 }
 
-static int ssusb_phy_power_on(struct ssusb_mtk *ssusb)
+int ssusb_phy_power_on(struct ssusb_mtk *ssusb)
 {
 	int i;
 	int ret;
@@ -92,7 +116,7 @@ power_off_phy:
 	return ret;
 }
 
-static void ssusb_phy_power_off(struct ssusb_mtk *ssusb)
+void ssusb_phy_power_off(struct ssusb_mtk *ssusb)
 {
 	unsigned int i;
 
@@ -100,9 +124,14 @@ static void ssusb_phy_power_off(struct ssusb_mtk *ssusb)
 		phy_power_off(ssusb->phys[i]);
 }
 
-static int ssusb_clks_enable(struct ssusb_mtk *ssusb)
+int ssusb_clks_enable(struct ssusb_mtk *ssusb)
 {
 	int ret;
+
+	if (ssusb->clk_on == true) {
+		dev_info(ssusb->dev, "clk already enabled\n");
+		return 0;
+	}
 
 	ret = clk_prepare_enable(ssusb->sys_clk);
 	if (ret) {
@@ -128,6 +157,8 @@ static int ssusb_clks_enable(struct ssusb_mtk *ssusb)
 		goto dma_clk_err;
 	}
 
+	ssusb->clk_on = true;
+
 	return 0;
 
 dma_clk_err:
@@ -140,12 +171,13 @@ sys_clk_err:
 	return ret;
 }
 
-static void ssusb_clks_disable(struct ssusb_mtk *ssusb)
+void ssusb_clks_disable(struct ssusb_mtk *ssusb)
 {
 	clk_disable_unprepare(ssusb->dma_clk);
 	clk_disable_unprepare(ssusb->mcu_clk);
 	clk_disable_unprepare(ssusb->ref_clk);
 	clk_disable_unprepare(ssusb->sys_clk);
+	ssusb->clk_on = false;
 }
 
 static int ssusb_rscs_init(struct ssusb_mtk *ssusb)
@@ -194,25 +226,20 @@ static void ssusb_rscs_exit(struct ssusb_mtk *ssusb)
 	ssusb_phy_exit(ssusb);
 }
 
-static void ssusb_ip_sw_reset(struct ssusb_mtk *ssusb)
+void ssusb_ip_sw_reset(struct ssusb_mtk *ssusb)
 {
 	/* reset whole ip (xhci & u3d) */
 	mtu3_setbits(ssusb->ippc_base, U3D_SSUSB_IP_PW_CTRL0, SSUSB_IP_SW_RST);
 	udelay(1);
 	mtu3_clrbits(ssusb->ippc_base, U3D_SSUSB_IP_PW_CTRL0, SSUSB_IP_SW_RST);
-}
 
-/* ignore the error if the clock does not exist */
-static struct clk *get_optional_clk(struct device *dev, const char *id)
-{
-	struct clk *opt_clk;
-
-	opt_clk = devm_clk_get(dev, id);
-	/* ignore error number except EPROBE_DEFER */
-	if (IS_ERR(opt_clk) && (PTR_ERR(opt_clk) != -EPROBE_DEFER))
-		opt_clk = NULL;
-
-	return opt_clk;
+	/*
+	 * device ip may be powered on in firmware/BROM stage before entering
+	 * kernel stage;
+	 * power down device ip, otherwise ip-sleep will fail when working as
+	 * host only mode
+	 */
+	mtu3_setbits(ssusb->ippc_base, U3D_SSUSB_IP_PW_CTRL2, SSUSB_IP_DEV_PDN);
 }
 
 static int get_ssusb_rscs(struct platform_device *pdev, struct ssusb_mtk *ssusb)
@@ -220,12 +247,11 @@ static int get_ssusb_rscs(struct platform_device *pdev, struct ssusb_mtk *ssusb)
 	struct device_node *node = pdev->dev.of_node;
 	struct otg_switch_mtk *otg_sx = &ssusb->otg_switch;
 	struct device *dev = &pdev->dev;
-	struct regulator *vbus;
 	struct resource *res;
 	int i;
 	int ret;
 
-	ssusb->vusb33 = devm_regulator_get(&pdev->dev, "vusb33");
+	ssusb->vusb33 = devm_regulator_get(dev, "vusb33");
 	if (IS_ERR(ssusb->vusb33)) {
 		dev_err(dev, "failed to get vusb33\n");
 		return PTR_ERR(ssusb->vusb33);
@@ -237,15 +263,15 @@ static int get_ssusb_rscs(struct platform_device *pdev, struct ssusb_mtk *ssusb)
 		return PTR_ERR(ssusb->sys_clk);
 	}
 
-	ssusb->ref_clk = get_optional_clk(dev, "ref_ck");
+	ssusb->ref_clk = devm_clk_get_optional(dev, "ref_ck");
 	if (IS_ERR(ssusb->ref_clk))
 		return PTR_ERR(ssusb->ref_clk);
 
-	ssusb->mcu_clk = get_optional_clk(dev, "mcu_ck");
+	ssusb->mcu_clk = devm_clk_get_optional(dev, "mcu_ck");
 	if (IS_ERR(ssusb->mcu_clk))
 		return PTR_ERR(ssusb->mcu_clk);
 
-	ssusb->dma_clk = get_optional_clk(dev, "dma_ck");
+	ssusb->dma_clk = devm_clk_get_optional(dev, "dma_ck");
 	if (IS_ERR(ssusb->dma_clk))
 		return PTR_ERR(ssusb->dma_clk);
 
@@ -273,12 +299,16 @@ static int get_ssusb_rscs(struct platform_device *pdev, struct ssusb_mtk *ssusb)
 	if (IS_ERR(ssusb->ippc_base))
 		return PTR_ERR(ssusb->ippc_base);
 
+	ssusb->force_vbus = of_property_read_bool(node, "mediatek,force-vbus");
+	ssusb->clk_mgr = of_property_read_bool(node, "mediatek,clk-mgr");
+	ssusb->spm_mgr = of_property_read_bool(node, "mediatek,spm-mgr");
+
 	ssusb->dr_mode = usb_get_dr_mode(dev);
 	if (ssusb->dr_mode == USB_DR_MODE_UNKNOWN)
 		ssusb->dr_mode = USB_DR_MODE_OTG;
 
 	if (ssusb->dr_mode == USB_DR_MODE_PERIPHERAL)
-		return 0;
+		goto out;
 
 	/* if host role is supported */
 	ret = ssusb_wakeup_of_property_parse(ssusb, node);
@@ -291,22 +321,22 @@ static int get_ssusb_rscs(struct platform_device *pdev, struct ssusb_mtk *ssusb)
 	of_property_read_u32(node, "mediatek,u3p-dis-msk",
 			     &ssusb->u3p_dis_msk);
 
-	vbus = devm_regulator_get(&pdev->dev, "vbus");
-	if (IS_ERR(vbus)) {
+	otg_sx->vbus = devm_regulator_get(dev, "vbus");
+	if (IS_ERR(otg_sx->vbus)) {
 		dev_err(dev, "failed to get vbus\n");
-		return PTR_ERR(vbus);
+		return PTR_ERR(otg_sx->vbus);
 	}
-	otg_sx->vbus = vbus;
 
 	if (ssusb->dr_mode == USB_DR_MODE_HOST)
-		return 0;
+		goto out;
 
 	/* if dual-role mode is supported */
 	otg_sx->is_u3_drd = of_property_read_bool(node, "mediatek,usb3-drd");
 	otg_sx->manual_drd_enabled =
 		of_property_read_bool(node, "enable-manual-drd");
+	otg_sx->role_sw_used = of_property_read_bool(node, "usb-role-switch");
 
-	if (of_property_read_bool(node, "extcon")) {
+	if (!otg_sx->role_sw_used && of_property_read_bool(node, "extcon")) {
 		otg_sx->edev = extcon_get_edev_by_phandle(ssusb->dev, 0);
 		if (IS_ERR(otg_sx->edev)) {
 			dev_err(ssusb->dev, "couldn't get extcon device\n");
@@ -314,6 +344,7 @@ static int get_ssusb_rscs(struct platform_device *pdev, struct ssusb_mtk *ssusb)
 		}
 	}
 
+out:
 	dev_info(dev, "dr_mode: %d, is_u3_dr: %d, u3p_dis_msk: %x, drd: %s\n",
 		ssusb->dr_mode, otg_sx->is_u3_drd, ssusb->u3p_dis_msk,
 		otg_sx->manual_drd_enabled ? "manual" : "auto");
@@ -339,12 +370,22 @@ static int mtu3_probe(struct platform_device *pdev)
 		return -ENOTSUPP;
 	}
 
+	ret = device_rename(dev, node->name);
+	if (ret)
+		dev_info(&pdev->dev, "failed to rename\n");
+	/* fix uaf(use after free) issue: backup pdev->name,
+	 * device_rename will free pdev->name
+	 */
+	pdev->name = pdev->dev.kobj.name;
+
 	platform_set_drvdata(pdev, ssusb);
 	ssusb->dev = dev;
 
 	ret = get_ssusb_rscs(pdev, ssusb);
 	if (ret)
 		return ret;
+
+	ssusb_debugfs_create_root(ssusb);
 
 	/* enable power domain */
 	pm_runtime_enable(dev);
@@ -393,7 +434,11 @@ static int mtu3_probe(struct platform_device *pdev)
 			goto gadget_exit;
 		}
 
-		ssusb_otg_switch_init(ssusb);
+		ret = ssusb_otg_switch_init(ssusb);
+		if (ret) {
+			dev_err(dev, "failed to initialize switch\n");
+			goto host_exit;
+		}
 		break;
 	default:
 		dev_err(dev, "unsupported mode: %d\n", ssusb->dr_mode);
@@ -403,6 +448,8 @@ static int mtu3_probe(struct platform_device *pdev)
 
 	return 0;
 
+host_exit:
+	ssusb_host_exit(ssusb);
 gadget_exit:
 	ssusb_gadget_exit(ssusb);
 comm_exit:
@@ -410,6 +457,7 @@ comm_exit:
 comm_init_err:
 	pm_runtime_put_sync(dev);
 	pm_runtime_disable(dev);
+	ssusb_debugfs_remove_root(ssusb);
 
 	return ret;
 }
@@ -437,6 +485,7 @@ static int mtu3_remove(struct platform_device *pdev)
 	ssusb_rscs_exit(ssusb);
 	pm_runtime_put_sync(&pdev->dev);
 	pm_runtime_disable(&pdev->dev);
+	ssusb_debugfs_remove_root(ssusb);
 
 	return 0;
 }

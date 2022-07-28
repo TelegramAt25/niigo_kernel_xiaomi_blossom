@@ -81,6 +81,24 @@ int xhci_handshake(void __iomem *ptr, u32 mask, u32 done, u64 timeout_us)
 	return ret;
 }
 
+int xhci_handshake_check_state(struct xhci_hcd *xhci,
+		void __iomem *ptr, u32 mask, u32 done, int usec)
+{
+	u32	result;
+	int	ret;
+
+	ret = readl_poll_timeout_atomic(ptr, result,
+					(result & mask) == done ||
+					result == U32_MAX ||
+					xhci->xhc_state == XHCI_STATE_REMOVING,
+					1, usec);
+	if (result == U32_MAX || /* card removed */
+		xhci->xhc_state == XHCI_STATE_REMOVING)
+		return -ENODEV;
+
+	return ret;
+}
+
 /*
  * Disable interrupts and begin the xHCI halting process.
  */
@@ -115,7 +133,7 @@ int xhci_halt(struct xhci_hcd *xhci)
 	xhci_quiesce(xhci);
 
 	ret = xhci_handshake(&xhci->op_regs->status,
-			STS_HALT, STS_HALT, XHCI_MAX_HALT_USEC);
+			STS_HALT, STS_HALT, 2 * XHCI_MAX_HALT_USEC);
 	if (ret) {
 		xhci_warn(xhci, "Host halt failed, %d\n", ret);
 		return ret;
