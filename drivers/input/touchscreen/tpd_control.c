@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0
 /*
  * Copyright (C) 2019 MediaTek Inc.
+ * Copyright (C) 2021 XiaoMi, Inc.
  */
 
 #include "tpd.h"
@@ -42,6 +43,10 @@ struct pinctrl *pinctrl1;
 struct pinctrl_state *pins_default;
 struct pinctrl_state *eint_as_int, *eint_output0,
 		*eint_output1, *rst_output0, *rst_output1;
+#if defined(CONFIG_TOUCHSCREEN_COMMON)
+bool tpd_gesture_flag;
+struct pinctrl_state *spi_cs_output0, *spi_cs_output1;
+#endif
 const struct of_device_id touch_of_match[] = {
 	{ .compatible = "goodix,touch", },
 	{},
@@ -147,6 +152,21 @@ void tpd_gpio_as_int(int pin)
 	mutex_unlock(&tpd_set_gpio_mutex);
 }
 
+#if defined(CONFIG_TOUCHSCREEN_COMMON)
+void tpd_spi_cs_gpio_output(int level)
+{
+	mutex_lock(&tpd_set_gpio_mutex);
+	TPD_DEBUG("tpd_spi_cs_gpio_output  level = %d\n", level);
+
+	if (level)
+		pinctrl_select_state(pinctrl1, spi_cs_output1);
+	else
+		pinctrl_select_state(pinctrl1, spi_cs_output0);
+
+	mutex_unlock(&tpd_set_gpio_mutex);
+}
+#endif
+
 void tpd_gpio_output(int pin, int level)
 {
 	mutex_lock(&tpd_set_gpio_mutex);
@@ -189,6 +209,22 @@ int tpd_get_gpio_info(struct platform_device *pdev)
 		ret = PTR_ERR(pins_default);
 		TPD_DMESG("Cannot find pinctrl default %d!\n", ret);
 	}
+
+#if defined(CONFIG_TOUCHSCREEN_COMMON)
+	spi_cs_output0 = pinctrl_lookup_state(pinctrl1, "state_spi_cs_out0");
+	if (IS_ERR(spi_cs_output0)) {
+		ret = PTR_ERR(spi_cs_output0);
+		TPD_DMESG("Cannot find pinctrl spi_cs_output0!\n");
+	}
+	TPD_DMESG(" find pinctrl spi_cs_output0!\n");
+	spi_cs_output1 = pinctrl_lookup_state(pinctrl1, "state_spi_cs_out1");
+	if (IS_ERR(spi_cs_output1)) {
+		ret = PTR_ERR(spi_cs_output1);
+		TPD_DMESG("Cannot find pinctrl spi_cs_output1!\n");
+	}
+	TPD_DMESG(" find pinctrl spi_cs_output1!\n");
+#endif
+
 	eint_as_int = pinctrl_lookup_state(pinctrl1, "state_eint_as_int");
 	if (IS_ERR(eint_as_int)) {
 		ret = PTR_ERR(eint_as_int);

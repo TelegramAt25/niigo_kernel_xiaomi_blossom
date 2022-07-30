@@ -59,6 +59,18 @@
 
 #include "mtk_charger.h"
 
+#if CONFIG_TOUCHSCREEN_COMMON
+typedef struct touchscreen_usb_piugin_data {
+	bool valid;
+	bool usb_plugged_in;
+	void (*event_callback)(void);
+} touchscreen_usb_piugin_data_t;
+
+
+touchscreen_usb_piugin_data_t g_touchscreen_usb_pulgin = {0};
+EXPORT_SYMBOL(g_touchscreen_usb_pulgin);
+#endif
+
 struct tag_bootmode {
 	u32 size;
 	u32 tag;
@@ -1580,6 +1592,13 @@ static int charger_routine_thread(void *arg)
 			info->pd_type);
 
 		is_charger_on = mtk_is_charger_on(info);
+
+#if CONFIG_TOUCHSCREEN_COMMON
+		g_touchscreen_usb_pulgin.usb_plugged_in = is_charger_on;
+		if (g_touchscreen_usb_pulgin.valid) {
+			g_touchscreen_usb_pulgin.event_callback();
+		}
+#endif
 
 		if (info->charger_thread_polling == true)
 			mtk_charger_start_timer(info);
