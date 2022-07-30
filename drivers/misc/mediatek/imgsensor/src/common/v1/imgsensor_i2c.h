@@ -1,6 +1,7 @@
 /* SPDX-License-Identifier: GPL-2.0 */
 /*
  * Copyright (c) 2019 MediaTek Inc.
+ * Copyright (C) 2021 XiaoMi, Inc.
  */
 
 #ifndef __IMGSENSOR_I2C_H__
@@ -23,7 +24,7 @@
 #define IMGSENSOR_I2C_BURST_WRITE_LENGTH MAX_DMA_TRANS_SIZE
 #define IMGSENSOR_I2C_CMD_LENGTH_MAX     255
 
-#define IMGSENSOR_I2C_BUFF_MODE_DEV      IMGSENSOR_I2C_DEV_2
+#define IMGSENSOR_I2C_BUFF_MODE_DEV      IMGSENSOR_I2C_DEV_3
 
 #ifdef IMGSENSOR_I2C_1000K
 #define IMGSENSOR_I2C_SPEED              1000

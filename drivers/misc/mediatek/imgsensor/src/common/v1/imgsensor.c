@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0
 /*
  * Copyright (c) 2019 MediaTek Inc.
+ * Copyright (C) 2021 XiaoMi, Inc.
  */
 
 #include "imgsensor_cfg_table.h"
@@ -47,6 +48,7 @@
 #include "imgsensor_proc.h"
 #include "imgsensor_clk.h"
 #include "imgsensor.h"
+#include <linux/string.h>
 
 #define PDAF_DATA_SIZE 4096
 
@@ -79,6 +81,14 @@ MUINT32 last_id;
 /*prevent imgsensor race condition in vulunerbility test*/
 struct mutex imgsensor_mutex;
 
+//M505
+unsigned char fusion_id_main[48] = {0};//hi1337
+unsigned char fusion_id_front[48] = {0};
+unsigned char fusion_id_back2[48] = {0};
+unsigned char fusion_id_back3[48] = {0};
+unsigned char fusion_id_back4[48] = {0};
+
+char imgsensor_name[128] = {0};
 
 DEFINE_MUTEX(pinctrl_mutex);
 DEFINE_MUTEX(oc_mutex);
@@ -484,6 +494,8 @@ static inline int imgsensor_check_is_alive(struct IMGSENSOR_SENSOR *psensor)
  ************************************************************************/
 int imgsensor_set_driver(struct IMGSENSOR_SENSOR *psensor)
 {
+	static int num1 = 0;
+	static int num2 = 0;
 	u32 drv_idx = 0;
 	int ret = -EIO;
 
@@ -594,6 +606,13 @@ int imgsensor_set_driver(struct IMGSENSOR_SENSOR *psensor)
 					    psensor->inst.sensor_idx,
 					    drv_idx,
 					    psensor_inst->psensor_name);
+
+					if(num1 == 0){
+						num1 = sprintf(imgsensor_name, "%s;", psensor_inst->psensor_name);
+					}
+					else if (num2 == 0){
+						num2 = sprintf(imgsensor_name + num1, "%s;", psensor_inst->psensor_name);
+					}
 
 					ret = drv_idx;
 					break;
@@ -3007,8 +3026,82 @@ static struct platform_driver gimgsensor_platform_driver = {
 /*
  * imgsensor_init()
  */
+static struct kobject * sensor_kobject;
+static ssize_t imgsensor_name_show(struct device *dev, struct device_attribute *attr, char *buf)
+{
+	ssize_t ret = 0;
+	int num1 = 0;
+	int num2 = 0;
+
+	char* dst[4];
+	unsigned int i=0;
+	unsigned int j=0;
+	unsigned int len = 0;
+	char imgsensorname[128] = {0};
+	char* src_name = NULL;
+
+	if(strlen(imgsensor_name) > 0){
+		strncpy(imgsensorname, imgsensor_name, strlen(imgsensor_name));
+		src_name = imgsensorname;
+		if(src_name != NULL)
+		{
+			len = strlen(src_name);
+			pr_info("[chenxy] len:%d\n", len);
+			if(len > 0){
+				for(i=0; ((i < 4) && (src_name != NULL)); i++) {
+					pr_info("[chenxy] src_name :%s \n", src_name);
+					dst[i] = strsep(&src_name, ";");
+					pr_info("[chenxy] dst[%d]:%s \n", i,  dst[i]);
+				}
+			}
+
+			pr_info("[chenxy] i:%d\n", i);
+
+		} else {
+			pr_info("[chenxy] imgsensorname is NULL");
+		}
+	}
+	ret = strlen(buf) + 1;
+	return ret;
+}
+
+static DEVICE_ATTR(sensor, 0664, imgsensor_name_show, NULL);
+static struct kobject * sensor_kobject;
+
+
+static ssize_t sensorid_show(struct device *dev, struct device_attribute *attr, char *buf)
+{
+	int i;
+	ssize_t size = 0;
+	//main
+	strncpy(buf, "main:", 5);
+	for (i = 0; i < 11; i++) {
+		sprintf(buf + 5 + 2*i, "%02x", fusion_id_main[i]);
+	}
+	size = strlen(buf) + 1;
+	//front
+	strncpy(buf + size, "front:", 6);
+	for (i = 0; i < 12; i++) {
+		sprintf(buf + size + 6 + 2*i, "%02x", fusion_id_front[i]);
+	}
+	//back2
+	size = size + 6+ 2*i + 1;
+	strncpy(buf + size, "back2:", 6);//fusion_id_back2
+	for (i = 0; i < 12; i++) {
+		sprintf(buf + size + 6 + 2*i, "%02x", fusion_id_back2[i]);
+	}
+	size = size + 6 + 2*i + 1;
+	//strncpy(buf + size, "\nback3: ", 9);//fusion_id_back2
+	strncpy(buf + size, "\n", 2);//fusion_id_back2
+
+	return 100;
+}
+
+static DEVICE_ATTR(sensorid, 0664, sensorid_show, NULL);
+
 static int __init imgsensor_init(void)
 {
+	int ret;
 	pr_info("[camerahw_probe] start\n");
 
 	if (platform_driver_register(&gimgsensor_platform_driver)) {
@@ -3030,6 +3123,17 @@ static int __init imgsensor_init(void)
 #ifdef IMGSENSOR_DFS_CTRL_ENABLE
 	imgsensor_dfs_ctrl(DFS_CTRL_ENABLE, NULL);
 #endif
+	sensor_kobject = kobject_create_and_add("android_camera", NULL);
+	if (sensor_kobject == NULL) {
+		pr_info("[imgsensor_init]Big error: sensor_kobject_create_sysfs_ failed\n");
+	} else {
+		ret = sysfs_create_file(sensor_kobject, &dev_attr_sensor.attr);
+		ret = sysfs_create_file(sensor_kobject, &dev_attr_sensorid.attr);
+		if (ret) {
+			pr_info("%s failed \n", __func__);
+			kobject_del(sensor_kobject);
+		}
+	}
 
 	return 0;
 }
