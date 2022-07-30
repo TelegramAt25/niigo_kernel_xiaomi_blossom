@@ -874,6 +874,12 @@ config ARCH_HAS_CACHE_LINE_SIZE
 	def_bool y
 
 
+config KERNEL_CUSTOM_FACTORY
+    default n
+    bool "Custom for hardware FACTORY_pcb"
+    help
+    Custom for FACTORY_pcb.
+
 # Supported by clang >= 7.0
 config CC_HAVE_SHADOW_CALL_STACK
 	def_bool $(cc-option, -fsanitize=shadow-call-stack -ffixed-x18)
