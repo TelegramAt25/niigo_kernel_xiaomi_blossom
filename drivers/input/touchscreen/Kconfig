@@ -1357,6 +1357,19 @@ config TOUCHSCREEN_MTK_FOCALTECH_FHD
 	  To compile this dirver as a module, choose M here: the
 	  module will be called.
 
+config TOUCHSCREEN_HIMAX_CHIPSET
+	bool "HIMAX for Mediatek package"
+	default n
+	help
+	  Say Y here if you have HIMAX touch panel.
+
+	  If unsure, say N.
+
+	  To compile this dirver as a module, choose M here: the
+	  module will be called.
+
+source "drivers/input/touchscreen/hxchipset/Kconfig"
+
 config TOUCHSCREEN_MTK_SYNAPTICS_I2C_RMI4
         tristate "Synaptics DSX I2C touchscreen"
         depends on I2C
