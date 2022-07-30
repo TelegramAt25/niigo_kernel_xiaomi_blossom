@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0
 /*
  * Copyright (c) 2019 MediaTek Inc.
+ * Copyright (C) 2021 XiaoMi, Inc.
  */
 
 #include <linux/delay.h>
@@ -122,6 +123,9 @@ unsigned int _can_switch_check_mode(void)
 static unsigned int _need_do_esd_check(void)
 {
 	int ret = 0;
+#ifdef CONFIG_KERNEL_CUSTOM_FACTORY
+	return ret;
+#endif
 
 #ifdef CONFIG_OF
 	if ((primary_get_lcm()->params->dsi.esd_check_enable == 1) &&
