@@ -1378,4 +1378,11 @@ config TOUCHSCREEN_MTK_TOUCH
 
 	  To compile this dirver for used touch IC.
 
+config TOUCHSCREEN_COMMON
+	bool "touchscreen for xiaomi C3L project"
+	depends on SPI
+	default n
+	help
+	  Say Y here if you have a Xiaomi C3L touchscreen and want to enable support for the built-in touchscreen.
+
 endif
