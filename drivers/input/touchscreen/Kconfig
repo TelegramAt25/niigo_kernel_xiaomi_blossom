@@ -1374,6 +1374,8 @@ config TOUCHSCREEN_MTK_TOUCH
 
 	  To compile this dirver for used touch IC.
 
+source "drivers/input/touchscreen/nt36xxx_spi/Kconfig"
+
 config TOUCHSCREEN_COMMON
 	bool "touchscreen for xiaomi C3L project"
 	depends on SPI
