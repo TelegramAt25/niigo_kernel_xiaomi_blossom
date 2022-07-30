@@ -1,6 +1,7 @@
 /* SPDX-License-Identifier: GPL-2.0 */
 /*
  * Copyright (c) 2019 MediaTek Inc.
+ * Copyright (C) 2021 XiaoMi, Inc.
  */
 
 #ifndef _KD_IMGSENSOR_H
@@ -379,6 +380,16 @@
 #define OV16A10_SENSOR_ID                       0x561641
 #define GC02M1B_SENSOR_ID                       0x02e0
 
+/*M505 ImageSensor*/
+#define GC_GC5035_I_SENSOR_ID			0x5035
+#define GC_GC5035_II_SENSOR_ID			0x5036
+#define GC_GC5035_III_SENSOR_ID			0x5037
+#define GC_GC5035_IIII_SENSOR_ID		0x5038
+#define HYNIX_HI1337_I_SENSOR_ID                0x1337
+#define HYNIX_HI1337_II_SENSOR_ID               0x1338
+#define HYNIX_HI1337_III_SENSOR_ID              0x1339
+#define HYNIX_HI1337_IIII_SENSOR_ID             0x133a
+
 /* CAMERA DRIVER NAME */
 #define CAMERA_HW_DEVNAME                       "kd_camera_hw"
 /* SENSOR DEVICE DRIVER NAME */
@@ -603,6 +614,21 @@
 #define SENSOR_DRVNAME_IMX355_MIPI_RAW          "imx355_mipi_raw"
 #define SENSOR_DRVNAME_OV13B10_MIPI_RAW         "ov13b10_mipi_raw"
 #define SENSOR_DRVNAME_OV02B10_MIPI_RAW         "ov02b10_mipi_raw"
+
+/*M505 SENSOR_DRVNAME*/
+#define SENSOR_DRVNAME_GC_GC5035_I      "gc_gc5035_i"
+#define SENSOR_DRVNAME_GC_GC5035_II      "gc_gc5035_ii"
+#define SENSOR_DRVNAME_GC_GC5035_III      "gc_gc5035_iii"
+#define SENSOR_DRVNAME_GC_GC5035_IIII       "gc_gc5035_iiii"
+#define SENSOR_DRVNAME_HYNIX_HI1337_I             "hynix_hi1337_i"
+#define SENSOR_DRVNAME_HYNIX_HI1337_II             "hynix_hi1337_ii"
+#define SENSOR_DRVNAME_HYNIX_HI1337_III             "hynix_hi1337_iii"
+#define SENSOR_DRVNAME_HYNIX_HI1337_IIII             "hynix_hi1337_iiii"
+#define SENSOR_DRVNAME_GC_GC5035_INDIA_I      "gc_gc5035_india_i"
+#define SENSOR_DRVNAME_GC_GC5035_INDIA_II      "gc_gc5035_india_ii"
+#define SENSOR_DRVNAME_HYNIX_HI1337_INDIA_I             "hynix_hi1337_india_i"
+#define SENSOR_DRVNAME_HYNIX_HI1337_INDIA_II             "hynix_hi1337_india_ii"
+
 
 /******************************************************************************
  *

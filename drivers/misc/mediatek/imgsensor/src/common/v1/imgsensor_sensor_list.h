@@ -1,6 +1,7 @@
 /* SPDX-License-Identifier: GPL-2.0 */
 /*
  * Copyright (c) 2019 MediaTek Inc.
+ * Copyright (C) 2021 XiaoMi, Inc.
  */
 
 #ifndef __KD_SENSORLIST_H__
@@ -176,6 +177,15 @@ UINT32 T4KA7_MIPI_RAW_SensorInit(struct SENSOR_FUNCTION_STRUCT **pfFunc);
 /*Others*/
 UINT32 ISX012_MIPI_YUV_SensorInit(struct SENSOR_FUNCTION_STRUCT **pfFunc);
 UINT32 T8EV5_YUV_SensorInit(struct SENSOR_FUNCTION_STRUCT **pfFunc);
+/*M505 imagesensor*/
+UINT32 HYNIX_HI1337_I_SensorInit(struct SENSOR_FUNCTION_STRUCT **pfFunc);
+UINT32 HYNIX_HI1337_II_SensorInit(struct SENSOR_FUNCTION_STRUCT **pfFunc);
+UINT32 HYNIX_HI1337_III_SensorInit(struct SENSOR_FUNCTION_STRUCT **pfFunc);
+UINT32 HYNIX_HI1337_IIII_SensorInit(struct SENSOR_FUNCTION_STRUCT **pfFunc);
+UINT32 GC_GC5035_I_SensorInit(struct SENSOR_FUNCTION_STRUCT **pfFunc);
+UINT32 GC_GC5035_II_SensorInit(struct SENSOR_FUNCTION_STRUCT **pfFunc);
+UINT32 GC_GC5035_III_SensorInit(struct SENSOR_FUNCTION_STRUCT **pfFunc);
+UINT32 GC_GC5035_IIII_SensorInit(struct SENSOR_FUNCTION_STRUCT **pfFunc);
 
 extern struct IMGSENSOR_INIT_FUNC_LIST kdSensorList[];
 
