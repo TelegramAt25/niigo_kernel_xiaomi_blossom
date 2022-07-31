@@ -808,4 +808,22 @@ config CHARGER_BQ25601
 	  It depends on
 	  the config MTK_CHARGER.
 
+config CHARGER_BQ2560X
+    bool "CHARGER_BQ2560X"
+	depends on MTK_CHARGER
+	help
+	  Say Yes to enable
+	  TI BQ25601 driver.
+	  It depends on
+	  the config MTK_CHARGER.
+
+config CHARGER_CX7601
+    bool "CHARGER_CX7601"
+	depends on MTK_CHARGER
+	help
+	  Say Yes to enable
+	  SUNCORE CX7601 driver.
+	  It depends on
+	  the config MTK_CHARGER.
+
 endif # POWER_SUPPLY
