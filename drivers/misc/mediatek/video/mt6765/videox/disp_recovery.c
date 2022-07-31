@@ -79,6 +79,8 @@ static unsigned int esd_check_mode;
 static unsigned int esd_check_enable;
 unsigned int esd_checking;
 static int te_irq;
+extern void esd_resume(int flag);
+extern char mtkfb_lcm_name[256];
 
 #if defined(CONFIG_MTK_DUAL_DISPLAY_SUPPORT) && \
 	(CONFIG_MTK_DUAL_DISPLAY_SUPPORT == 2)
@@ -726,6 +728,16 @@ int primary_display_esd_recovery(void)
 	DISPDBG("[POWER]lcm suspend[begin]\n");
 	/*after dsi_stop, we should enable the dsi basic irq.*/
 	dsi_basic_irq_enable(DISP_MODULE_DSI0, NULL);
+
+	/*2020.5.29 longcheer TaoCheng add for NVT IC Frozen screen issue begin*/
+	if (strnstr(mtkfb_lcm_name,"nt36525b",strlen(mtkfb_lcm_name))) {
+		esd_resume(0);
+		DISPCHECK("It is NVT IC, do tp suspend/resume\n");
+	} else{
+		DISPCHECK("It is not NVT IC, Skip\n");
+	}
+	/*2020.5.29 longcheer TaoCheng add for NVT IC Frozen screen issue end*/
+
 	disp_lcm_suspend(primary_get_lcm());
 	DISPCHECK("[POWER]lcm suspend[end]\n");
 
@@ -743,6 +755,16 @@ int primary_display_esd_recovery(void)
 
 	DISPDBG("[ESD]lcm recover[begin]\n");
 	disp_lcm_esd_recover(primary_get_lcm());
+
+	/*2020.5.29 longcheer TaoCheng add for NVT IC Frozen screen issue begin*/
+	if (strnstr(mtkfb_lcm_name,"nt36525b",strlen(mtkfb_lcm_name))) {
+		esd_resume(1);
+		DISPCHECK("It is NVT IC, do tp suspend/resume\n");
+	} else{
+		DISPCHECK("It is not NVT IC, Skip\n");
+	}
+	/*2020.5.29 longcheer TaoCheng add for NVT IC Frozen screen issue end*/
+
 	DISPCHECK("[ESD]lcm recover[end]\n");
 	mmprofile_log_ex(mmp_r, MMPROFILE_FLAG_PULSE, 0, 8);
 
