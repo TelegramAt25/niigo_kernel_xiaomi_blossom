@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0
 /*
  * Copyright (C) 2018 MediaTek Inc.
- *
+ * Copyright (C) 2021 XiaoMi, Inc.
  */
 
 
@@ -698,6 +698,10 @@ void mt_mt65xx_led_set(struct led_classdev *led_cdev, enum led_brightness level)
 				    255;
 			}
 			backlight_debug_log(led_data->level, level);
+#ifdef CONFIG_BACKLIGHT_SUPPORT_2047_FEATURE
+			disp_pq_notify_backlight_changed(level);
+			disp_aal_notify_backlight_changed(level);
+#else
 			disp_pq_notify_backlight_changed((((1 <<
 					MT_LED_INTERNAL_LEVEL_BIT_CNT)
 							    - 1) * level +
@@ -706,6 +710,7 @@ void mt_mt65xx_led_set(struct led_classdev *led_cdev, enum led_brightness level)
 					MT_LED_INTERNAL_LEVEL_BIT_CNT)
 							    - 1) * level +
 							   127) / 255);
+#endif
 		}
 	}
 #else
