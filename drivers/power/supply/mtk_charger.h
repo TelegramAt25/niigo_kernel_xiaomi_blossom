@@ -1,6 +1,7 @@
 /* SPDX-License-Identifier: GPL-2.0 */
 /*
  * Copyright (c) 2019 MediaTek Inc.
+ * Copyright (C) 2021 XiaoMi, Inc.
  */
 
 #ifndef __MTK_CHARGER_H
@@ -43,7 +44,7 @@ do {								\
 
 struct mtk_charger;
 #define BATTERY_CV 4350000
-#define V_CHARGER_MAX 6500000 /* 6.5 V */
+#define V_CHARGER_MAX 10500000 /* 10.5 V */
 #define V_CHARGER_MIN 4600000 /* 4.6 V */
 
 #define USB_CHARGER_CURRENT_SUSPEND		0 /* def CONFIG_USB_IF */
@@ -52,7 +53,7 @@ struct mtk_charger;
 #define USB_CHARGER_CURRENT			500000 /* 500mA */
 #define AC_CHARGER_CURRENT			2050000
 #define AC_CHARGER_INPUT_CURRENT		3200000
-#define NON_STD_AC_CHARGER_CURRENT		500000
+#define NON_STD_AC_CHARGER_CURRENT		1000000
 #define CHARGING_HOST_CHARGER_CURRENT		650000
 
 /* dynamic mivr */
@@ -76,8 +77,8 @@ struct mtk_charger;
 /* Battery Temperature Protection */
 #define MIN_CHARGE_TEMP  0
 #define MIN_CHARGE_TEMP_PLUS_X_DEGREE	6
-#define MAX_CHARGE_TEMP  50
-#define MAX_CHARGE_TEMP_MINUS_X_DEGREE	47
+#define MAX_CHARGE_TEMP  60
+#define MAX_CHARGE_TEMP_MINUS_X_DEGREE	57
 
 #define MAX_ALG_NO 10
 

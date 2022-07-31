@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0
 /*
  * Copyright (c) 2019 MediaTek Inc.
+ * Copyright (C) 2021 XiaoMi, Inc.
  * Author Wy Chuang<wy.chuang@mediatek.com>
  */
 
@@ -469,7 +470,7 @@ void battery_service_data_init(struct mtk_battery *gm)
 	bs_data->bat_status = POWER_SUPPLY_STATUS_DISCHARGING,
 	bs_data->bat_health = POWER_SUPPLY_HEALTH_GOOD,
 	bs_data->bat_present = 1,
-	bs_data->bat_technology = POWER_SUPPLY_TECHNOLOGY_LION,
+	bs_data->bat_technology = POWER_SUPPLY_TECHNOLOGY_LIPO,
 	bs_data->bat_capacity = -1,
 	bs_data->bat_batt_vol = 0,
 	bs_data->bat_batt_temp = 0,
@@ -674,7 +675,7 @@ int force_get_tbat_internal(struct mtk_battery *gm, bool update)
 			if (((dtime.tv_sec <= 20) &&
 				(abs(pre_bat_temperature_val2 -
 				bat_temperature_val) >= 50)) ||
-				bat_temperature_val >= 580) {
+				bat_temperature_val >= 630) {
 				bm_err("[%s][err] current:%d,%d,%d,%d,%d,%d pre:%d,%d,%d,%d,%d,%d\n",
 					__func__,
 					bat_temperature_volt_temp,
@@ -1806,7 +1807,7 @@ void battery_update(struct mtk_battery *gm)
 	}
 
 	battery_update_psd(gm);
-	bat_data->bat_technology = POWER_SUPPLY_TECHNOLOGY_LION;
+	bat_data->bat_technology = POWER_SUPPLY_TECHNOLOGY_LIPO;
 	bat_data->bat_health = POWER_SUPPLY_HEALTH_GOOD;
 	bat_data->bat_present =
 		gauge_get_int_property(GAUGE_PROP_BATTERY_EXIST);

@@ -1,6 +1,7 @@
 /* SPDX-License-Identifier: GPL-2.0 */
 /*
  * Copyright (c) 2019 MediaTek Inc.
+ * Copyright (C) 2021 XiaoMi, Inc.
  * Author Wy Chuang<wy.chuang@mediatek.com>
  */
 
@@ -220,21 +221,21 @@
 
 /* using current to limit uisoc in 100% case*/
 /* UI_FULL_LIMIT_ITH0 3000 means 300ma */
-#define UI_FULL_LIMIT_EN	0
-#define UI_FULL_LIMIT_SOC0	9900
-#define UI_FULL_LIMIT_ITH0	2200
+#define UI_FULL_LIMIT_EN	1
+#define UI_FULL_LIMIT_SOC0	10000
+#define UI_FULL_LIMIT_ITH0	3500
 
-#define UI_FULL_LIMIT_SOC1	9900
-#define UI_FULL_LIMIT_ITH1	2200
+#define UI_FULL_LIMIT_SOC1	10000
+#define UI_FULL_LIMIT_ITH1	3500
 
-#define UI_FULL_LIMIT_SOC2	9900
-#define UI_FULL_LIMIT_ITH2	2200
+#define UI_FULL_LIMIT_SOC2	10000
+#define UI_FULL_LIMIT_ITH2	3500
 
-#define UI_FULL_LIMIT_SOC3	9900
-#define UI_FULL_LIMIT_ITH3	2200
+#define UI_FULL_LIMIT_SOC3	10000
+#define UI_FULL_LIMIT_ITH3	3500
 
-#define UI_FULL_LIMIT_SOC4	9900
-#define UI_FULL_LIMIT_ITH4	2200
+#define UI_FULL_LIMIT_SOC4	10000
+#define UI_FULL_LIMIT_ITH4	3500
 
 #define UI_FULL_LIMIT_TIME	99999
 
@@ -262,14 +263,14 @@
 #define Q_MAX_H_CURRENT		10000
 
 /* multiple battery profile compile options */
-/*#define MTK_GET_BATTERY_ID_BY_AUXADC*/
+#define MTK_GET_BATTERY_ID_BY_AUXADC
 
 
 /* if ACTIVE_TABLE == 0 && MULTI_BATTERY == 0
  * load g_FG_PSEUDO100_Tx from dtsi
  */
 #define MULTI_BATTERY			0
-#define BATTERY_ID_CHANNEL_NUM	1
+#define BATTERY_ID_CHANNEL_NUM	2
 #define BATTERY_PROFILE_ID		0
 #define TOTAL_BATTERY_NUMBER	4
 
@@ -285,11 +286,11 @@
 /* Qmax for battery  */
 int g_Q_MAX[MAX_TABLE][TOTAL_BATTERY_NUMBER] = {
 	/*bat1,   bat2,   bat3,    bat4*/
-	{ 2946, 2712, 2490, 1965},/*T0*/
-	{ 2796, 2851, 2468, 1984},/*T1*/
-	{ 2718, 2432, 2310, 1946},/*T2*/
-	{ 2535, 1991, 1858, 1873},/*T3*/
-	{ 2523, 1960, 1843, 1851},/*T4*/
+	{ 5071, 5071, 2490, 1965},/*T0*/
+	{ 5078, 5078, 2468, 1984},/*T1*/
+	{ 5053, 5053, 2310, 1946},/*T2*/
+	{ 5038, 5038, 1858, 1873},/*T3*/
+	{ 4992, 4992, 1843, 1851},/*T4*/
 	{ 2211, 1652, 1533, 1541},/*T5*/
 	{ 2201, 1642, 1523, 1531},/*T6*/
 	{ 2191, 1632, 1513, 1521},/*T7*/
@@ -316,7 +317,7 @@ int g_Q_MAX_SYS_VOLTAGE[TOTAL_BATTERY_NUMBER] = { 3400, 3400, 3400, 3400};
 /* 0~0.5V for battery 0, 0.5~1V for battery 1*/
 /* 1~1.5V for battery 2, -1 for the last one (battery 3) */
 int g_battery_id_voltage[TOTAL_BATTERY_NUMBER] = {
-	500000, 1000000, 1500000, -1};
+	800000, 1500000, -1, -1};
 
 int g_FG_PSEUDO1[MAX_TABLE][TOTAL_BATTERY_NUMBER] = {
 	/*bat1,   bat2,   bat3,    bat4*/
@@ -397,11 +398,11 @@ int g_PON_SYS_IBOOT[MAX_TABLE][TOTAL_BATTERY_NUMBER] = {
 /* Q_MAX_SYS_VOLTAGE by temp ,control by MULTI_TEMP_GAUGE0=1, */
 int g_QMAX_SYS_VOL[MAX_TABLE][TOTAL_BATTERY_NUMBER] = {
 	/*bat1,   bat2,   bat3,    bat4*/
-	{33500, 33500, 33500, 33500},/*T0*/
-	{33500, 33500, 33500, 33500},/*T1*/
-	{33500, 33500, 33500, 33500},/*T2*/
-	{32900, 32900, 32900, 32900},/*T3*/
-	{32800, 32800, 32800, 32800},/*T4*/
+	{33450, 33450, 33500, 33500},/*T0*/
+	{33450, 33450, 33500, 33500},/*T1*/
+	{33450, 33450, 33500, 33500},/*T2*/
+	{34800, 34800, 32900, 32900},/*T3*/
+	{34800, 34800, 32800, 32800},/*T4*/
 	{33500, 33500, 33500, 33500},/*T5*/
 	{33500, 33500, 33500, 33500},/*T6*/
 	{33500, 33500, 33500, 33500},/*T7*/
@@ -427,8 +428,9 @@ int g_temperature[MAX_TABLE] = {
 };
 
 
-#define BAT_NTC_10 1
+#define BAT_NTC_10 0
 #define BAT_NTC_47 0
+#define BAT_NTC_100 1
 
 #if (BAT_NTC_10 == 1)
 #define RBAT_PULL_UP_R             24000
@@ -436,6 +438,10 @@ int g_temperature[MAX_TABLE] = {
 
 #if (BAT_NTC_47 == 1)
 #define RBAT_PULL_UP_R             61900
+#endif
+
+#if (BAT_NTC_100 == 1)
+#define RBAT_PULL_UP_R             100000
 #endif
 
 #define RBAT_PULL_UP_VOLT          2800
@@ -491,6 +497,32 @@ struct fuelgauge_temperature Fg_Temperature_Table[21] = {
 		{50, 16433},
 		{55, 13539},
 		{60, 11210}
+};
+#endif
+
+#if (BAT_NTC_100 == 1)
+struct fuelgauge_temperature Fg_Temperature_Table[21] = {
+	{-40, 4251119},
+	{-35, 3005599},
+	{-30, 2149225},
+	{-25, 1554881},
+	{-20, 1135037},
+	{-15, 837879},
+	{-10, 624188},
+	{-5, 469132},
+	{0, 355612},
+	{5, 271800},
+	{10, 209410},
+	{15, 162551},
+	{20, 127080},
+	{25, 100000},
+	{30, 79232},
+	{35, 63187},
+	{40, 50687},
+	{45, 40904},
+	{50, 33195},
+	{55, 27091},
+	{60, 22224}
 };
 #endif
 

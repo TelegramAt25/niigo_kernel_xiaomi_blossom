@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0
 /*
  * Copyright (c) 2019 MediaTek Inc.
+ * Copyright (C) 2021 XiaoMi, Inc.
  */
 
 /*
@@ -158,7 +159,10 @@ static bool select_charging_current_limit(struct mtk_charger *info,
 		&& (info->chr_type == POWER_SUPPLY_TYPE_USB ||
 		info->chr_type == POWER_SUPPLY_TYPE_USB_CDP)
 		) {
-		pdata->input_current_limit = 100000; /* 100mA */
+		/*2020.04.13 longcheer xugui set charging_current_limit start*/
+		pdata->input_current_limit = 500000; /* 500mA */
+		pdata->charging_current_limit = 500000;
+		/*2020.04.13 longcheer xugui set charging_current_limit end*/
 		is_basic = true;
 		goto done;
 	}
@@ -238,7 +242,7 @@ static bool select_charging_current_limit(struct mtk_charger *info,
 		else {
 			if (info->sw_jeita.sm == TEMP_T0_TO_T1) {
 				pdata->input_current_limit = 500000;
-				pdata->charging_current_limit = 350000;
+				pdata->charging_current_limit = 540000;
 			}
 		}
 	}
