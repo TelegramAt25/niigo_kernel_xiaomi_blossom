@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0
 /*
  * Copyright (c) 2019 MediaTek Inc.
+ * Copyright (C) 2021 XiaoMi, Inc.
  */
 
 #include <linux/kernel.h>
@@ -82,7 +83,11 @@ static atomic_t g_pwm_backlight[PWM_TOTAL_MODULE_NUM] = {
 static atomic_t g_pwm_en[PWM_TOTAL_MODULE_NUM] = {
 	ATOMIC_INIT(-1), ATOMIC_INIT(-1) };
 static atomic_t g_pwm_max_backlight[PWM_TOTAL_MODULE_NUM] = {
+#ifdef CONFIG_BACKLIGHT_SUPPORT_2047_FEATURE
+	ATOMIC_INIT(2047), ATOMIC_INIT(2047) };
+#else
 	ATOMIC_INIT(1023), ATOMIC_INIT(1023) };
+#endif
 static atomic_t g_pwm_is_power_on[PWM_TOTAL_MODULE_NUM] = {
 	ATOMIC_INIT(0), ATOMIC_INIT(0) };
 static atomic_t g_pwm_value_before_power_off[PWM_TOTAL_MODULE_NUM] = {
@@ -101,7 +106,11 @@ static atomic_t g_pwm_is_change_state[PWM_TOTAL_MODULE_NUM] = {
 static atomic_t g_pwm_backlight[PWM_TOTAL_MODULE_NUM] = { ATOMIC_INIT(-1) };
 static atomic_t g_pwm_en[PWM_TOTAL_MODULE_NUM] = { ATOMIC_INIT(-1) };
 static atomic_t g_pwm_max_backlight[PWM_TOTAL_MODULE_NUM] = {
+#ifdef CONFIG_BACKLIGHT_SUPPORT_2047_FEATURE
+	ATOMIC_INIT(2047) };
+#else
 	ATOMIC_INIT(1023) };
+#endif
 static atomic_t g_pwm_is_power_on[PWM_TOTAL_MODULE_NUM] = { ATOMIC_INIT(0) };
 static atomic_t g_pwm_value_before_power_off[PWM_TOTAL_MODULE_NUM] = {
 	ATOMIC_INIT(0) };

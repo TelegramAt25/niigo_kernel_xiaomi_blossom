@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0
 /*
  * Copyright (C) 2018 MediaTek Inc.
- *
+ * Copyright (C) 2021 XiaoMi, Inc.
  */
 
 #include <linux/i2c.h>
@@ -136,8 +136,12 @@ int setMaxbrightness(int max_level, int enable)
 	}
 #else
 	pr_info("Set max brightness go through AAL\n");
+#ifdef CONFIG_BACKLIGHT_SUPPORT_2047_FEATURE
+	disp_bls_set_max_backlight(max_level);
+#else
 	disp_bls_set_max_backlight(((((1 << LED_INTERNAL_LEVEL_BIT_CNT) -
 				      1) * max_level + 127) / 255));
+#endif
 #endif				/* endif CONFIG_MTK_AAL_SUPPORT */
 	return 0;
 }
@@ -179,9 +183,13 @@ static int mt65xx_led_set_cust(struct cust_mt65xx_led *cust, int level)
 #endif
 #ifdef LED_INCREASE_LED_LEVEL_MTKPATCH
 	if (cust->mode == MT65XX_LED_MODE_CUST_BLS_PWM) {
+#ifdef CONFIG_BACKLIGHT_SUPPORT_2047_FEATURE
+		mt_mt65xx_led_set_cust(cust, level);
+#else
 		mt_mt65xx_led_set_cust(cust,
 				       ((((1 << LED_INTERNAL_LEVEL_BIT_CNT) -
 					  1) * level + 127) / 255));
+#endif
 	} else {
 		mt_mt65xx_led_set_cust(cust, level);
 	}
@@ -306,8 +314,13 @@ int mt65xx_leds_brightness_set(enum mt65xx_led_type type,
 	if (type < 0 || type >= MT65XX_LED_TYPE_TOTAL)
 		return -1;
 
+#ifdef CONFIG_BACKLIGHT_SUPPORT_2047_FEATURE
+	if (level > 2047)
+		level = 2047;
+#else
 	if (level > LED_FULL)
 		level = LED_FULL;
+#endif
 	else if (level < 0)
 		level = 0;
 
@@ -355,8 +368,13 @@ int backlight_brightness_set(int level)
 {
 	struct cust_mt65xx_led *cust_led_list = mt_get_cust_led_list();
 
+#ifdef CONFIG_BACKLIGHT_SUPPORT_2047_FEATURE
+	if (level > 2047)
+		level = 2047;
+#else
 	if (level > ((1 << MT_LED_INTERNAL_LEVEL_BIT_CNT) - 1))
 		level = ((1 << MT_LED_INTERNAL_LEVEL_BIT_CNT) - 1);
+#endif
 	else if (level < 0)
 		level = 0;
 
@@ -385,9 +403,13 @@ int backlight_brightness_set(int level)
 					   level);
 	} else {
 		return mt65xx_led_set_cust(&cust_led_list[MT65XX_LED_TYPE_LCD],
+#ifdef CONFIG_BACKLIGHT_SUPPORT_2047_FEATURE
+					   level);
+#else
 					   (level >>
 					    (MT_LED_INTERNAL_LEVEL_BIT_CNT -
 					     8)));
+#endif
 	}
 
 }
@@ -487,7 +509,11 @@ static int mt65xx_leds_probe(struct platform_device *pdev)
 #ifdef CONTROL_BL_TEMPERATURE
 
 	last_level = 0;
+#ifdef CONFIG_BACKLIGHT_SUPPORT_2047_FEATURE
+	limit = 2047;
+#else
 	limit = 255;
+#endif
 	limit_flag = 0;
 	current_level = 0;
 	pr_debug
