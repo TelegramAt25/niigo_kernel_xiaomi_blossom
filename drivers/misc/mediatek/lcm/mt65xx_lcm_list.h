@@ -1,6 +1,7 @@
 /* SPDX-License-Identifier: GPL-2.0 */
 /*
  * Copyright (c) 2019 MediaTek Inc.
+ * Copyright (C) 2021 XiaoMi, Inc.
  * Author: Joey Pan <joey.pan@mediatek.com>
  */
 
@@ -9,6 +10,7 @@
 
 #include <lcm_drv.h>
 
+extern struct LCM_DRIVER nt36525b_vdo_hdp_boe_dijing_lcm_drv;
 extern struct LCM_DRIVER otm1282a_hd720_dsi_vdo_60hz_lcm_drv;
 extern struct LCM_DRIVER otm1282a_hd720_dsi_vdo_lcm_drv;
 extern struct LCM_DRIVER nt35595_fhd_dsi_cmd_truly_8163_lcm_drv;

@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0
 /*
  * Copyright (c) 2019 MediaTek Inc.
+ * Copyright (C) 2021 XiaoMi, Inc.
  * Author: Joey Pan <joey.pan@mediatek.com>
  */
 
@@ -23,6 +24,9 @@ enum LCM_DSI_MODE_CON lcm_dsi_mode;
 struct LCM_DRIVER *lcm_driver_list[] = {
 #if defined(HX83102P_WXGA_VDO_INCELL_BOE)
 	&hx83102p_wxga_vdo_incell_boe_lcm_drv,
+#endif
+#if defined(NT36525B_VDO_HDP_BOE_DIJING)
+	&nt36525b_vdo_hdp_boe_dijing_lcm_drv,
 #endif
 #if defined(NT36672AH_HDP_DSI_VDO_TCL_CSOT)
 	&nt36672ah_hdp_dsi_vdo_tcl_csot_lcm_drv,
