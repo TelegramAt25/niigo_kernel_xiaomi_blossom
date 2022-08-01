@@ -79,6 +79,7 @@ static unsigned int esd_check_mode;
 static unsigned int esd_check_enable;
 unsigned int esd_checking;
 static int te_irq;
+extern int esd_backlight_level;
 extern void esd_resume(int flag);
 extern char mtkfb_lcm_name[256];
 
@@ -814,6 +815,7 @@ int primary_display_esd_recovery(void)
 		cmdqCoreSetEvent(CMDQ_SYNC_TOKEN_CONFIG_DIRTY);
 		mdelay(40);
 	}
+	disp_lcm_set_backlight(primary_get_lcm(),NULL,esd_backlight_level);
 
 done:
 	primary_display_manual_unlock();
