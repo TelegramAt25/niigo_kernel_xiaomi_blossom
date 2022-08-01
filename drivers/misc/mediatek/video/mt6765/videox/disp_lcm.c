@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0
 /*
  * Copyright (c) 2019 MediaTek Inc.
+ * Copyright (C) 2021 XiaoMi, Inc.
  */
 
 #include <linux/slab.h>
@@ -12,10 +13,26 @@
 #include "disp_drv_platform.h"
 #include "ddp_manager.h"
 #include "disp_lcm.h"
+#include "disp_feature.h"
 
 #if defined(MTK_LCM_DEVICE_TREE_SUPPORT)
 #include <linux/of.h>
 #endif
+
+#include <linux/delay.h>
+
+/* 2020.03.23 longcheer zhaoxiangxiang add for display feature start */
+extern void DSI_set_cmdq_V2_Wrapper_DSI0(unsigned int cmd, unsigned char count,
+					 unsigned char *para_list, unsigned char force_update);
+extern int do_lcm_vdo_lp_write(struct ddp_lcm_write_cmd_table *write_table,
+			       unsigned int count);
+extern int do_lcm_vdo_lp_read(struct ddp_lcm_read_cmd_table *read_table);
+struct LCM_setting_table *hbm0_on,*hbm1_on,*hbm2_on;
+extern char mtkfb_lcm_name[256];
+extern unsigned int islcmconnected;
+extern void disp_aal_set_ess_level (int level);
+int esd_backlight_level;
+/* 2020.03.23 longcheer zhaoxiangxiang add for display feature end */
 
 /* This macro and arrya is designed for multiple LCM support */
 /* for multiple LCM, we should assign I/F Port id in lcm driver, */
@@ -1020,6 +1037,258 @@ void load_lcm_resources_from_DT(struct LCM_DRIVER *lcm_drv)
 }
 #endif
 
+/* 2020.03.23 longcheer zhaoxiangxiang add for display feature start */
+static void diff_panel_set_cmd(struct disp_lcm_handle *plcm)
+{
+	if (_is_lcm_inited(plcm)) {
+		if(strnstr(plcm->drv->name,"nt36525b",strlen(plcm->drv->name))){
+			hbm0_on = dijing_hbm0_on;
+			hbm1_on = dijing_hbm1_on;
+			hbm2_on = dijing_hbm2_on;
+		}
+		if(strnstr(plcm->drv->name,"ft8006s",strlen(plcm->drv->name))){
+			hbm0_on = helitai_hbm0_on;
+			hbm1_on = helitai_hbm1_on;
+			hbm2_on = helitai_hbm2_on;
+		}
+		if(strnstr(plcm->drv->name,"hx83102d",strlen(plcm->drv->name))){
+			hbm0_on = xinli_hbm0_on;
+			hbm1_on = xinli_hbm1_on;
+			hbm2_on = xinli_hbm2_on;
+		}
+	}
+}
+
+static void display_feature_push_table(struct LCM_setting_table *table,
+				       unsigned int count,
+				       unsigned char force_update)
+{
+	unsigned int i;
+	unsigned int cmd;
+
+	for (i = 0; i < count; i++) {
+		cmd = table[i].cmd;
+		DSI_set_cmdq_V2_Wrapper_DSI0(cmd, table[i].count,
+					     table[i].para_list, force_update);
+	}
+}
+/* 2020.03.23 longcheer zhaoxiangxiang add for display feature end */
+
+//2020.03.19 longcheer zhaoxiangxiang add for hbm start
+static ssize_t dsi_display_set_hbm(struct device *dev,struct device_attribute *attr,const char *buf,size_t len)
+{
+
+	int rc = 0;
+	int param = 0;
+	struct ddp_lcm_write_cmd_table dimming_on[1] = {
+		{0x53, 1, {0x2C} },
+	};
+	do_lcm_vdo_lp_write(dimming_on,1);
+	rc = kstrtoint(buf, 10, &param);
+	if (rc) {
+		pr_err("kstrtoint failed. rc=%d\n", rc);
+		return rc;
+	}
+	pr_info("xinj:_###_%s,set_hbm_cmd: %d\n",__func__, param);
+	switch(param) {
+	case 0x1: //hbm1 on
+		display_feature_push_table(hbm1_on,1,1);
+		break;
+	case 0x2: //hbm2 on
+		display_feature_push_table(hbm2_on,1,1);
+		break;
+	case 0x0://hbm off
+		display_feature_push_table(hbm0_on,1,1);
+		break;
+	default:
+		pr_err("unknow cmds: %d\n", param);
+		break;
+	}
+	return len;
+}
+
+static ssize_t dsi_display_set_cabc(struct device *dev,struct device_attribute *attr,const char *buf,size_t len)
+{
+
+	int rc = 0;
+	int param = 0;
+	rc = kstrtoint(buf, 10, &param);
+	if (rc) {
+		pr_err("kstrtoint failed. rc=%d\n", rc);
+		return rc;
+	}
+	pr_info("xinj:_###_%s,set_cabc_cmd: %d\n",__func__, param);
+	switch(param) {
+	case 0x1: //cabc ui on
+		disp_aal_set_ess_level(29);
+		break;
+	case 0x2: //cabc movie on
+		disp_aal_set_ess_level(88);
+		break;
+	case 0x03://cabc still on
+		disp_aal_set_ess_level(180);
+		break;
+	case 0x0://cabc off
+		disp_aal_set_ess_level(0);
+		break;
+	default:
+		pr_err("unknow cmds: %d\n", param);
+		break;
+	}
+	return len;
+}
+
+
+static ssize_t white_point_show(struct device *dev,
+				struct device_attribute *attr, char *buf)
+{
+	ssize_t ret = 0;
+	struct ddp_lcm_read_cmd_table read_table;
+	memset(&read_table, 0, sizeof(struct ddp_lcm_read_cmd_table));
+	if(islcmconnected == 1){
+		if(strnstr(mtkfb_lcm_name,"nt36525b",strlen(mtkfb_lcm_name))){
+			struct ddp_lcm_write_cmd_table write_table[2] = {
+				{0xFF, 1, {0x10} },
+				{0xFB, 1, {0x01} },
+			};
+			do_lcm_vdo_lp_write(write_table, 2);
+			read_table.cmd[0] = 0xDA;
+			read_table.cmd[1] = 0xDB;
+			do_lcm_vdo_lp_read(&read_table);
+		}else if(strnstr(mtkfb_lcm_name,"ft8006s",strlen(mtkfb_lcm_name))){
+			struct LCM_setting_table write_table[1] = {
+				{0x41, 3, {0x5A,0x02} },
+			};
+			struct LCM_setting_table write_table1[1] = {
+				{0x41, 3, {0x5A,0x2F} },
+			};
+			display_feature_push_table(write_table, 1, 1);
+			read_table.cmd[0] = 0x8A;
+			read_table.cmd[1] = 0x8B;
+			do_lcm_vdo_lp_read(&read_table);
+			display_feature_push_table(write_table1, 1, 1);
+		}else if(strnstr(mtkfb_lcm_name,"hx83102d",strlen(mtkfb_lcm_name))){
+			struct LCM_setting_table write_table[2] = {
+				{0xB9, 3, {0x83,0x10,0x2D} },
+				{0xBD, 1, {0x00} },
+			};
+			display_feature_push_table(write_table, 2, 1);
+			read_table.cmd[0] = 0xDA;
+			read_table.cmd[1] = 0xDB;
+			do_lcm_vdo_lp_read(&read_table);
+		}
+		sprintf(buf,"val0=%d,val1=%d\n",read_table.data[0].byte1,read_table.data[1].byte1);
+
+	}else{
+		sprintf(buf,"%s\n","null");
+	}
+	ret = strlen(buf) + 1;
+	return ret;
+}
+
+static ssize_t brightness_light_show(struct device *dev,
+				     struct device_attribute *attr, char *buf)
+{
+	ssize_t ret = 0;
+	struct ddp_lcm_read_cmd_table read_table;
+	memset(&read_table, 0, sizeof(struct ddp_lcm_read_cmd_table));
+	if(islcmconnected == 1){
+		if(strnstr(mtkfb_lcm_name,"nt36525b",strlen(mtkfb_lcm_name))){
+			struct ddp_lcm_write_cmd_table write_table[2] = {
+				{0xFF, 1, {0x10} },
+				{0xFB, 1, {0x01} },
+			};
+			do_lcm_vdo_lp_write(write_table, 2);
+			read_table.cmd[0] = 0xDC;
+			do_lcm_vdo_lp_read(&read_table);
+		}else if(strnstr(mtkfb_lcm_name,"ft8006s",strlen(mtkfb_lcm_name))){
+			struct LCM_setting_table write_table[1] = {
+				{0x41, 2, {0x5A,0x02} },
+			};
+			struct LCM_setting_table write_table1[1] = {
+				{0x41, 3, {0x5A,0x2F} },
+			};
+			display_feature_push_table(write_table, 1, 1);
+			read_table.cmd[0] = 0x8C;
+			do_lcm_vdo_lp_read(&read_table);
+			display_feature_push_table(write_table1, 1, 1);
+		}else if(strnstr(mtkfb_lcm_name,"hx83102d",strlen(mtkfb_lcm_name))){
+			struct LCM_setting_table write_table[2] = {
+				{0xB9, 3, {0x83,0x10,0x2D} },
+				{0xBD, 1, {0x00} },
+			};
+			display_feature_push_table(write_table, 1, 1);
+			read_table.cmd[0] = 0xDC;
+			do_lcm_vdo_lp_read(&read_table);
+		}
+		sprintf(buf,"%d\n",read_table.data[0].byte1);
+	}else{
+		sprintf(buf,"%s\n","null");
+	}
+	ret = strlen(buf) + 1;
+	return ret;
+
+}
+static DEVICE_ATTR(hbm_mode, 0644, NULL,dsi_display_set_hbm );
+static DEVICE_ATTR(cabc_mode, 0644, NULL,dsi_display_set_cabc );
+static DEVICE_ATTR(whitepoint, 0664, white_point_show, NULL);
+static DEVICE_ATTR(brightness_light, 0664, brightness_light_show, NULL);
+static struct kobject *dsi_display_hbm;
+static struct kobject *dsi_display_cabc;
+static struct kobject *dsi_display_whitepoint;
+static struct kobject *dsi_display_brightness_light;
+static int display_feature_create_sysfs(void)
+{
+	int ret;
+
+	dsi_display_hbm = kobject_create_and_add("display_hbm", NULL);
+	if(dsi_display_hbm == NULL) {
+		pr_info(" temp_create_sysfs_ failed\n");
+		ret=-ENOMEM;
+		return ret;
+	}
+	dsi_display_cabc = kobject_create_and_add("display_cabc", NULL);
+	if(dsi_display_cabc == NULL) {
+		pr_info(" temp_create_sysfs_ failed\n");
+		ret=-ENOMEM;
+		return ret;
+	}
+	dsi_display_whitepoint = kobject_create_and_add("android_whitepoint", NULL);
+	if(dsi_display_whitepoint == NULL) {
+		pr_info(" temp_create_sysfs_ failed\n");
+		ret=-ENOMEM;
+		return ret;
+	}
+	dsi_display_brightness_light = kobject_create_and_add("android_brightness", NULL);
+	if(dsi_display_brightness_light == NULL) {
+		pr_info(" temp_create_sysfs_ failed\n");
+		ret=-ENOMEM;
+		return ret;
+	}
+	ret=sysfs_create_file(dsi_display_hbm, &dev_attr_hbm_mode.attr);
+	if(ret) {
+		pr_info("%s failed \n", __func__);
+		kobject_del(dsi_display_hbm);
+	}
+	ret=sysfs_create_file(dsi_display_cabc, &dev_attr_cabc_mode.attr);
+	if(ret) {
+		pr_info("%s failed \n", __func__);
+		kobject_del(dsi_display_cabc);
+	}
+	ret=sysfs_create_file(dsi_display_whitepoint, &dev_attr_whitepoint.attr);
+	if(ret) {
+		pr_info("%s failed \n", __func__);
+		kobject_del(dsi_display_whitepoint);
+	}
+	ret=sysfs_create_file(dsi_display_brightness_light, &dev_attr_brightness_light.attr);
+	if(ret) {
+		pr_info("%s failed \n", __func__);
+		kobject_del(dsi_display_brightness_light);
+	}
+	return 0;
+}
+//2020.03.19 longcheer zhaoxiangxiang add for hbm end
+
 struct disp_lcm_handle *disp_lcm_probe(char *plcm_name,
 	enum LCM_INTERFACE_ID lcm_id, int is_lcm_inited)
 {
@@ -1145,6 +1414,11 @@ struct disp_lcm_handle *disp_lcm_probe(char *plcm_name,
 
 	plcm->drv->get_params(plcm->params);
 	plcm->lcm_if_id = plcm->params->lcm_if;
+	//2020.03.19 longcheer zhaoxiangxiang add for hbm start
+	esd_backlight_level = 0;
+	diff_panel_set_cmd(plcm);
+	display_feature_create_sysfs();
+	//2020.03.19 longcheer zhaoxiangxiang add for hbm end
 
 	/* below code is for lcm driver forward compatible */
 	if (plcm->params->type == LCM_TYPE_DSI
@@ -1397,6 +1671,9 @@ int disp_lcm_esd_recover(struct disp_lcm_handle *plcm)
 	return -1;
 }
 
+#if defined(CONFIG_TOUCHSCREEN_COMMON)
+extern tpd_gesture_flag;
+#endif
 int disp_lcm_suspend(struct disp_lcm_handle *plcm)
 {
 	struct LCM_DRIVER *lcm_drv = NULL;
@@ -1411,8 +1688,15 @@ int disp_lcm_suspend(struct disp_lcm_handle *plcm)
 			return -1;
 		}
 
+#if defined(CONFIG_TOUCHSCREEN_COMMON)
+		if(!tpd_gesture_flag) {
+			if (lcm_drv->suspend_power)
+				lcm_drv->suspend_power();
+		}
+#else
 		if (lcm_drv->suspend_power)
 			lcm_drv->suspend_power();
+#endif
 
 
 		return 0;
@@ -1429,8 +1713,15 @@ int disp_lcm_resume(struct disp_lcm_handle *plcm)
 	if (_is_lcm_inited(plcm)) {
 		lcm_drv = plcm->drv;
 
+#if defined(CONFIG_TOUCHSCREEN_COMMON)
+		if(!tpd_gesture_flag) {
+			if (lcm_drv->resume_power)
+				lcm_drv->resume_power();
+		}
+#else
 		if (lcm_drv->resume_power)
 			lcm_drv->resume_power();
+#endif
 
 
 		if (lcm_drv->resume) {
@@ -1514,6 +1805,7 @@ int disp_lcm_set_backlight(struct disp_lcm_handle *plcm,
 		DISPERR("FATAL ERROR, lcm_drv->set_backlight is null\n");
 		return -1;
 	}
+	esd_backlight_level = level;
 
 	return 0;
 }
