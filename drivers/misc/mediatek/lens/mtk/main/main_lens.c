@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0
 /*
  * Copyright (c) 2019 MediaTek Inc.
+ * Copyright (C) 2021 XiaoMi, Inc.
  */
 
 /*
@@ -150,6 +151,14 @@ static struct stAF_DrvList g_stAF_DrvList[MAX_NUM_OF_LENS] = {
 	 LC898122AF_Release, LC898122AF_GetFileName, NULL},
 	{1, AFDRV_WV511AAF, WV511AAF_SetI2Cclient, WV511AAF_Ioctl,
 	 WV511AAF_Release, WV511AAF_GetFileName, NULL},
+#ifdef CONFIG_MTK_LENS_CN3927AF_SUPPORT
+	{1, AFDRV_CN3927AF, CN3927AF_SetI2Cclient, CN3927AF_Ioctl,
+	  CN3927AF_Release, CN3927AF_GetFileName, NULL},
+#endif
+#ifdef CONFIG_MTK_LENS_GT9769AF_SUPPORT
+	{1, AFDRV_GT9769AF, GT9769AF_SetI2Cclient, GT9769AF_Ioctl,
+	  GT9769AF_Release, GT9769AF_GetFileName, NULL},
+#endif
 };
 
 static struct stAF_DrvList *g_pstAF_CurDrv;

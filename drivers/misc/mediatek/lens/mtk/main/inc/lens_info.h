@@ -1,6 +1,7 @@
 /* SPDX-License-Identifier: GPL-2.0 */
 /*
  * Copyright (c) 2019 MediaTek Inc.
+ * Copyright (C) 2021 XiaoMi, Inc.
  */
 
 
@@ -67,6 +68,9 @@
 #define AFDRV_DW9718TAF "DW9718TAF"
 #define AFDRV_GT9772AF "GT9772AF"
 #define AFDRV_GT9768AF "GT9768AF"
+
+#define AFDRV_CN3927AF "CN3927AF"
+#define AFDRV_GT9769AF "GT9769AF"
 
 #define CONVERT_CCU_TIMESTAMP 0x1000
 
