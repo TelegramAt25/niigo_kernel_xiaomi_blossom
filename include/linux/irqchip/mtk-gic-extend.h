@@ -1,6 +1,7 @@
 /* SPDX-License-Identifier: GPL-2.0 */
 /*
  * Copyright (C) 2019 MediaTek Inc.
+ * Copyright (C) 2021 XiaoMi, Inc.
  */
 
 #ifndef __MTK_GIC_EXTEND_H
@@ -103,12 +104,9 @@ static inline unsigned int virq_to_hwirq(unsigned int virq)
 
 	desc = irq_to_desc(virq);
 
-	if (desc) {
-		hwirq = gic_irq(&desc->irq_data);
-	} else {
-		WARN_ON(!desc);
-		hwirq = INTID_INVALID;
-	}
+	WARN_ON(!desc);
+
+	hwirq = gic_irq(&desc->irq_data);
 
 	return hwirq;
 }
