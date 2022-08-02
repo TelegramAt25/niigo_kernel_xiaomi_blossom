@@ -1,0 +1,110 @@
+/*
+ * Copyright (C) 2019 MediaTek Inc.
+ * Copyright (C) 2021 XiaoMi, Inc.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 as
+ * published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See http://www.gnu.org/licenses/gpl-2.0.html for more details.
+ */
+
+#include "custom_common.dtsi"
+#include "touchscreen.dtsi"
+
+/* FINGERPRINT start */
+&spi0 {
+	#address-cells = <1>;
+	#size-cells = <0>;
+	fingerprint@0 {
+		compatible = "goodix,goodix-fp";
+		reg = <0>;
+		spi-max-frequency = <8000000>;
+		netlink-event = <30>;
+		status = "okay";
+	};
+};
+
+&goodix_fp {
+	pinctrl-names = "default", "reset_high", "reset_low";
+	pinctrl-0 = <&fingerprint_default>;
+	pinctrl-1 = <&fingerprint_reset_high>;
+	pinctrl-2 = <&fingerprint_reset_low>;
+	status = "okay";
+};
+
+&pio {
+	fingerprint_default: state_default {
+	};
+	fingerprint_reset_high: state_reset_high {
+		pins_cmd_dat {
+			pinmux = <PINMUX_GPIO172__FUNC_GPIO172>;
+			slew-rate = <1>;
+			output-high;
+		};
+	};
+	fingerprint_reset_low: state_reset_low {
+		pins_cmd_dat {
+			pinmux = <PINMUX_GPIO172__FUNC_GPIO172>;
+			slew-rate = <1>;
+			output-low;
+		};
+	};
+};
+/* FINGERPRINT end */
+
+/* CHARGER start */
+
+&i2c3 {
+	rt9465@4b {
+		compatible = "richtek,rt9465";
+		reg = <0x4b>;
+		interrupt-names = "wdtmri";
+		status = "okay";
+		charger_name = "secondary_chg";
+
+		rt,en_gpio = <&pio 176 0x00>; /* GPIO */
+		rt,en_gpio_num = <176>; /* direct defined GPIO num */
+		rt,intr_gpio = <&pio 23 0x00>; /* GPIO */
+		rt,intr_gpio_num = <23>; /* direct defined GPIO num */
+
+		mivr = <4500000>;	/* uV */
+		cv = <4550000>;		/* uA */
+		ichg = <1500000>;	/* uA */
+		ieoc = <700000>;	/* uA */
+		safety_timer = <12>;		/* hour */
+		en_st;
+		en_wdt;
+	};
+};
+
+&charger {
+	charger_configuration = <1>;
+};
+
+&pe2 {
+	/* dual charger in series */
+	dcs_chg1_charger_current = <2000000>;
+	dcs_chg2_charger_current = <2000000>;
+};
+
+&pdc {
+	pd_vbus_upper_bound = <12000000>;
+
+	/* dual charger in series */
+	dcs_chg1_charger_current = <2000000>;
+	dcs_chg2_charger_current = <2000000>;
+};
+
+&pe4 {
+	/* dual charger in series*/
+	dcs_chg1_charger_current = <2000000>;
+	dcs_chg2_charger_current = <2000000>;
+};
+
+/* CHARGER end */
+
+#include <dandelion/cust.dtsi>
