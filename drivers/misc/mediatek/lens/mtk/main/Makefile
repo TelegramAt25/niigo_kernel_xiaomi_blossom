@@ -72,4 +72,6 @@ mainaf-y  += common/bu63169af/OIS_func.o
 mainaf-y  += common/bu63169af/OIS_main.o
 mainaf-y  += common/bu63169af/OIS_user.o
 mainaf-y  += common/bu64253gwzaf/BU64253GWZAF.o
+mainaf-$(CONFIG_MTK_LENS_CN3927AF_SUPPORT) += common/cn3927af/CN3927AF.o
+mainaf-$(CONFIG_MTK_LENS_GT9769AF_SUPPORT) += common/gt9769af/GT9769AF.o
 
