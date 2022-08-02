@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0
 /*
  * Copyright (C) 2019 MediaTek Inc.
+ * Copyright (C) 2021 XiaoMi, Inc.
  */
 
 
@@ -60,7 +61,7 @@ static kgid_t gid = KGIDT_INIT(1000);
 static DEFINE_SEMAPHORE(sem_mutex);
 
 static unsigned int interval = 1;	/* seconds, 0 : no auto polling */
-static int trip_temp[10] = { 120000, 110000, 100000, 90000, 80000,
+static int trip_temp[10] = { 100000, 96000, 95000, 90000, 80000,
 				70000, 65000, 60000, 55000, 50000 };
 
 static struct thermal_zone_device *thz_dev;
@@ -68,7 +69,7 @@ static int mtkts_bts_debug_log;
 static int kernelmode;
 static int g_THERMAL_TRIP[10] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 
-static int num_trip;
+static int num_trip = 1;
 static char g_bind0[20] = {"mtktsAP-sysrst"};
 static char g_bind1[20] = { 0 };
 static char g_bind2[20] = { 0 };

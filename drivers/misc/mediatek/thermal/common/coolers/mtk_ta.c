@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0
 /*
  * Copyright (c) 2019 MediaTek Inc.
+ * Copyright (C) 2021 XiaoMi, Inc.
  */
 
 #include <linux/version.h>
@@ -531,7 +532,7 @@ static int __init ta_init(void)
 
 	g_tad_pid = 0;
 	init_flag = false;
-	g_tad_ttj = 0;
+	g_tad_ttj = CLCTM_TARGET_TJ;
 	g_ta_status = 0;
 
 	/*add by willcai for the userspace to kernelspace*/

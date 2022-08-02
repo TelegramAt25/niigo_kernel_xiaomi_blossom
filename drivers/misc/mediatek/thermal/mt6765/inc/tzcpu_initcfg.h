@@ -1,6 +1,7 @@
 /* SPDX-License-Identifier: GPL-2.0 */
 /*
  * Copyright (C) 2019 MediaTek Inc.
+ * Copyright (C) 2021 XiaoMi, Inc.
  */
 
 #ifndef __TZCPU_INITCFG_H__
@@ -8,22 +9,22 @@
 
 #define TZCPU_SET_INIT_CFG			(1)
 
-#define TZCPU_INITCFG_INTERVAL			(40)
-#define TZCPU_INITCFG_NUM_TRIPS			(4)
+#define TZCPU_INITCFG_INTERVAL			(200)
+#define TZCPU_INITCFG_NUM_TRIPS			(2)
 
 #define TZCPU_INITCFG_TRIP_0_TEMP		(117000)
 #define TZCPU_INITCFG_TRIP_0_COOLER		"mtktscpu-sysrst"
 
-#define TZCPU_INITCFG_TRIP_1_TEMP		(95000)
-#define TZCPU_INITCFG_TRIP_1_COOLER		"cpu00"
+#define TZCPU_INITCFG_TRIP_1_TEMP		(65000)
+#define TZCPU_INITCFG_TRIP_1_COOLER		"cpu_adaptive_0"
 
-#define TZCPU_INITCFG_TRIP_2_TEMP		(85000)
-#define TZCPU_INITCFG_TRIP_2_COOLER		"cpu03"
+#define TZCPU_INITCFG_TRIP_2_TEMP		(64000)
+#define TZCPU_INITCFG_TRIP_2_COOLER		""
 
-#define TZCPU_INITCFG_TRIP_3_TEMP		(65000)
-#define TZCPU_INITCFG_TRIP_3_COOLER		"cpu_adaptive_0"
+#define TZCPU_INITCFG_TRIP_3_TEMP		(63000)
+#define TZCPU_INITCFG_TRIP_3_COOLER		""
 
-#define TZCPU_INITCFG_TRIP_4_TEMP		(63000)
+#define TZCPU_INITCFG_TRIP_4_TEMP		(62000)
 #define TZCPU_INITCFG_TRIP_4_COOLER		""
 
 #define TZCPU_INITCFG_TRIP_5_TEMP		(60000)

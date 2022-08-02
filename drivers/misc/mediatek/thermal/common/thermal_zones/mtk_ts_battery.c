@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0
 /*
  * Copyright (c) 2019 MediaTek Inc.
+ * Copyright (C) 2021 XiaoMi, Inc.
  */
 
 #include <linux/version.h>
@@ -423,7 +424,7 @@ struct thermal_cooling_device *cdev, unsigned long state)
 		/* To trigger data abort to reset the system
 		 * for thermal protection.
 		 */
-		BUG();
+		//BUG();
 	}
 	return 0;
 }
