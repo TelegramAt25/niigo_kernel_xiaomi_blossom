@@ -2,6 +2,7 @@
 
 /*
  * Copyright (c) 2019 MediaTek Inc.
+ * Copyright (C) 2021 XiaoMi, Inc.
  */
 
 #include <linux/module.h>
@@ -220,9 +221,9 @@ static inline int mt6370_fled_parse_dt(struct device *dev,
 static struct flashlight_properties mt6370_fled_props = {
 	.type = FLASHLIGHT_TYPE_LED,
 	.torch_brightness = 0,
-	.torch_max_brightness = 30, /* 00000 ~ 11110 */
+	.torch_max_brightness = 31, /* 0000 ~ 1110 */
 	.strobe_brightness = 0,
-	.strobe_max_brightness = 255, /* 0000000 ~ 1111111 */
+	.strobe_max_brightness = 256, /* 0000000 ~ 1110000 */
 	.strobe_delay = 0,
 	.strobe_timeout = 0,
 	.alias_name = "mt6370-fled",
@@ -468,12 +469,8 @@ static int mt6370_fled_strobe_current_list(struct rt_fled_dev *info,
 {
 	struct mt6370_pmu_fled_data *fi = (struct mt6370_pmu_fled_data *)info;
 
-	if (selector > fi->base.init_props->strobe_max_brightness)
-		return -EINVAL;
-	if (selector < 128)
-		return 50000 + selector * 12500;
-	else
-		return 25000 + (selector - 128) * 6250;
+	return (selector > fi->base.init_props->strobe_max_brightness) ?
+		       -EINVAL : 100000 + selector * 12500;
 }
 
 static unsigned int mt6370_timeout_level_list[] = {
@@ -514,12 +511,12 @@ static int mt6370_fled_set_strobe_current_sel(struct rt_fled_dev *info,
 	struct mt6370_pmu_fled_data *fi = (struct mt6370_pmu_fled_data *)info;
 	int ret;
 
-	if (selector > fi->base.init_props->strobe_max_brightness)
+	if (selector >= 256)
 		return -EINVAL;
-	if (selector < 128)
-		mt6370_pmu_reg_clr_bit(fi->chip, fi->fled_strb_cur_reg, 0x80);
-	else
+	if (selector >= 128)
 		mt6370_pmu_reg_set_bit(fi->chip, fi->fled_strb_cur_reg, 0x80);
+	else
+		mt6370_pmu_reg_clr_bit(fi->chip, fi->fled_strb_cur_reg, 0x80);
 
 	if (selector >= 128)
 		selector -= 128;

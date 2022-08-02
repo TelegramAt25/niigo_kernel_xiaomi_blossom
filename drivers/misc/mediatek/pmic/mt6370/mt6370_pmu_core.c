@@ -2,6 +2,7 @@
 
 /*
  * Copyright (c) 2019 MediaTek Inc.
+ * Copyright (C) 2021 XiaoMi, Inc.
  */
 
 #include <linux/module.h>
@@ -172,6 +173,11 @@ static int mt6370_pmu_core_reset(struct mt6370_pmu_core_data *core_data)
 					 2, pascode);
 	if (ret < 0)
 		dev_err(core_data->dev, "excute reset pascode fail\n");
+	/* disable i2c&mrstb reset */
+	ret = mt6370_pmu_reg_write(core_data->chip,
+				   MT6370_PMU_REG_CORECTRL1, 0x06);
+	if (ret < 0)
+		dev_err(core_data->dev, "en i2c reset fail\n");
 	/* add dsvp discharge bit */
 	return mt6370_pmu_reg_write(core_data->chip,
 				    MT6370_PMU_REG_DBCTRL2, 0x32);
