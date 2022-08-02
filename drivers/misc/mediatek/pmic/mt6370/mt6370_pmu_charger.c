@@ -2,6 +2,7 @@
 
 /*
  * Copyright (c) 2019 MediaTek Inc.
+ * Copyright (C) 2021 XiaoMi, Inc.
  */
 
 #include <linux/module.h>
@@ -163,7 +164,7 @@ struct mt6370_pmu_charger_data {
 static struct mt6370_pmu_charger_desc mt6370_default_chg_desc = {
 	.ichg = 2000000,		/* uA */
 	.aicr = 500000,			/* uA */
-	.mivr = 4400000,		/* uV */
+	.mivr = 4500000,		/* uV */
 	.cv = 4350000,			/* uA */
 	.ieoc = 250000,			/* uA */
 	.safety_timer = 12,		/* hour */
