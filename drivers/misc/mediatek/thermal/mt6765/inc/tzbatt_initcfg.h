@@ -1,6 +1,7 @@
 /* SPDX-License-Identifier: GPL-2.0 */
 /*
  * Copyright (C) 2019 MediaTek Inc.
+ * Copyright (C) 2021 XiaoMi, Inc.
  */
 
 #ifndef __TZBATT_INITCFG_H__
@@ -9,13 +10,13 @@
 #define TZBATT_SET_INIT_CFG				(1)
 
 #define TZBATT_INITCFG_INTERVAL				(1)
-#define TZBATT_INITCFG_NUM_TRIPS			(3)
+#define TZBATT_INITCFG_NUM_TRIPS			(1)
 
-#define TZBATT_INITCFG_TRIP_0_TEMP			(49000)
-#define TZBATT_INITCFG_TRIP_0_COOLER			"mtk-cl-bcct02"
+#define TZBATT_INITCFG_TRIP_0_TEMP			(60000)
+#define TZBATT_INITCFG_TRIP_0_COOLER			"mtktsbattery-sysrst"
 
 #define TZBATT_INITCFG_TRIP_1_TEMP			(48000)
-#define TZBATT_INITCFG_TRIP_1_COOLER			"mtk-cl-bcct01"
+#define TZBATT_INITCFG_TRIP_1_COOLER			""
 
 #define TZBATT_INITCFG_TRIP_2_TEMP			(46000)
 #define TZBATT_INITCFG_TRIP_2_COOLER			"mtk-cl-bcct00"
