@@ -1,5 +1,6 @@
 # Makefile for the focaltech touchscreen drivers.
 
+ccflags-y += -I$(srctree)/drivers/input/touchscreen/
 ccflags-y += -I$(srctree)/drivers/input/touchscreen/mediatek/
 ccflags-y += -I$(srctree)/drivers/input/touchscreen/mediatek/focaltech_fhd_touch/
 ccflags-y += -I$(srctree)/drivers/spi/mediatek/$(MTK_PLATFORM)
@@ -20,10 +21,3 @@ obj-$(CONFIG_TOUCHSCREEN_MTK_FOCALTECH_FHD)   +=  focaltech_proximity.o
 
 obj-$(CONFIG_TOUCHSCREEN_MTK_FOCALTECH_FHD)   +=  focaltech_i2c.o
 obj-$(CONFIG_TOUCHSCREEN_MTK_FOCALTECH_FHD)	+=  focaltech_flash.o
-
-obj-y   +=  tpd_control.o
-obj-y   +=  tpd_button.o
-obj-y   +=  tpd_debug.o
-obj-y   +=  tpd_default.o
-obj-y   +=  tpd_misc.o
-obj-y   +=  tpd_setting.o

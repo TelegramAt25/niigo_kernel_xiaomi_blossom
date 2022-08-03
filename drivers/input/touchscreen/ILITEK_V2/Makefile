@@ -9,6 +9,7 @@ platform=ilitek_plat_mtk
 ccflags-y += -I$(srctree)/drivers/spi/mediatek/mt6797/
 ccflags-y += -I$(srctree)/drivers/input/touchscreen/ILITEK_V2/
 ccflags-y += -I$(srctree)/drivers/input/touchscreen/ILITEK_V2/firmware/
+ccflags-y += -I$(srctree)/drivers/input/touchscreen/
 ccflags-y += -I$(srctree)/drivers/input/touchscreen/mediatek/
 ccflags-y += -I$(srctree)/drivers/misc/mediatek/include/mt-plat/
 ccflags-y += -I$(srctree)/drivers/misc/mediatek/include/mt-plat/$(MTK_PLATFORM)/include/
@@ -37,13 +38,7 @@ obj-y += ilitek_main.o \
 	ilitek_ic.o \
 	ilitek_touch.o \
 	$(fwupdate).o \
-	ilitek_node.o \
-	tpd_control.o \
-	tpd_button.o \
-	tpd_debug.o \
-	tpd_default.o \
-	tpd_misc.o \
-	tpd_setting.o
+	ilitek_node.o
 else
 	obj-m += ilitek.o
 	ilitek-y := ilitek_main.o \
