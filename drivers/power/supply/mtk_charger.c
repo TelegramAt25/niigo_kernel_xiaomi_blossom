@@ -1405,7 +1405,7 @@ static bool charger_init_algo(struct mtk_charger *info)
 			chr_err("Found secondary charger\n");
 		else {
 			chr_err("*** Error : can't find secondary charger ***\n");
-			return false;
+			//return false;
 		}
 	}
 
