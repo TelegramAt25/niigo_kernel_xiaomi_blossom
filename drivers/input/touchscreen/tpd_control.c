@@ -48,7 +48,7 @@ bool tpd_gesture_flag;
 struct pinctrl_state *spi_cs_output0, *spi_cs_output1;
 #endif
 const struct of_device_id touch_of_match[] = {
-	{ .compatible = "goodix,touch", },
+	{ .compatible = "mediatek,touch", },
 	{},
 };
 
