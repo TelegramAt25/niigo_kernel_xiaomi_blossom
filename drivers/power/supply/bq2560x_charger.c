@@ -733,7 +733,7 @@ static int bq2560x_charging(struct charger_device *chg_dev, bool enable)
 {
 
 	struct bq2560x *bq = dev_get_drvdata(&chg_dev->dev);
-	int ret = 0,rc = 0;
+	int ret = 0;
 	u8 val;
 
 	if (enable)
@@ -749,7 +749,7 @@ static int bq2560x_charging(struct charger_device *chg_dev, bool enable)
 				  !ret ? "successfully" : "failed");
 
 	ret = bq2560x_read_byte(bq, &val, BQ2560X_REG_01);
-	if (!ret && !rc )
+	if (!ret)
 		bq->charge_enabled = !!(val & REG01_CHG_CONFIG_MASK);
 
 	return ret;
@@ -763,7 +763,7 @@ static int bq2560x_plug_in(struct charger_device *chg_dev)
 	pr_info("[%s] enter!", __func__);
 	ret = bq2560x_charging(chg_dev, true);
 
-	if (!ret)
+	if (ret)
 		pr_err("Failed to enable charging:%d\n", ret);
 	
 	return ret;
@@ -776,7 +776,7 @@ static int bq2560x_plug_out(struct charger_device *chg_dev)
 	pr_info("[%s] enter!", __func__);
 	ret = bq2560x_charging(chg_dev, false);
 
-	if (!ret)
+	if (ret)
 		pr_err("Failed to disable charging:%d\n", ret);
 	
 	return ret;
