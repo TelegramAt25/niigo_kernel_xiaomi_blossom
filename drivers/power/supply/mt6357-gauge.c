@@ -1957,8 +1957,8 @@ static int boot_zcv_get(struct mtk_gauge *gauge_dev,
 	int _hw_ocv_57_pon;
 	int _hw_ocv_57_plugin;
 	int _hw_ocv_57_pon_rdy;
-	int _hw_ocv_chgin;
-	int _hw_ocv_chgin_rdy;
+	int _hw_ocv_chgin = 0;
+	int _hw_ocv_chgin_rdy = 0;
 	int now_temp;
 	int now_thr;
 	int tmp_hwocv_chgin = 0;
@@ -1974,12 +1974,6 @@ static int boot_zcv_get(struct mtk_gauge *gauge_dev,
 	_hw_ocv_57_pon = read_hw_ocv_6357_power_on(gauge_dev);
 	_hw_ocv_57_plugin = read_hw_ocv_6357_plug_in(gauge_dev);
 
-	tmp_hwocv_chgin = get_charger_zcv(gauge_dev);
-	if (tmp_hwocv_chgin != -ENODEV)
-		_hw_ocv_chgin = tmp_hwocv_chgin / 100;
-	else
-		_hw_ocv_chgin = 0;
-
 	now_temp = gm->bs_data.bat_batt_temp;
 
 	if (gm == NULL)
@@ -1990,11 +1984,6 @@ static int boot_zcv_get(struct mtk_gauge *gauge_dev,
 		else
 			now_thr = gm->ext_hwocv_swocv_lt;
 	}
-
-	if (_hw_ocv_chgin < 25000)
-		_hw_ocv_chgin_rdy = 0;
-	else
-		_hw_ocv_chgin_rdy = 1;
 
 	/* if preloader records charge in, need to using subpmic as hwocv */
 	fgauge_get_info(
