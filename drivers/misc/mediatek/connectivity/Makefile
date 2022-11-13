@@ -46,6 +46,8 @@ ifneq ($(KERNELRELEASE),)
     # export MTK_ANDROID_EMI=y
     export WIFI_IP_SET=1
     export WIFI_ECO_VER=1
+    export CFG_FM_CHIP_ID=6765
+    export CFG_FM_CHIP=mt6631
 
     # Do build-in for Makefile checking
     # export CONFIG_WLAN_DRV_BUILD_IN=y
