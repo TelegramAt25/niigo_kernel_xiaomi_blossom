@@ -246,8 +246,10 @@ static int rsz_config(enum DISP_MODULE_ENUM module,
 		if (!dump) {
 			dump = true;
 			primary_display_diagnose();
+#ifdef CONFIG_MTK_AEE_AED
 			disp_aee_print("need rsz but input w(%u) > (%u)\n",
 				       rsz_config->frm_in_w, RSZ_TILE_LENGTH);
+#endif
 		}
 		return -EINVAL;
 	}

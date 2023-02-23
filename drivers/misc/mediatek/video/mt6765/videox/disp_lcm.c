@@ -1911,7 +1911,9 @@ int disp_lcm_is_video_mode(struct disp_lcm_handle *plcm)
 		}
 	}
 
+#ifdef CONFIG_MTK_AEE_AED
 	disp_aee_db_print("LCM parmas is error, type=%d\n", lcm_param->type);
+#endif
 	return -1;
 }
 

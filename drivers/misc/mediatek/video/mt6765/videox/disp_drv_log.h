@@ -73,6 +73,7 @@
 
 #define DISPPR_HWOP(string, args...)
 
+#ifdef CONFIG_MTK_AEE_AED
 #ifdef CONFIG_MTK_AEE_FEATURE
 #define disp_aee_print(string, args...) do {	\
 	char disp_name[100];						\
@@ -100,6 +101,7 @@
 	} while (0)
 #else
 #define disp_aee_db_print(string, args...) pr_debug("DISP error:"string, ##args)
+#endif
 #endif
 
 #define _DISP_PRINT_FENCE_OR_ERR(is_err, string, args...) \
