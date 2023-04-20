@@ -11,7 +11,14 @@
 #include <lcm_drv.h>
 
 extern struct LCM_DRIVER nt36525b_vdo_hdp_boe_dijing_lcm_drv;
+extern struct LCM_DRIVER nt36525b_vdo_hdp_boe_xinli_lcm_drv;
+extern struct LCM_DRIVER nt36525b_vdo_hdp_boe_helitai_lcm_drv;
+extern struct LCM_DRIVER nt36525b_vdo_hdp_panda_shengchao_lcm_drv;
+extern struct LCM_DRIVER icnl9911c_vdo_hdp_boe_xinli_lcm_drv;
+extern struct LCM_DRIVER icnl9911c_vdo_hdp_boe_tianma_lcm_drv;
 extern struct LCM_DRIVER ft8006s_vdo_hdp_boe_helitai_lcm_drv;
+extern struct LCM_DRIVER ft8006s_ab_vdo_hdp_boe_helitai_lcm_drv;
+extern struct LCM_DRIVER ft8006s_ac_vdo_hdp_boe_helitai_lcm_drv;
 extern struct LCM_DRIVER hx83102d_vdo_hdp_boe_xinli_lcm_drv;
 extern struct LCM_DRIVER otm1282a_hd720_dsi_vdo_60hz_lcm_drv;
 extern struct LCM_DRIVER otm1282a_hd720_dsi_vdo_lcm_drv;

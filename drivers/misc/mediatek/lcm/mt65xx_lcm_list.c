@@ -22,14 +22,32 @@ enum LCM_DSI_MODE_CON lcm_dsi_mode;
 #define LCD_HW_ID_STATUS_ERROR  0x03
 
 struct LCM_DRIVER *lcm_driver_list[] = {
+#if defined(ICNL9911C_VDO_HDP_BOE_XINLI)
+	&icnl9911c_vdo_hdp_boe_xinli_lcm_drv,
+#endif
+#if defined(ICNL9911C_VDO_HDP_BOE_TIANMA)
+        &icnl9911c_vdo_hdp_boe_tianma_lcm_drv,
+#endif
 #if defined(HX83102P_WXGA_VDO_INCELL_BOE)
 	&hx83102p_wxga_vdo_incell_boe_lcm_drv,
 #endif
 #if defined(NT36525B_VDO_HDP_BOE_DIJING)
 	&nt36525b_vdo_hdp_boe_dijing_lcm_drv,
 #endif
+#if defined(NT36525B_VDO_HDP_BOE_XINLI)
+        &nt36525b_vdo_hdp_boe_xinli_lcm_drv,
+#endif
+#if defined(NT36525B_VDO_HDP_BOE_HELITAI)
+	&nt36525b_vdo_hdp_boe_helitai_lcm_drv,
+#endif
+#if defined(NT36525B_VDO_HDP_PANDA_SHENGCHAO)
+	&nt36525b_vdo_hdp_panda_shengchao_lcm_drv,
+#endif
 #if defined(FT8006S_VDO_HDP_BOE_HELITAI)
 	&ft8006s_vdo_hdp_boe_helitai_lcm_drv,
+#endif
+#if defined(FT8006S_AB_VDO_HDP_BOE_HELITAI)
+	&ft8006s_ab_vdo_hdp_boe_helitai_lcm_drv,
 #endif
 #if defined(HX83102D_VDO_HDP_BOE_XINLI)
 	&hx83102d_vdo_hdp_boe_xinli_lcm_drv,
