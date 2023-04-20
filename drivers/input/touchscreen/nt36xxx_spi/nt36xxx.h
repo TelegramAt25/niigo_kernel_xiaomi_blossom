@@ -109,8 +109,9 @@ extern const uint16_t gesture_key_array[];
 #define MP_UPDATE_FIRMWARE_NAME           "novatek_ts_mp.bin"
 #define MP_UPDATE_TIANMA_FIRMWARE_NAME    "novatek_ts_tianma_mp.bin"
 #define MP_UPDATE_EBBG_FIRMWARE_NAME      "novatek_ts_ebbg_mp.bin"
-#define MP_UPDATE_DJN_FIRMWARE_NAME		  "novatek_ts_djn_mp.bin"
-#define MP_UPDATE_HLT_FIRMWARE_NAME		  "novatek_ts_hlt_mp.bin"
+#define MP_UPDATE_DJN_FIRMWARE_NAME	  "novatek_ts_djn_mp.bin"
+#define MP_UPDATE_HLT_FIRMWARE_NAME	  "novatek_ts_hlt_mp.bin"
+#define BOOT_UPDATE_XNL_FIRMWARE_NAME     "novatek_ts_djn_fw.bin"
 
 //---ESD Protect.---
 #define NVT_TOUCH_ESD_PROTECT 0
@@ -145,8 +146,9 @@ typedef struct touchscreen_usb_plugin_data {
 #define TP_VENDOR_TIANMA    0x01
 #define TP_VENDOR_HUAXING   0x02
 #define TP_VENDOR_EBBG      0x03
-#define TP_VENDOR_DJN      0x04
-#define TP_VENDOR_HLT      0x05
+#define TP_VENDOR_DJN	    0x04
+#define TP_VENDOR_HLT	    0x05
+#define TP_VENDOR_XNL	    0x06
 
 /* 2019.12.16 longcheer taocheng add (xiaomi game mode) start */
 #define NVT_REG_MONITOR_MODE                0x7000
