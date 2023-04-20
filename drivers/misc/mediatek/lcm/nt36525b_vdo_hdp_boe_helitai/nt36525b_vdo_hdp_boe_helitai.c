@@ -372,6 +372,7 @@ static void lcm_init(void)
 	disp_dts_gpio_select_state(DTS_GPIO_STATE_LCM_RST_OUT1);
 	
 	MDELAY(4);
+
 	push_table(init_setting,
 		sizeof(init_setting) / sizeof(struct LCM_setting_table), 1);
 }
@@ -585,8 +586,8 @@ static void *lcm_switch_mode(int mode)
 }
 
 
-struct LCM_DRIVER nt36525b_vdo_hdp_boe_dijing_lcm_drv = {
-	.name = "nt36525b_vdo_hdp_boe_dijing_drv",
+struct LCM_DRIVER nt36525b_vdo_hdp_boe_helitai_lcm_drv = {
+	.name = "nt36525b_vdo_hdp_boe_helitai_drv",
 	.set_util_funcs = lcm_set_util_funcs,
 	.get_params = lcm_get_params,
 	.init = lcm_init,
