@@ -585,8 +585,8 @@ static void *lcm_switch_mode(int mode)
 }
 
 
-struct LCM_DRIVER nt36525b_vdo_hdp_boe_dijing_lcm_drv = {
-	.name = "nt36525b_vdo_hdp_boe_dijing_drv",
+struct LCM_DRIVER nt36525b_vdo_hdp_panda_shengchao_lcm_drv = {
+	.name = "nt36525b_vdo_hdp_panda_shengchao_drv",
 	.set_util_funcs = lcm_set_util_funcs,
 	.get_params = lcm_get_params,
 	.init = lcm_init,

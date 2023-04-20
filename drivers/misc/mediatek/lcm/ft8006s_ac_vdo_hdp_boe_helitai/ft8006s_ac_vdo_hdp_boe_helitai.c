@@ -94,7 +94,6 @@ static const unsigned char LCD_MODULE_ID = 0x01;
 #define LCM_PHYSICAL_HEIGHT (151200)
 #define LCM_DENSITY	(320)
 
-
 #define GPIO_LCD_BIAS_ENP_PIN 168
 #define GPIO_65132_ENP GPIO_LCD_BIAS_ENP_PIN
 #define GPIO_LCD_BIAS_ENN_PIN 173
@@ -124,51 +123,41 @@ struct LCM_setting_table {
 
 static struct LCM_setting_table lcm_suspend_setting[] = {
 	{0x28, 0, {} },
-	{REGFLAG_DELAY, 2, {} },
+	{REGFLAG_DELAY, 20, {} },
 	{0x10, 0, {} },
-	{REGFLAG_DELAY, 145, {} },
+	{REGFLAG_DELAY, 120, {} },
+	{0x17,1,{0x5A}},
+	{0x18,1,{0x5A}},
+	{REGFLAG_DELAY, 150, {} },
 };
 
 static struct LCM_setting_table init_setting[] = {
+{0x41,2,{0x5A,0x19}},
 #ifdef CONFIG_BACKLIGHT_SUPPORT_2047_FEATURE
-	{0xFF,0x01,{0x23}},
-	{REGFLAG_DELAY,1,{}},
-	{0xFB,0x01,{0x01}},
-	{0x00,0x01,{0x68}},//11bit
-	//PWM frequency 30K start
-	{0x07,0x01,{0x00}},
-	{0x08,0x01,{0x01}},
-	{0x09,0x01,{0x00}},
-	//PWM frequency 30K end
+{0xA0,4,{0x00,0x00,0x46,0x00}},
 #else
-	{0xFF,0x01,{0x23}},
-	{REGFLAG_DELAY,1,{}},
-	{0xFB,0x01,{0x01}},
-	{0x07,0x01,{0x20}},
-	{0x08,0x01,{0x07}},
-	{0x09,0x01,{0x02}},
+{0xA0,4,{0x05,0x05,0x02,0x00}},
 #endif
 
-	{0xFF,0x01,{0x10}},
-	{0xFB,0x01,{0x01}},
-	//Set_tear_on
-	{0x35,0x01,{0x00}},
+{0x41,2,{0x5A,0x24}},
+{0x42,1,{0x24}},
+{0x8D,1,{0x5A}},
+
+{0x41,2,{0x5A,0x2F}},
+{0x19,1,{0x01}},
+{0x4C,1,{0x03}},
+{0x11,0,{}},
+{REGFLAG_DELAY,120, {}},
+{0x29,0,{}},
 #ifdef CONFIG_BACKLIGHT_SUPPORT_2047_FEATURE
-	{0x51,0x02,{0x00,0x00}},
+{0x51,2,{0x00,0x00}},
 #else
-	{0x51,0x01,{0x00}},
+{0x51,1,{0x00}},
 #endif
-	{0x53,1,{0x2C}},
-	{0x55,1,{0x00}},
-	{0x68,2,{0x02,0x01}},
-	//Display_on
-	{0x29,0,{}},
-	//Sleep_out
-	{0x11,0,{}},
-	{REGFLAG_DELAY,100,{}},
-
-
-	/* {0x51,1,{0xFF}},     //      write   display brightness */
+{0x53,1,{0x2C}},
+{0x55,1,{0x00}},
+{REGFLAG_DELAY,5, {}},
+{REGFLAG_DELAY,5, {}},
 };
 
 #if 0
@@ -203,9 +192,9 @@ static struct LCM_setting_table lcm_deep_sleep_mode_in_setting[] = {
 #endif
 static struct LCM_setting_table bl_level[] = {
 #ifdef CONFIG_BACKLIGHT_SUPPORT_2047_FEATURE
-	{0x51,2,{0x05,0xc2}},
+	{0x51, 2, {0xC2,0x05} },
 #else
-	{0x51,1,{0xB8}},
+	{0x51, 1, {0xB8} },
 #endif
 	{REGFLAG_END_OF_TABLE, 0x00, {} }
 };
@@ -264,7 +253,7 @@ static void lcm_get_params(struct LCM_PARAMS *params)
 	params->physical_height = LCM_PHYSICAL_HEIGHT/1000;
 	params->physical_width_um = LCM_PHYSICAL_WIDTH;
 	params->physical_height_um = LCM_PHYSICAL_HEIGHT;
-	params->density		   = LCM_DENSITY;
+	params->density = LCM_DENSITY;
 
 #if (LCM_DSI_CMD_MODE)
 	params->dsi.mode = CMD_MODE;
@@ -290,18 +279,18 @@ static void lcm_get_params(struct LCM_PARAMS *params)
 
 	params->dsi.PS = LCM_PACKED_PS_24BIT_RGB888;
 
-	params->dsi.vertical_sync_active = 2;
-	params->dsi.vertical_backporch = 8;
-	params->dsi.vertical_frontporch = 10;
+	params->dsi.vertical_sync_active = 8;
+	params->dsi.vertical_backporch = 45;
+	params->dsi.vertical_frontporch = 115;
 	params->dsi.vertical_active_line = FRAME_HEIGHT;
 
-	params->dsi.horizontal_sync_active = 4;
-	params->dsi.horizontal_backporch = 85;
-	params->dsi.horizontal_frontporch = 85;
+	params->dsi.horizontal_sync_active = 16;
+	params->dsi.horizontal_backporch = 45;
+	params->dsi.horizontal_frontporch = 48;
 	params->dsi.horizontal_active_pixel = FRAME_WIDTH;
-	params->dsi.ssc_disable = 1;
+	params->dsi.ssc_disable = 0;
 #ifndef CONFIG_FPGA_EARLY_PORTING
-	params->dsi.PLL_CLOCK = 277;
+	params->dsi.PLL_CLOCK = 285;
 	/* this value must be in MTK suggested table */
 #else
 	params->dsi.pll_div1 = 0;
@@ -328,11 +317,9 @@ static void lcm_init_power(void)
 static void lcm_suspend_power(void)
 {
 	no_printk("[LCM]%s\n",__func__);
-
 	disp_dts_gpio_select_state(DTS_GPIO_STATE_LCD_BIAS_ENN0);
 	MDELAY(2);
 	disp_dts_gpio_select_state(DTS_GPIO_STATE_LCD_BIAS_ENP0);
-	MDELAY(5);
 }
 
 static void lcm_resume_power(void)
@@ -348,30 +335,28 @@ static void lcm_init(void)
 	unsigned char cmd = 0x0;
 	unsigned char data = 0xFF;
 	int ret = 0;
+	cmd = 0x00;
+	data = 0x13;
+	disp_dts_gpio_select_state(DTS_GPIO_STATE_TP_RST_OUT0);
+	MDELAY(5);
+	disp_dts_gpio_select_state(DTS_GPIO_STATE_LCM_RST_OUT0);
+	
 	disp_dts_gpio_select_state(DTS_GPIO_STATE_LCD_BIAS_ENP1);
 	MDELAY(2);
 	disp_dts_gpio_select_state(DTS_GPIO_STATE_LCD_BIAS_ENN1);
-	cmd = 0x00;
-	data = 0x13;
 
 	ret = tps65132_write_bytes(cmd, data);
+
 	cmd = 0x01;
 	data = 0x13;
 
 	ret = tps65132_write_bytes(cmd, data);
 	MDELAY(4);
-	disp_dts_gpio_select_state(DTS_GPIO_STATE_LCM_RST_OUT0);
-	
-	MDELAY(4);
+	disp_dts_gpio_select_state(DTS_GPIO_STATE_TP_RST_OUT1);
+	MDELAY(2);
 	disp_dts_gpio_select_state(DTS_GPIO_STATE_LCM_RST_OUT1);
-	
-	MDELAY(4);
-	disp_dts_gpio_select_state(DTS_GPIO_STATE_LCM_RST_OUT0);
-	
-	MDELAY(4);
-	disp_dts_gpio_select_state(DTS_GPIO_STATE_LCM_RST_OUT1);
-	
-	MDELAY(4);
+	MDELAY(35);
+
 	push_table(init_setting,
 		sizeof(init_setting) / sizeof(struct LCM_setting_table), 1);
 }
@@ -425,14 +410,14 @@ static void lcm_update(unsigned int x, unsigned int y, unsigned int width,
 #endif
 }
 
-#define LCM_ID_NT35595 (0x95)
+#define LCM_ID_FT8006S (0x00)
 
 static unsigned int lcm_compare_id(void)
 {
 	unsigned int id0 = 0;
 	unsigned int id1 = 0;
 	unsigned int id2 = 0;
-	unsigned char buffer[3];
+	unsigned char buffer[2];
 	unsigned int array[16];
 
 	SET_RESET_PIN(1);
@@ -442,20 +427,21 @@ static unsigned int lcm_compare_id(void)
 	SET_RESET_PIN(1);
 	MDELAY(20);
 
-	array[0] = 0x00033700;	/* read id return two byte,version and id */
+	array[0] = 0x00023700;	/* read id return two byte,version and id */
 	dsi_set_cmdq(array, 1, 1);
 
-	read_reg_v2(0x04, buffer, 3);
+	read_reg_v2(0xDA, buffer, 2);
 	id0 = buffer[0];     /* we only need ID */
-	id1 = buffer[1];     /* we only need ID */
-	id2 = buffer[2];     /* we only need ID */
-
-	no_printk("[LCM]%s,nt36525b id0 = 0x%x,id1 = 0x%x, id2 = 0x%x\n",
-		 __func__, id0,id1,id2);
-	if(id0 == 0x00 && id1 == 0x80 && id2 == 0x00)
-		return 1;
+	read_reg_v2(0xDB, buffer, 2);
+	id1 = buffer[0];     /* we only need ID */
+	read_reg_v2(0xDC, buffer, 2);
+	id2 = buffer[0];     /* we only need ID */
+	no_printk("%s,ft8006s debug: ft8006s id0 = 0x%x, id1 = 0x%x, id2 = 0x%x\n", __func__, id0,id1,id2);
+	if(id0 == 0x00 && id1 ==0x00 && id2 == 0x00)
+	return 1;
 	else
-		return 0;
+	return 0;
+
 }
 
 
@@ -539,12 +525,11 @@ static unsigned int lcm_ata_check(unsigned char *buffer)
 static void lcm_setbacklight_cmdq(void *handle, unsigned int level)
 {
 
-	if((0 != level) && (level <= 14))
-		level = 14;
 	level = level*72/100;
 #ifdef CONFIG_BACKLIGHT_SUPPORT_2047_FEATURE
-	bl_level[0].para_list[0] = level >> 8;
-	bl_level[0].para_list[1] = level & 0xFF;
+	level = level << 1;
+	bl_level[0].para_list[0] = level >> 4;
+	bl_level[0].para_list[1] = level & 0x0E;
 #else
 	bl_level[0].para_list[0] = level;
 #endif
@@ -585,8 +570,8 @@ static void *lcm_switch_mode(int mode)
 }
 
 
-struct LCM_DRIVER nt36525b_vdo_hdp_boe_dijing_lcm_drv = {
-	.name = "nt36525b_vdo_hdp_boe_dijing_drv",
+struct LCM_DRIVER ft8006s_ac_vdo_hdp_boe_helitai_lcm_drv = {
+	.name = "ft8006s_ac_vdo_hdp_boe_helitai_drv",
 	.set_util_funcs = lcm_set_util_funcs,
 	.get_params = lcm_get_params,
 	.init = lcm_init,
