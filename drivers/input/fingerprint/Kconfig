@@ -4,9 +4,24 @@
 menu "Fingerprint support"
 	depends on INPUT
 
+config FPC_FINGERPRINT
+	bool "FPC Fingerprint"
+	default y
+	select MTK_FINGERPRINT_SUPPORT
+	help
+	  FPC fingerprint FPC's 102x/104x device.
+
+config FOCALTECH_FINGERPRINT
+    tristate "FOCALTECH Fingerprint"
+    default y
+    select MTK_FINGERPRINT_SUPPORT
+    help
+    If you say Y to this option, support will be included for the focaltech's fingerprint sensor.
+    This driver supports both REE and TEE. If in REE, CONFIG_SPI_SPIDEV must be set to use the standard 'spidev' driver.
+
 config MTK_FINGERPRINT_SUPPORT
 	bool "Mediatek Fingerprint"
-	default n
+	default y
 	help
 	  Fingerprint mtk driver enable/disable
 	  in the kernel.Say Y here if you want to
