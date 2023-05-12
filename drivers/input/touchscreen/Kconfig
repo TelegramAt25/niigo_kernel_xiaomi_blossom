@@ -1389,6 +1389,7 @@ config TOUCHSCREEN_MTK_TOUCH
 
 source "drivers/input/touchscreen/ft8006s_spi/Kconfig"
 source "drivers/input/touchscreen/nt36xxx_spi/Kconfig"
+source "drivers/input/touchscreen/chipone/Kconfig"
 
 config TOUCHSCREEN_COMMON
 	bool "touchscreen for xiaomi C3L project"
