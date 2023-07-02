@@ -31,8 +31,6 @@ int ff_ctl_enable_power(bool on);
 #define FF_COMPATIBLE_NODE_2 "mediatek,fpsensor_fp_eint"
 #define FF_COMPATIBLE_NODE_3 "mediatek,mt6765-spi-fp"
 
-//extern void mt_spi_disable_master_clk(struct spi_device *spidev);
-//extern void mt_spi_enable_master_clk(struct spi_device *spidev);
 /* Define pinctrl state types. */
 #if 0
 typedef enum {
@@ -114,7 +112,7 @@ int ff_ctl_init_pins(int *irq_num)
     struct device_node *dev_node = NULL;
     struct platform_device *pdev = NULL;
 
-    no_printk("'%s' enter.", __func__);
+    pr_info("'%s' enter.", __func__);
 
     /* Find device tree node. */
     dev_node = of_find_compatible_node(NULL, NULL, FF_COMPATIBLE_NODE_1);
@@ -216,14 +214,14 @@ int ff_ctl_init_pins(int *irq_num)
 
     ff_ctl_enable_power(true);
 
-    no_printk("'%s' leave.", __func__);
+    pr_info("'%s' leave.", __func__);
     return err;
 }
 //extern int is_fpc;
 int ff_ctl_free_pins(void)
 {
     int err = 0;
-    no_printk("'%s' enter.", __func__);
+    pr_info("'%s' enter.", __func__);
 
     // TODO:
 	if (g_context->pinctrl) {
@@ -235,21 +233,21 @@ int ff_ctl_free_pins(void)
     gpio_free(gpio_int_pin);
 		
 	
-    no_printk("'%s' leave.", __func__);
+    pr_info("'%s' leave.", __func__);
     return err;
 }
 
 int ff_ctl_enable_spiclk(bool on)
 {
     int err = 0;
-    no_printk("'%s' enter.", __func__);
+    pr_info("'%s' enter.", __func__);
     FF_LOGD("clock: '%s'.", on ? "enable" : "disabled");
 
     if (unlikely(!g_context->spiclk)) {
         return (-ENOSYS);
     }
 	
-	no_printk("focal '%s' b_spiclk_enabled = %d. \n", __func__, g_context->b_spiclk_enabled);
+	pr_info("focal '%s' b_spiclk_enabled = %d. \n", __func__, g_context->b_spiclk_enabled);
 
 #if !defined(CONFIG_MTK_CLKMGR)
     /* Prepare the clock source. */
@@ -278,7 +276,7 @@ int ff_ctl_enable_spiclk(bool on)
         g_context->b_spiclk_enabled = false;
     }
 
-    no_printk("'%s' leave.", __func__);
+    pr_info("'%s' leave.", __func__);
     return err;
 }
 
@@ -286,7 +284,7 @@ int ff_ctl_enable_power(bool on)
 {
     int err = 0;
     
-	no_printk("'%s' enter.", __func__);
+	pr_info("'%s' enter.", __func__);
     FF_LOGI("power: '%s'.", on ? "on" : "off");
 
     if (unlikely(!g_context->pinctrl)) {
@@ -299,7 +297,7 @@ int ff_ctl_enable_power(bool on)
         //err = pinctrl_select_state(g_context->pinctrl, g_context->pin_states[FF_PINCTRL_STATE_PWR_CLR]);
     }
 
-    no_printk("'%s' leave.", __func__);
+    pr_info("'%s' leave.", __func__);
 	
     return err;
 }
@@ -308,7 +306,7 @@ int ff_ctl_enable_power(bool on)
 int ff_ctl_reset_device(void)
 {
     int err = 0;
-    no_printk("'%s' enter.", __func__);
+    pr_info("'%s' enter.", __func__);
 
     if (unlikely(!g_context->pinctrl)) {
         return (-ENOSYS);
@@ -325,7 +323,7 @@ int ff_ctl_reset_device(void)
     /* Pull up RST pin. */
     err = pinctrl_select_state(g_context->pinctrl, g_context->pin_states[FF_PINCTRL_STATE_RST_ACT]);
 
-    no_printk("'%s' leave.", __func__);
+    pr_info("'%s' leave.", __func__);
     return err;
 }
 

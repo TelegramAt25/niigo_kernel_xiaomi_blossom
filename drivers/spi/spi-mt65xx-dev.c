@@ -9,6 +9,7 @@
 #include <linux/spi/spi.h>
 #include <linux/clk.h>
 #include <linux/platform_data/spi-mt65xx.h>
+#include <spi-mt65xx-dev.h>
 
 static bool spi_auto_test_flag;
 
@@ -234,7 +235,7 @@ static struct device_attribute *spi_attribute[] = {
 	&dev_attr_spi,
 };
 
-static int spi_create_attribute(struct device *dev)
+int spi_create_attribute(struct device *dev)
 {
 	int size, idx;
 	int res = 0;

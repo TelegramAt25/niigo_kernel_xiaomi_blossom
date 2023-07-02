@@ -40,7 +40,7 @@
 #include "ff_log.h"
 #include "ff_err.h"
 #include "ff_ctl.h"
-#include <spi-mt65xx-dev.c>
+#include <spi-mt65xx-dev.h>
     
 
 /*
@@ -605,7 +605,7 @@ static int spidev_open(struct inode *inode, struct file *filp)
 	}
 
 	if (status) {
-		no_printk("spidev: nothing for minor %d\n", iminor(inode));
+		pr_info("spidev: nothing for minor %d\n", iminor(inode));
 		goto err_find_dev;
 	}
 
@@ -749,7 +749,7 @@ static inline void spidev_probe_acpi(struct spi_device *spi) {}
 #endif
 
 /*-------------------------------------------------------------------------*/
-#define SPIS_DEBUG(fmt, args...) no_printk(fmt, ##args)
+#define SPIS_DEBUG(fmt, args...) pr_info(fmt, ##args)
 
 static int spidev_probe(struct spi_device *spi)
 {

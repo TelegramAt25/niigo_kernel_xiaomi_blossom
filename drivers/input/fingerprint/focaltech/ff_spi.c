@@ -22,9 +22,9 @@
 
 #if defined CONFIG_ARCH_MT6735M || \
     defined CONFIG_ARCH_MT6755
-# include <mt_spi.h>
+#include <mt_spi.h>
 #elif defined CONFIG_ARCH_MT6795
-# include <mach/mt_spi.h>
+#include <mach/mt_spi.h>
 #else
 //# error "unknown arch platform."
 #endif
@@ -42,7 +42,6 @@
 /* See spidev.c for implementation. */
 extern int  spidev_init(void);
 extern void spidev_exit(void);
-static int g_spidev_major = 0;
 extern struct spi_device *g_spidev;
 extern struct spi_device* global_spi;
 
