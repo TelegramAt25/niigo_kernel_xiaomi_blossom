@@ -686,7 +686,7 @@ static int proc_show_ver(struct seq_file *file,void *v)
 
 static int proc_open(struct inode *inode,struct file *file)
 {
-	no_printk("focaltech proc_open\n");
+	pr_info("focaltech proc_open\n");
 	single_open(file,proc_show_ver,NULL);
 	return 0;
 }
