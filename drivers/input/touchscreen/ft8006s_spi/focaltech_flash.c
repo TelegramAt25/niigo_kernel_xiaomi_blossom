@@ -36,12 +36,15 @@
 #include "focaltech_core.h"
 #include "focaltech_flash.h"
 
+extern char mtkfb_lcm_name[256];
+
 /*****************************************************************************
 * Private constant and macro definitions using #define
 *****************************************************************************/
 #define FTS_FW_REQUEST_SUPPORT                      1
 /* Example: focaltech_ts_fw_tianma.bin */
-#define FTS_FW_NAME_PREX_WITH_REQUEST               "focaltech_ts_fw"
+#define FTS_FW_NAME_PREX_WITH_REQUEST_AA               "focaltech_aa_ts_fw_"
+#define FTS_FW_NAME_PREX_WITH_REQUEST_AB               "focaltech_ab_ts_fw_"
 #define FTS_READ_BOOT_ID_TIMEOUT                    3
 #define FTS_FLASH_PACKET_LENGTH_SPI_LOW             (4 * 1024 - 4)
 #define FTS_FLASH_PACKET_LENGTH_SPI                 (32 * 1024 - 16)
@@ -81,6 +84,7 @@ struct upgrade_setting_nf upgrade_setting_list[] = {
     {0x87, 0x56, 0, (88 * 1024), 32766,        0xA5, 0x01, 8,  0, 1, 0, 1},
     {0x80, 0x09, 0, (88 * 1024), 32766,        0xA5, 0x01, 8,  0, 1, 0, 1},
     {0x86, 0x32, 0, (64 * 1024), (128 * 1024), 0xA5, 0x01, 12, 0, 0, 0, 0},
+    {0x86, 0x42, 0, (64 * 1024), (128 * 1024), 0xA5, 0x01, 12, 0, 0, 0, 0},
 };
 
 struct fts_upgrade *fwupgrade;
@@ -884,8 +888,16 @@ int fts_fw_resume(void)
         return -EINVAL;
     }
 
+    if (strcmp(mtkfb_lcm_name, "ft8006s_vdo_hdp_boe_helitai_drv")) {
     snprintf(fwname, FILE_NAME_LENGTH, "%s%s.bin", \
-             FTS_FW_NAME_PREX_WITH_REQUEST, upg->module_info->vendor_name);
+             FTS_FW_NAME_PREX_WITH_REQUEST_AA, upg->module_info->vendor_name);
+    } else if (strcmp(mtkfb_lcm_name, "ft8006s_ab_vdo_hdp_boe_helitai_drv")) {
+    snprintf(fwname, FILE_NAME_LENGTH, "%s%s.bin", \
+             FTS_FW_NAME_PREX_WITH_REQUEST_AB, upg->module_info->vendor_name);
+    } else if (strcmp(mtkfb_lcm_name, "ft8006s_ac_vdo_hdp_boe_helitai_drv")) {
+    snprintf(fwname, FILE_NAME_LENGTH, "%s%s.bin", \
+             FTS_FW_NAME_PREX_WITH_REQUEST_AB, upg->module_info->vendor_name);
+    }
 
     /* 1. request firmware */
     ret = request_firmware(&fw, fwname, upg->ts_data->dev);
@@ -1009,9 +1021,16 @@ static int fts_get_fw_file_via_request_firmware(struct fts_upgrade *upg)
     u8 *tmpbuf = NULL;
     char fwname[FILE_NAME_LENGTH] = { 0 };
 
+    if (strcmp(mtkfb_lcm_name, "ft8006s_vdo_hdp_boe_helitai_drv")) {
+    	snprintf(fwname, FILE_NAME_LENGTH, "%s%s.bin", \
+             FTS_FW_NAME_PREX_WITH_REQUEST_AA, upg->module_info->vendor_name);
+    } else if (strcmp(mtkfb_lcm_name, "ft8006s_ab_vdo_hdp_boe_helitai_drv")) {
     snprintf(fwname, FILE_NAME_LENGTH, "%s%s.bin", \
-             FTS_FW_NAME_PREX_WITH_REQUEST, \
-             upg->module_info->vendor_name);
+             FTS_FW_NAME_PREX_WITH_REQUEST_AB, upg->module_info->vendor_name);
+    } else if (strcmp(mtkfb_lcm_name, "ft8006s_ac_vdo_hdp_boe_helitai_drv")) {
+    snprintf(fwname, FILE_NAME_LENGTH, "%s%s.bin", \
+             FTS_FW_NAME_PREX_WITH_REQUEST_AB, upg->module_info->vendor_name);
+    }
 
     ret = request_firmware(&fw, fwname, upg->ts_data->dev);
     if (0 == ret) {
@@ -1202,8 +1221,8 @@ int fts_fwupg_init(struct fts_ts_data *ts_data)
 #endif
 
     fwupgrade->ts_data = ts_data;
-    INIT_WORK(&ts_data->fwupg_work, fts_fwupg_work);
-    queue_work(ts_data->ts_workqueue, &ts_data->fwupg_work);
+    INIT_DELAYED_WORK(&ts_data->fwupg_work, fts_fwupg_work);
+    queue_delayed_work(ts_data->ts_workqueue, &ts_data->fwupg_work, msecs_to_jiffies(5000));
 
     return 0;
 }
