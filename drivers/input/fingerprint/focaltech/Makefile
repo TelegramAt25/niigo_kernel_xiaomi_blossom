@@ -2,9 +2,7 @@
 # If KERNELRELEASE is defined, we've been invoked from the
 # kernel build system and can use its language.
 
-KBUILD_CFLAGS += -fPIC
 # Include headers.
-ccflags-y += -I$(srctree)/drivers/spi
 ccflags-y += -I$(srctree)/drivers/misc/mediatek/include
 ccflags-y += -I$(srctree)/drivers/misc/mediatek/include/mt-plat/
 ccflags-y += -I$(srctree)/drivers/spi/
@@ -29,7 +27,7 @@ endif
 # 3 - FF_LOG_LEVEL_INF, Info
 # 4 - FF_LOG_LEVEL_WRN, Warning
 # 5 - FF_LOG_LEVEL_ERR, Error
-ccflags-y += -D__FF_EARLY_LOG_LEVEL=2
+ccflags-y += -D__FF_EARLY_LOG_LEVEL=0
 
 # Source files. $(CONFIG_FOCALTECH_FINGERPRINT)
 obj-y := ff_ctl.o plat-mt6762.o chip-ft9348.o ff_spi.o spidev.o
