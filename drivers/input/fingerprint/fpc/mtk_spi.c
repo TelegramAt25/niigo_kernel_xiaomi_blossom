@@ -66,17 +66,17 @@ struct TEEC_UUID uuid_ta_fpc = { 0x7778c03f, 0xc30c, 0x4dd0,
 
 #define FPC1022_CHIP 0x1000
 #define FPC1022_CHIP_MASK_SENSOR_TYPE 0xff00
-#define FPC_RESET_LOW_US 3400
-#define FPC_RESET_HIGH1_US 75
-#define FPC_RESET_HIGH2_US 3500
-#define FPC_TTW_HOLD_TIME 750
+#define FPC_RESET_LOW_US 5000
+#define FPC_RESET_HIGH1_US 100
+#define FPC_RESET_HIGH2_US 5000
+#define FPC_TTW_HOLD_TIME 1000
 #define     FPC102X_REG_HWID      252
-u32 spi_speed = 1 * 16000000;
+u32 spi_speed = 1 * 1000000;
 
 #define PROC_NAME  "hwinfo"
 static struct proc_dir_entry *proc_entry;
 static int cluster_num;
-static struct ppm_limit_data *freq_to_set;
+static struct cpu_ctrl_data *freq_to_set;
 static atomic_t boosted = ATOMIC_INIT(0);
 static struct timer_list release_timer;
 static struct work_struct fp_display_work;
@@ -95,7 +95,7 @@ struct fpc_data {
 	int irq_gpio;
 	int rst_gpio;
 	bool wakeup_enabled;
-	struct wakeup_source ttw_wl;
+	struct wakeup_source *ttw_wl;
 	bool clocks_enabled;
 };
 
@@ -164,6 +164,10 @@ static int hw_reset(struct  fpc_data *fpc)
 	usleep_range(FPC_RESET_HIGH2_US, FPC_RESET_HIGH2_US + 100);
 
 	irq_gpio = gpio_get_value(fpc->irq_gpio);
+	dev_info(dev, "IRQ after reset %d\n", irq_gpio);
+
+	dev_info( dev, "Using GPIO# %d as IRQ.\n", fpc->irq_gpio );
+	dev_info( dev, "Using GPIO# %d as RST.\n", fpc->rst_gpio );
 
 	return 0;
 }
@@ -252,11 +256,18 @@ static struct attribute *fpc_attributes[] = {
 	NULL
 };
 
-static const struct attribute_group fpc_attribute_group = {
+static struct attribute_group const fpc_attribute_group = {
 	.attrs = fpc_attributes,
 };
 
+static ssize_t performance_store(struct device *dev,
+				 struct device_attribute *attr, const char *buf,
+				 size_t count);
+
+static DEVICE_ATTR(performance, S_IRUGO | S_IWUSR, NULL, performance_store);
+
 static struct attribute *performance_attrs[] = {
+	&dev_attr_performance.attr,
 	NULL
 };
 
@@ -265,8 +276,68 @@ static const struct attribute_group performance_attr_group = {
 	.name = "authen_fd"
 };
 
-static void unblank_work(struct work_struct *work)
+static void freq_release(struct work_struct *work)
 {
+	int i;
+
+	for (i = 0; i < cluster_num; i++) {
+		freq_to_set[i].min = -1;
+		freq_to_set[i].max = -1;
+	}
+	if (atomic_read(&boosted) == 1) {
+		pr_info("%s  release freq lock\n", __func__);
+		update_userlimit_cpu_freq(CPU_KIR_FP, cluster_num, freq_to_set);
+		atomic_dec(&boosted);
+	}
+}
+
+static void freq_release_timer(struct timer_list *timer)
+{
+	pr_info(" entry %s line %d \n", __func__, __LINE__);
+	schedule_work(&fp_freq_work);
+}
+
+static int freq_hold(int sec)
+{
+
+	int i;
+
+	for (i = 0; i < cluster_num; i++) {
+		freq_to_set[i].min = 2301000;
+		freq_to_set[i].max = -1;
+	}
+	if (atomic_read(&boosted) == 0) {
+		pr_info( "%s for %d * 500 msec \n", __func__, sec);
+		update_userlimit_cpu_freq(CPU_KIR_FP, cluster_num, freq_to_set);
+		atomic_inc(&boosted);
+		release_timer.expires = jiffies + (HZ / 2) * sec;
+		add_timer(&release_timer);
+	}
+	schedule_work(&fp_display_work);
+	return 0;
+}
+
+static ssize_t performance_store(struct device *dev,
+				 struct device_attribute *attr, const char *buf,
+				 size_t count)
+{
+	if (!strncmp(buf, "1", count)) {
+		pr_info("finger down in authentication/enroll\n");
+		freq_hold(1);
+
+	} else if (!strncmp(buf, "0", 1)) {
+		pr_info("finger up in authentication/enroll\n");
+	} else {
+		int timeout;
+		if (kstrtoint(buf, 10, &timeout) == 0) {
+			freq_hold(timeout);
+			pr_info( "hold performance lock for %d * 500ms\n", timeout);
+		} else {
+			freq_hold(1);
+			pr_info("hold performance lock for 500ms\n");
+		}
+	}
+	return count;
 }
 
 static irqreturn_t fpc_irq_handler(int irq, void *handle)
@@ -288,7 +359,7 @@ static irqreturn_t fpc_irq_handler(int irq, void *handle)
 	** since this is interrupt context (other thread...) */
 	smp_rmb();
 	if (fpc->wakeup_enabled) {
-		__pm_wakeup_event(&fpc->ttw_wl, FPC_TTW_HOLD_TIME);
+		__pm_wakeup_event(fpc->ttw_wl, FPC_TTW_HOLD_TIME);
 	}
 
 	sysfs_notify(&fpc->dev->kobj, NULL, dev_attr_irq.attr.name);
@@ -317,7 +388,7 @@ static int spi_read_hwid(struct spi_device *spi, u8 * rx_buf)
 	tmp_buf[0] = addr;
 	xfer[0].tx_buf = tmp_buf;
 	xfer[0].len = 1;
-	xfer[0].delay_usecs = 1;
+	xfer[0].delay_usecs = 5;
 
 #ifdef CONFIG_SPI_MT65XX
 	xfer[0].speed_hz = spi_speed;
@@ -330,7 +401,7 @@ static int spi_read_hwid(struct spi_device *spi, u8 * rx_buf)
 	xfer[1].tx_buf = tmp_buf + 2;
 	xfer[1].rx_buf = tmp_buf + 4;
 	xfer[1].len = 2;
-	xfer[1].delay_usecs = 1;
+	xfer[1].delay_usecs = 5;
 
 #ifdef CONFIG_SPI_MT65XX
 	xfer[1].speed_hz = spi_speed;
@@ -359,6 +430,8 @@ static int check_hwid(struct spi_device *spi)
 
 	do {
 		spi_read_hwid(spi, tmp_buf);
+		pr_info("%s, fpc1520 chip version is 0x%x, 0x%x\n",
+		       __func__, tmp_buf[0], tmp_buf[1]);
 
 		time_out++;
 
@@ -378,9 +451,14 @@ static int check_hwid(struct spi_device *spi)
 		}
 
 		if (!error) {
+			pr_info("fpc %s, fpc1022 chip version check pass, time_out=%d\n",
+			       __func__, time_out);
 			return 0;
 		}
 	} while (time_out < 2);
+
+	pr_info("%s, fpc1022 chip version read failed, time_out=%d\n",
+	       __func__, time_out);
 
 	return -1;
 }
@@ -393,6 +471,7 @@ static int proc_show_ver(struct seq_file *file,void *v)
 
 static int proc_open(struct inode *inode,struct file *file)
 {
+	pr_info("fpc proc_open\n");
 	single_open(file,proc_show_ver,NULL);
 	return 0;
 }
@@ -432,12 +511,21 @@ static int mtk6765_probe(struct spi_device *spidev)
 		goto exit;
 	}
 
+	cluster_num = topology_nr_clusters();
+	dev_err(dev, "cluster_num = %d \n", cluster_num);
+
+	freq_to_set =
+	    kcalloc(cluster_num, sizeof(struct cpu_ctrl_data), GFP_KERNEL);
+
 	if (!freq_to_set) {
 		dev_err(dev, "kcalloc freq_to_set fail\n");
 		goto exit;
 	}
 
-	INIT_WORK(&fp_display_work, unblank_work);
+	INIT_WORK(&fp_freq_work, freq_release);
+	timer_setup(&release_timer, freq_release_timer, 0UL);
+	//release_timer.function = freq_release_timer;
+	//release_timer.data = 0UL;
 
 	fpc->dev = dev;
 	dev_set_drvdata(dev, fpc);
@@ -445,7 +533,7 @@ static int mtk6765_probe(struct spi_device *spidev)
 	fpc->spidev->irq = 0; /*SPI_MODE_0*/
 	fpc->spidev->mode = SPI_MODE_0;
 	fpc->spidev->bits_per_word = 8;
-	fpc->spidev->max_speed_hz = 1 * 1000 * 1550;
+	fpc->spidev->max_speed_hz = 1 * 1000 * 1000;
 
 	fpc->pinctrl_fpc = devm_pinctrl_get(&spidev->dev);
 	if (IS_ERR(fpc->pinctrl_fpc)) {
@@ -477,6 +565,8 @@ static int mtk6765_probe(struct spi_device *spidev)
 	
 	fpc_sensor_exit = check_hwid(spidev);
 	if (fpc_sensor_exit < 0) {
+			pr_notice("%s: %d get chipid fail. now exit\n",
+				  __func__, __LINE__);
 			devm_pinctrl_put(fpc->pinctrl_fpc);
 			gpio_free(fpc->rst_gpio);
 			set_clks(fpc,false );
@@ -522,6 +612,7 @@ static int mtk6765_probe(struct spi_device *spidev)
 
 	/* Request that the interrupt should be wakeable */
 	enable_irq_wake(irq_num);
+	fpc->ttw_wl = wakeup_source_register(NULL, "fpc_ttw_wl");
 
 	rc = sysfs_create_group(&dev->kobj, &fpc_attribute_group);
 	if (rc) {
@@ -539,6 +630,7 @@ static int mtk6765_probe(struct spi_device *spidev)
 		pr_err("fpc1020 Create proc entry success!");
 	}
 
+	dev_info(dev, "%s: ok\n", __func__);
 exit:
 	set_clks(fpc,false );
 	return rc;
@@ -549,7 +641,9 @@ static int mtk6765_remove(struct spi_device *spidev)
 	struct  fpc_data *fpc = dev_get_drvdata(&spidev->dev);
 
 	sysfs_remove_group(&spidev->dev.kobj, &fpc_attribute_group);
+	wakeup_source_unregister(fpc->ttw_wl);
 	remove_proc_entry(PROC_NAME,NULL);
+	dev_info(&spidev->dev, "%s\n", __func__);
 
 	return 0;
 }
@@ -576,6 +670,9 @@ static int __init fpc_sensor_init(void)
 	int status;
 
 	status = spi_register_driver(&mtk6765_driver);
+	if (status < 0) {
+		pr_info("%s, fpc_sensor_init failed.\n", __func__);
+	}
 
 	return status;
 }
