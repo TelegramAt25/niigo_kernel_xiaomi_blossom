@@ -84,9 +84,9 @@ typedef struct {
     struct input_dev *input;
     struct notifier_block fb_notifier;
 #ifdef CONFIG_PM_WAKELOCKS
-    struct wakeup_source wake_lock;
+    struct wakeup_source *wake_lock;
 #else 
-    struct wake_lock wake_lock;
+    struct wake_lock *wake_lock;
 #endif
     bool b_driver_inited;
     bool b_config_dirtied;
@@ -237,9 +237,9 @@ static void ff_ctl_device_event(struct work_struct *ws)
     
     FF_LOGD("%s(irq = %d, ..) toggled.", __func__, ctx->irq_num);
 #ifdef CONFIG_PM_WAKELOCKS
-    __pm_wakeup_event(&g_context->wake_lock, jiffies_to_msecs(2*HZ));
+    __pm_wakeup_event(g_context->wake_lock, jiffies_to_msecs(2*HZ));
 #else
-    wake_lock_timeout(&g_context->wake_lock, 2 * HZ); // 2 seconds.
+    wake_lock_timeout(g_context->wake_lock, 2 * HZ); // 2 seconds.
 #endif
     kobject_uevent_env(&ctx->miscdev.this_device->kobj, KOBJ_CHANGE, uevent_env);
 
@@ -713,6 +713,13 @@ static int __init ff_ctl_driver_init(void)
     /* Init the interrupt workqueue. */
     INIT_WORK(&ff_ctl_context.work_queue, ff_ctl_device_event);
 
+        /* Init the wake lock. */
+#ifdef CONFIG_PM_WAKELOCKS
+    ff_ctl_context.wake_lock = wakeup_source_register(NULL, "ff_wake_lock");
+#else
+    wake_lock_init(ff_ctl_context.wake_lock, WAKE_LOCK_SUSPEND, "ff_wake_lock");
+#endif
+
     /* Assign the context instance. */
     g_context = &ff_ctl_context;
     init_flag=1;
@@ -759,6 +766,13 @@ static void __exit ff_ctl_driver_exit(void)
         err = ff_ctl_free_driver();
         g_context->b_driver_inited = false;
     }
+
+    /* De-init the wake lock. */
+#ifdef CONFIG_PM_WAKELOCKS
+    wakeup_source_unregister(g_context->wake_lock);
+#else
+    wake_lock_destroy(&g_context->wake_lock);
+#endif
 
     /* Unregister the miscellaneous device. */
     misc_deregister(&g_context->miscdev);
