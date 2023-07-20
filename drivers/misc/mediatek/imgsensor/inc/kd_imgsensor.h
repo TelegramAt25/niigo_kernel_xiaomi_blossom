@@ -336,6 +336,7 @@
 #define T8EV5_SENSOR_ID                         0x1011
 
 /*M505 ImageSensor*/
+#define HYNIX_HI556_I_SENSOR_ID                0x556
 #define GC_GC5035_I_SENSOR_ID			0x5035
 #define GC_GC5035_II_SENSOR_ID			0x5036
 #define GC_GC5035_III_SENSOR_ID			0x5037
@@ -344,6 +345,14 @@
 #define HYNIX_HI1337_II_SENSOR_ID               0x1338
 #define HYNIX_HI1337_III_SENSOR_ID              0x1339
 #define HYNIX_HI1337_IIII_SENSOR_ID             0x133a
+#define GC02M1_SENSOR_ID                        0x02e0
+#define GC02M1MACRO_SENSOR_ID                   0x02e2
+#define HYNIX_HI259_I_SENSOR_ID 	0xe1
+#define HYNIX_HI259_II_SENSOR_ID 	0xe2
+#define HYNIX_HI259_III_SENSOR_ID 	0xe3
+#define HYNIX_HI259_IV_SENSOR_ID 	0xe4
+#define OV02B_SENSOR_ID 	0x2b
+#define OV02B_III_SENSOR_ID 	0x2c
 
 /* CAMERA DRIVER NAME */
 #define CAMERA_HW_DEVNAME                       "kd_camera_hw"
