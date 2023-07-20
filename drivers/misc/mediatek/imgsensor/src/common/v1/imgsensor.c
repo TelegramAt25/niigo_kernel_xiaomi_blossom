@@ -2913,6 +2913,8 @@ static ssize_t imgsensor_name_show(struct device *dev, struct device_attribute *
 	ssize_t ret = 0;
 	int num1 = 0;
 	int num2 = 0;
+	int num3 = 0;
+	int num4 = 0;
 
 	char* dst[4];
 	unsigned int i=0;
