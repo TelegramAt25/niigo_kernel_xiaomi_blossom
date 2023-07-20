@@ -2952,6 +2952,21 @@ static ssize_t imgsensor_name_show(struct device *dev, struct device_attribute *
 					break;
 				}
 			}
+			for(j=0; j < i; j++) {
+				if(!strcmp("hynix_hi259_i", dst[j]) || !strcmp("hynix_hi259_ii", dst[j]) || !strcmp("hynix_hi259_iii", dst[j]) || !strcmp("hynix_hi259_iv", dst[j])){
+					num3 = sprintf(buf+num1+num2, "MACRO=%s\n", dst[j]);
+					no_printk("[chenxy] MACRO=%s\n", dst[j]);
+					break;
+				}
+			}
+
+			for(j=0; j < i; j++) {
+				if(!strcmp("ov_ov02b_i", dst[j]) || !strcmp("gc_gc02m1_ii", dst[j]) || !strcmp("ov_ov02b_iii", dst[j])){
+					num4 = sprintf(buf+num1+num2+num3, "DEPTH=%s\n", dst[j]);
+					no_printk("[chenxy] DEPTH=%s\n", dst[j]);
+					break;
+				}
+			}
 
 		} else {
 			pr_info("[chenxy] imgsensorname is NULL");
