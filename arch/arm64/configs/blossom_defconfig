@@ -1626,7 +1626,7 @@ CONFIG_MTK_DISP_PLATFORM=""
 # CONFIG_MTK_SEC_VIDEO_PATH_SUPPORT is not set
 # CONFIG_MTK_DRM_KEY_MNG_SUPPORT is not set
 # CONFIG_MTK_LCM_PHYSICAL_ROTATION_HW is not set
-CONFIG_CUSTOM_KERNEL_IMGSENSOR="hynix_hi1337_i hynix_hi1337_ii hynix_hi1337_iii hynix_hi1337_iiii gc_gc5035_i gc_gc5035_ii gc_gc5035_iii gc_gc5035_iiii"
+CONFIG_CUSTOM_KERNEL_IMGSENSOR="hynix_hi1337_i hynix_hi1337_ii hynix_hi1337_iii hynix_hi1337_iiii hynix_hi556_i gc_gc5035_i gc_gc5035_ii gc_gc5035_iii gc_gc5035_iiii hynix_hi259_i hynix_hi259_ii gc_gc02m1_ii hynix_hi259_iii hynix_hi259_iv"
 CONFIG_MTK_VIDEOCODEC_DRIVER=y
 CONFIG_MTK_MMPROFILE_SUPPORT=y
 CONFIG_MMPROFILE=y
