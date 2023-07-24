@@ -9,6 +9,11 @@ ifdef CONFIG_KASAN_SW_TAGS
 KASAN_SANITIZE_main.o := n
 endif
 
+ifdef CONFIG_INLINE_OPTIMIZATION
+ccflags-y += -mllvm -inline-threshold=15000
+ccflags-y += -mllvm -inlinehint-threshold=10000
+endif
+
 obj-y                          := main.o version.o mounts.o
 ifneq ($(CONFIG_BLK_DEV_INITRD),y)
 obj-y                          += noinitramfs.o
