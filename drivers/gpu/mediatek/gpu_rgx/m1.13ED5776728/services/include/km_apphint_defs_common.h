@@ -188,34 +188,22 @@ X(GPUVIRT_VAL)
 #define APPHINT_ENABLED_CLASS_ALWAYS IMG_TRUE
 #define APPHINT_ENABLED_CLASS_NEVER IMG_FALSE
 #define apphint_modparam_class_ALWAYS(a, b, c) apphint_modparam_enable(a, b, c)
-#if defined(DEBUG)
-	#define APPHINT_ENABLED_CLASS_DEBUG IMG_TRUE
-	#define apphint_modparam_class_DEBUG(a, b, c) apphint_modparam_enable(a, b, c)
-#else
-	#define APPHINT_ENABLED_CLASS_DEBUG IMG_FALSE
-	#define apphint_modparam_class_DEBUG(a, b, c)
-#endif
-#if defined(PDUMP)
-	#define APPHINT_ENABLED_CLASS_PDUMP IMG_TRUE
-	#define apphint_modparam_class_PDUMP(a, b, c) apphint_modparam_enable(a, b, c)
-#else
-	#define APPHINT_ENABLED_CLASS_PDUMP IMG_FALSE
-	#define apphint_modparam_class_PDUMP(a, b, c)
-#endif
-#if defined(SUPPORT_VALIDATION)
-	#define APPHINT_ENABLED_CLASS_VALIDATION IMG_TRUE
-	#define apphint_modparam_class_VALIDATION(a, b, c) apphint_modparam_enable(a, b, c)
-#else
-	#define APPHINT_ENABLED_CLASS_VALIDATION IMG_FALSE
-	#define apphint_modparam_class_VALIDATION(a, b, c)
-#endif
-#if defined(SUPPORT_GPUVIRT_VALIDATION)
-	#define APPHINT_ENABLED_CLASS_GPUVIRT_VAL IMG_TRUE
-	#define apphint_modparam_class_GPUVIRT_VAL(a, b, c) apphint_modparam_enable(a, b, c)
-#else
-	#define APPHINT_ENABLED_CLASS_GPUVIRT_VAL IMG_FALSE
-	#define apphint_modparam_class_GPUVIRT_VAL(a, b, c)
-#endif
+
+#define APPHINT_ENABLED_CLASS_DEBUG IMG_FALSE
+#define apphint_modparam_class_DEBUG(a, b, c)
+
+
+#define APPHINT_ENABLED_CLASS_PDUMP IMG_FALSE
+#define apphint_modparam_class_PDUMP(a, b, c)
+
+
+#define APPHINT_ENABLED_CLASS_VALIDATION IMG_FALSE
+#define apphint_modparam_class_VALIDATION(a, b, c)
+
+
+#define APPHINT_ENABLED_CLASS_GPUVIRT_VAL IMG_FALSE
+#define apphint_modparam_class_GPUVIRT_VAL(a, b, c)
+
 
 /*
 *******************************************************************************
@@ -226,29 +214,16 @@ X(GPUVIRT_VAL)
 #else
 	#define APPHNT_BLDVAR_ENABLEHWR         0
 #endif
-#if defined(DEBUG)
-	#define APPHNT_BLDVAR_DEBUG             1
-	#define APPHNT_BLDVAR_DBGDUMPLIMIT      RGXFWIF_HWR_DEBUG_DUMP_ALL
-#else
-	#define APPHNT_BLDVAR_DEBUG             0
-	#define APPHNT_BLDVAR_DBGDUMPLIMIT      1
-#endif
-#if defined(PDUMP)
-#define APPHNT_BLDVAR_ENABLESIGNATURECHECKS     IMG_TRUE
-#else
-#define APPHNT_BLDVAR_ENABLESIGNATURECHECKS     IMG_FALSE
-#endif
-#if defined(DEBUG) || defined(SUPPORT_VALIDATION)
-#define APPHNT_BLDVAR_ENABLEPAGEFAULTDEBUG      IMG_TRUE
-#else
-#define APPHNT_BLDVAR_ENABLEPAGEFAULTDEBUG      IMG_FALSE
-#endif
 
-#if defined(DEBUG)
-	#define APPHNT_PHYSMEMTEST_ENABLE             1
-#else
-	#define APPHNT_PHYSMEMTEST_ENABLE             0
-#endif
+#define APPHNT_BLDVAR_DEBUG             0
+
+#define APPHNT_BLDVAR_DBGDUMPLIMIT      1
+
+#define APPHNT_BLDVAR_ENABLESIGNATURECHECKS     IMG_FALSE
+
+#define APPHNT_BLDVAR_ENABLEPAGEFAULTDEBUG      IMG_FALSE
+
+#define APPHNT_PHYSMEMTEST_ENABLE             0
 
 /* Data types and actions */
 typedef enum {
