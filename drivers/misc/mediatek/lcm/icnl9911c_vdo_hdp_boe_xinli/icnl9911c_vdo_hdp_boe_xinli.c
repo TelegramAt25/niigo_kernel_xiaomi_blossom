@@ -367,49 +367,28 @@ static void lcm_init(void)
 	unsigned char data = 0xFF;
 	int ret = 0;
 
-	no_printk("[LCM]%s\n",__func__);
-
 	disp_dts_gpio_select_state(DTS_GPIO_STATE_LCD_BIAS_ENP1);
-	MDELAY(2);
+	UDELAY(250);
 	disp_dts_gpio_select_state(DTS_GPIO_STATE_LCD_BIAS_ENN1);
 	cmd = 0x00;
 	data = 0x13;
 
-	ret = tps65132_write_bytes(cmd, data);
-
-	if (ret < 0)
-		no_printk("[LCM]icnl9911c--tps6132--cmd=%0x--i2c write error--\n",
-				cmd);
-	else
-		no_printk("[LCM]icnl9911c--tps6132--cmd=%0x--i2c write success--\n",
-				cmd);
+	tps65132_write_bytes(cmd, data);
 
 	cmd = 0x01;
 	data = 0x13;
 
-	ret = tps65132_write_bytes(cmd, data);
+	tps65132_write_bytes(cmd, data);
 
-	if (ret < 0)
-		no_printk("[LCM]icnl9911c--tps6132--cmd=%0x--i2c write error--\n",
-				cmd);
-	else
-		no_printk("[LCM]icnl9911c--tps6132--cmd=%0x--i2c write success--\n",
-				cmd);
-
-	MDELAY(2);
-	MDELAY(9);
+	UDELAY(250);
 	disp_dts_gpio_select_state(DTS_GPIO_STATE_LCM_RST_OUT0);
-	MDELAY(1);
-	MDELAY(9);
+	UDELAY(250);
 	disp_dts_gpio_select_state(DTS_GPIO_STATE_LCM_RST_OUT1);
-	MDELAY(1);
-	MDELAY(9);
+	UDELAY(250);
 	disp_dts_gpio_select_state(DTS_GPIO_STATE_LCM_RST_OUT0);
-	MDELAY(1);
-	MDELAY(9);
+	UDELAY(250);
 	disp_dts_gpio_select_state(DTS_GPIO_STATE_LCM_RST_OUT1);
-	MDELAY(1);
-	MDELAY(9);
+	MDELAY(5);
 
 	push_table(init_setting, sizeof(init_setting) /
 		sizeof(struct LCM_setting_table), 1);
