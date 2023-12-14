@@ -24,8 +24,8 @@
 #endif
 
 /* global variables */
-int gM4U_log_to_uart = 2;
-int gM4U_log_level = 2;
+int gM4U_log_to_uart = 1;
+int gM4U_log_level = 1;
 
 #if IS_ENABLED(CONFIG_DEBUG_FS) || IS_ENABLED(CONFIG_PROC_FS)
 int m4u_test_domain;
