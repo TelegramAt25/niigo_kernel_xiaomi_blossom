@@ -34,7 +34,7 @@
 		}							\
 	} while (0)
 
-static int debug;
+static int debug = 0;
 module_param(debug, int, 0644);
 
 MODULE_DESCRIPTION("helper module to manage video4linux buffers");
