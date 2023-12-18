@@ -64,35 +64,35 @@ extern unsigned int g_dbg_level;
 #define WCN_DBG(flag, fmt, args...) \
 	do { \
 		if ((FM_DEF(flag) <= (g_dbg_level&0x0000000f)) && ((flag)&ALL) & g_dbg_level) { \
-			pr_info("[" #flag "] %s: " fmt, __func__, ## args); \
+			pr_debug("[" #flag "] %s: " fmt, __func__, ## args); \
 		} \
 	} while (0)
 
 #define WCN_DBG_LIMITED(flag, fmt, args...) \
 	do { \
 		if ((FM_DEF(flag) <= (g_dbg_level&0x0000000f)) && ((flag)&ALL) & g_dbg_level) { \
-			pr_info_ratelimited("[" #flag "]" fmt, ## args); \
+			pr_debug("[" #flag "]" fmt, ## args); \
 		} \
 	} while (0)
 
 #define FM_LOG_DBG(flag, fmt, args...) \
 	do { \
 		if ((FM_DBG <= (g_dbg_level&0x0000000f)) && ((flag)&0xfffffff0) & g_dbg_level) { \
-			pr_info("[" #flag "]" fmt, ## args); \
+			pr_debug("[" #flag "]" fmt, ## args); \
 		} \
 	} while (0)
 
 #define FM_LOG_INF(flag, fmt, args...) \
 	do { \
 		if ((FM_INF <= (g_dbg_level&0x0000000f)) && ((flag)&0xfffffff0) & g_dbg_level) { \
-			pr_info("[" #flag "]" fmt, ## args); \
+			pr_debug("[" #flag "]" fmt, ## args); \
 		} \
 	} while (0)
 
 #define FM_LOG_NTC(flag, fmt, args...) \
 	do { \
 		if ((FM_NTC <= (g_dbg_level&0x0000000f)) && ((flag)&0xfffffff0) & g_dbg_level) { \
-			pr_info("[" #flag "]" fmt, ## args); \
+			pr_debug("[" #flag "]" fmt, ## args); \
 		} \
 	} while (0)
 

@@ -181,7 +181,7 @@ INT32 osal_snprintf(PINT8 buf, UINT32 len, const PINT8 fmt, ...)
 	va_end(args);
 
 	if (iRet < 0)
-		pr_info("vsnprintf error:%d\n", iRet);
+		pr_debug("vsnprintf error:%d\n", iRet);
 
 	return iRet;
 }
@@ -750,7 +750,7 @@ INT32 osal_bit_op_unlock(P_OSAL_UNSLEEPABLE_LOCK pLock)
 INT32 osal_clear_bit(UINT32 bitOffset, P_OSAL_BIT_OP_VAR pData)
 {
 	if (bitOffset >= BITS_PER_LONG) {
-		pr_info("bitOffset(%d) is out of range.\n", bitOffset);
+		pr_debug("bitOffset(%d) is out of range.\n", bitOffset);
 		return -1;
 	}
 	osal_bit_op_lock(&(pData->opLock));
@@ -762,7 +762,7 @@ INT32 osal_clear_bit(UINT32 bitOffset, P_OSAL_BIT_OP_VAR pData)
 INT32 osal_set_bit(UINT32 bitOffset, P_OSAL_BIT_OP_VAR pData)
 {
 	if (bitOffset >= BITS_PER_LONG) {
-		pr_info("bitOffset(%d) is out of range.\n", bitOffset);
+		pr_debug("bitOffset(%d) is out of range.\n", bitOffset);
 		return -1;
 	}
 	osal_bit_op_lock(&(pData->opLock));
@@ -776,7 +776,7 @@ INT32 osal_test_bit(UINT32 bitOffset, P_OSAL_BIT_OP_VAR pData)
 	UINT32 iRet = 0;
 
 	if (bitOffset >= BITS_PER_LONG) {
-		pr_info("bitOffset(%d) is out of range.\n", bitOffset);
+		pr_debug("bitOffset(%d) is out of range.\n", bitOffset);
 		return -1;
 	}
 	osal_bit_op_lock(&(pData->opLock));
@@ -790,7 +790,7 @@ INT32 osal_test_and_clear_bit(UINT32 bitOffset, P_OSAL_BIT_OP_VAR pData)
 	UINT32 iRet = 0;
 
 	if (bitOffset >= BITS_PER_LONG) {
-		pr_info("bitOffset(%d) is out of range.\n", bitOffset);
+		pr_debug("bitOffset(%d) is out of range.\n", bitOffset);
 		return -1;
 	}
 	osal_bit_op_lock(&(pData->opLock));
@@ -805,7 +805,7 @@ INT32 osal_test_and_set_bit(UINT32 bitOffset, P_OSAL_BIT_OP_VAR pData)
 	UINT32 iRet = 0;
 
 	if (bitOffset >= BITS_PER_LONG) {
-		pr_info("bitOffset(%d) is out of range.\n", bitOffset);
+		pr_debug("bitOffset(%d) is out of range.\n", bitOffset);
 		return -1;
 	}
 	osal_bit_op_lock(&(pData->opLock));
@@ -1255,7 +1255,7 @@ INT32 osal_wake_lock_deinit(P_OSAL_WAKE_LOCK pLock)
 		wakeup_source_unregister(pLock->wake_lock);
 		pLock->init_flag = 0;
 	} else
-		pr_info("%s: wake_lock is not initialized!\n", __func__);
+		pr_debug("%s: wake_lock is not initialized!\n", __func__);
 
 	return 0;
 }
@@ -1268,7 +1268,7 @@ INT32 osal_wake_lock(P_OSAL_WAKE_LOCK pLock)
 	if (pLock->init_flag == 1)
 		__pm_stay_awake(pLock->wake_lock);
 	else
-		pr_info("%s: wake_lock is not initialized!\n", __func__);
+		pr_debug("%s: wake_lock is not initialized!\n", __func__);
 
 	return 0;
 }
@@ -1281,7 +1281,7 @@ INT32 osal_wake_unlock(P_OSAL_WAKE_LOCK pLock)
 	if (pLock->init_flag == 1)
 		__pm_relax(pLock->wake_lock);
 	else
-		pr_info("%s: wake_lock is not initialized!\n", __func__);
+		pr_debug("%s: wake_lock is not initialized!\n", __func__);
 
 	return 0;
 
@@ -1297,7 +1297,7 @@ INT32 osal_wake_lock_count(P_OSAL_WAKE_LOCK pLock)
 	if (pLock->init_flag == 1)
 		count = pLock->wake_lock->active;
 	else
-		pr_info("%s: wake_lock is not initialized!\n", __func__);
+		pr_debug("%s: wake_lock is not initialized!\n", __func__);
 
 	return count;
 }
@@ -1466,7 +1466,7 @@ VOID osal_buffer_dump(const PUINT8 buf, const PUINT8 title, const UINT32 len, co
 	INT32 strlen = 0;
 	char *p = NULL;
 
-	pr_info("[%s] len=%d, limit=%d, start dump\n", title, len, limit);
+	pr_debug("[%s] len=%d, limit=%d, start dump\n", title, len, limit);
 
 	dump_len = ((limit != 0) && (len > limit)) ? limit : len;
 	p = str;
@@ -1476,14 +1476,14 @@ VOID osal_buffer_dump(const PUINT8 buf, const PUINT8 title, const UINT32 len, co
 			p += strlen;
 		} else {
 			strlen = osal_sprintf(p, "%02x\n",  buf[k]);
-			pr_info("%s", str);
+			pr_debug("%s", str);
 			p = str;
 		}
 	}
 	if (k % 16 != 0)
-		pr_info("%s\n", str);
+		pr_debug("%s\n", str);
 
-	pr_info("end of dump\n");
+	pr_debug("end of dump\n");
 }
 
 VOID osal_buffer_dump_data(const PUINT32 buf, const PUINT8 title, const UINT32 len, const UINT32 limit,
@@ -1508,7 +1508,7 @@ VOID osal_buffer_dump_data(const PUINT32 buf, const PUINT8 title, const UINT32 l
 			if (flag)
 				osal_ftrace_print("%s%s", title, str);
 			else
-				pr_info("%s%s", title, str);
+				pr_debug("%s%s", title, str);
 			p = str;
 		}
 	}
@@ -1516,7 +1516,7 @@ VOID osal_buffer_dump_data(const PUINT32 buf, const PUINT8 title, const UINT32 l
 		if (flag)
 			osal_ftrace_print("%s%s\n", title, str);
 		else
-			pr_info("%s%s\n", title, str);
+			pr_debug("%s%s\n", title, str);
 	}
 }
 
@@ -1604,7 +1604,7 @@ static VOID _osal_opq_dump(const char *qName, P_OSAL_OP_Q pOpQ)
 	rd = pOpQ->read;
 	wt = pOpQ->write;
 
-	pr_info("%s(%p), sz:%u/%u, rd:%u, wt:%u\n", qName, pOpQ, RB_COUNT(pOpQ), RB_SIZE(pOpQ), rd, wt);
+	pr_debug("%s(%p), sz:%u/%u, rd:%u, wt:%u\n", qName, pOpQ, RB_COUNT(pOpQ), RB_SIZE(pOpQ), rd, wt);
 	while (rd != wt && idx < RB_SIZE(pOpQ)) {
 		idxInBuf = idx % OPQ_DUMP_OP_PER_LINE;
 		op = pOpQ->queue[rd & RB_MASK(pOpQ)];
@@ -1640,7 +1640,7 @@ static VOID _osal_opq_dump(const char *qName, P_OSAL_OP_Q pOpQ)
 
 		if (idxInBuf == OPQ_DUMP_OP_PER_LINE - 1  || rd == wt - 1) {
 			buf[printed - 1] = 0;
-			pr_info("%s\n", buf);
+			pr_debug("%s\n", buf);
 		}
 		rd++;
 		idx++;
@@ -1653,7 +1653,7 @@ VOID osal_opq_dump(const char *qName, P_OSAL_OP_Q pOpQ)
 
 	err = osal_lock_sleepable_lock(&pOpQ->sLock);
 	if (err) {
-		pr_info("Failed to lock queue (%d)\n", err);
+		pr_debug("Failed to lock queue (%d)\n", err);
 		return;
 	}
 
@@ -1695,14 +1695,14 @@ static VOID osal_op_history_print_work(struct work_struct *work)
 	INT32 index = 0;
 
 	if (queue == NULL) {
-		pr_info("queue shouldn't be NULL, %s", log_history->name);
+		pr_debug("queue shouldn't be NULL, %s", log_history->name);
 		return;
 	}
 
 	RING_READ_FOR_EACH_ITEM(RING_SIZE(ring_buffer), seg, ring_buffer) {
 		index = seg.ring_pt - ring_buffer->base;
 		entry = &queue[index];
-		pr_info("(%llu.%06lu) %s: pOp(%p):%u(%d)-%x-%zx,%zx,%zx,%zx\n",
+		pr_debug("(%llu.%06lu) %s: pOp(%p):%u(%d)-%x-%zx,%zx,%zx,%zx\n",
 			entry->ts,
 			entry->usec,
 			log_history->name,
@@ -1750,7 +1750,7 @@ VOID osal_op_history_print(struct osal_op_history *log_history, PINT8 name)
 	spinlock_t *lock = &(log_history->lock);
 
 	if (log_history->queue == NULL) {
-		pr_info("Queue is NULL, name: %s\n", name);
+		pr_debug("Queue is NULL, name: %s\n", name);
 		return;
 	}
 
@@ -1770,7 +1770,7 @@ VOID osal_op_history_print(struct osal_op_history *log_history, PINT8 name)
 	if (dump_ring_buffer->base != NULL) {
 		spin_unlock_irqrestore(lock, flags);
 		kfree(queue);
-		pr_info("print is ongoing: %s\n", name);
+		pr_debug("print is ongoing: %s\n", name);
 		return;
 	}
 
@@ -1804,7 +1804,7 @@ VOID osal_op_history_save(struct osal_op_history *log_history, P_OSAL_OP pOp)
 	}
 
 	if (entry == NULL) {
-		pr_info("Entry is null, size %d\n", RING_SIZE(&log_history->ring_buffer));
+		pr_debug("Entry is null, size %d\n", RING_SIZE(&log_history->ring_buffer));
 		spin_unlock_irqrestore(&(log_history->lock), flags);
 		return;
 	}
