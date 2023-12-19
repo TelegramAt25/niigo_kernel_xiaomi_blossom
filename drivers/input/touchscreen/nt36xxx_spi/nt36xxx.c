@@ -752,8 +752,6 @@ info_retry:
 		ret = 0;
 	}
 
-	NVT_LOG("fw_ver = 0x%02X, fw_type = 0x%02X\n", ts->fw_ver, buf[14]);
-
 #ifdef CHECK_TOUCH_VENDOR
 	switch(ts->touch_vendor_id) {
 	case TP_VENDOR_DJN:
