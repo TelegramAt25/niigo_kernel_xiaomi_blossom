@@ -964,8 +964,10 @@ int wlan_reset_thread_main(void *data)
 		prGlueInfo = (struct GLUE_INFO *) wiphy_priv(wlanGetWiphy());
 		if (test_and_clear_bit(GLUE_FLAG_RST_START_BIT, &g_ulFlag) &&
 			 ((prGlueInfo) && (prGlueInfo->u4ReadyFlag))) {
+#if defined(CONFIG_ANDROID) && (CFG_ENABLE_WAKE_LOCK)
 			if (KAL_WAKE_LOCK_ACTIVE(NULL, g_IntrWakeLock))
 				KAL_WAKE_UNLOCK(NULL, g_IntrWakeLock);
+#endif
 
 			if (g_IsWholeChipRst) {
 #if (CFG_ANDORID_CONNINFRA_COREDUMP_SUPPORT == 1)
@@ -998,8 +1000,10 @@ int wlan_reset_thread_main(void *data)
 				g_SubsysRstTotalCnt);
 		}
 		if (test_and_clear_bit(GLUE_FLAG_RST_END_BIT, &g_ulFlag)) {
+#if defined(CONFIG_ANDROID) && (CFG_ENABLE_WAKE_LOCK)
 			if (KAL_WAKE_LOCK_ACTIVE(NULL, g_IntrWakeLock))
 				KAL_WAKE_UNLOCK(NULL, g_IntrWakeLock);
+#endif
 			DBGLOG(INIT, INFO, "Whole chip reset end start\n");
 			glResetMsgHandler(WMTMSG_TYPE_RESET,
 				WMTRSTMSG_RESET_END);
