@@ -28,8 +28,6 @@
 
 #define TEST_DRIVER_NAME "mt_otg_test"
 
-#define DX_DBG
-
 #define TEST_IS_STOP    0xfff1
 #define DEV_NOT_CONNECT 0xfff2
 #define DEV_HNP_TIMEOUT 0xfff3
