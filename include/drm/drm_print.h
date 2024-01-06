@@ -79,7 +79,12 @@ void __drm_puts_coredump(struct drm_printer *p, const char *str);
 void __drm_printfn_seq_file(struct drm_printer *p, struct va_format *vaf);
 void __drm_puts_seq_file(struct drm_printer *p, const char *str);
 void __drm_printfn_info(struct drm_printer *p, struct va_format *vaf);
+#ifdef CONFIG_DRM_DEBUG_PRINT
 void __drm_printfn_debug(struct drm_printer *p, struct va_format *vaf);
+#else
+static inline
+void __drm_printfn_debug(struct drm_printer *p, struct va_format *vaf) { }
+#endif
 
 __printf(2, 3)
 void drm_printf(struct drm_printer *p, const char *f, ...);
@@ -271,12 +276,23 @@ static inline struct drm_printer drm_debug_printer(const char *prefix)
 __printf(3, 4)
 void drm_dev_printk(const struct device *dev, const char *level,
 		    const char *format, ...);
+#ifdef CONFIG_DRM_DEBUG_PRINT
 __printf(3, 4)
 void drm_dev_dbg(const struct device *dev, unsigned int category,
 		 const char *format, ...);
+#else
+static inline __printf(3, 4)
+void drm_dev_dbg(const struct device *dev, unsigned int category,
+				 const char *format, ...) { }
+#endif
 
+#ifdef CONFIG_DRM_DEBUG_PRINT
 __printf(2, 3)
 void drm_dbg(unsigned int category, const char *format, ...);
+#else
+static inline __printf(2, 3)
+void drm_dbg(unsigned int category, const char *format, ...) { }
+#endif
 __printf(1, 2)
 void drm_err(const char *format, ...);
 
