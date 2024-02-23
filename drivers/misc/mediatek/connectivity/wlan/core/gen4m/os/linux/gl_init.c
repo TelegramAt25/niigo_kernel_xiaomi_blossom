@@ -5407,7 +5407,7 @@ static int initWlan(void)
 #if (CFG_CHIP_RESET_SUPPORT)
 	glResetInit(prGlueInfo);
 #endif
-	kalFbNotifierReg((struct GLUE_INFO *) wiphy_priv(
+	kalNotifierReg((struct GLUE_INFO *) wiphy_priv(
 				 wlanGetWiphy()));
 	wlanRegisterNetdevNotifier();
 
@@ -5462,7 +5462,7 @@ static void exitWlan(void)
 	DBGLOG(INIT, INFO, "Free wlan device..\n");
 	wlanFreeNetDev();
 #endif
-	kalFbNotifierUnReg();
+	kalNotifierUnReg();
 	wlanUnregisterNetdevNotifier();
 
 	/* printk("remove %p\n", wlanRemove); */
