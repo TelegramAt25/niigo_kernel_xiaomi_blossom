@@ -133,13 +133,13 @@ static u32 target_clk;
 /*#define ENABLE_WAITIRQ_LOG*/       /* wait irq debug logs */
 /*#define ENABLE_STT_IRQ_LOG*/       /*show STT irq debug logs */
 /* Queue timestamp for deque. Update when non-drop frame @SOF */
-#define TIMESTAMP_QUEUE_EN          (0)
+#define TIMESTAMP_QUEUE_EN          (1)
 #if (TIMESTAMP_QUEUE_EN == 1)
 #define TSTMP_SUBSAMPLE_INTPL		(1)
 #else
 #define TSTMP_SUBSAMPLE_INTPL		(0)
 #endif
-#define ISP_BOTTOMHALF_WORKQ		(1)
+#define ISP_BOTTOMHALF_WORKQ		(0)
 
 #if (ISP_BOTTOMHALF_WORKQ == 1)
 #include <linux/workqueue.h>
@@ -502,7 +502,7 @@ static struct isp_sec_dapc_reg lock_reg;
 static unsigned int sec_on;
 #endif
 
-#define AEE_DUMP_BY_USING_ION_MEMORY
+//#define AEE_DUMP_BY_USING_ION_MEMORY
 #define AEE_DUMP_REDUCE_MEMORY
 #ifdef AEE_DUMP_REDUCE_MEMORY
 /* ion */
@@ -12461,7 +12461,7 @@ static int32_t ISP_CompensateMissingSofTime(enum ISP_DEV_NODE_ENUM reg_module,
 			unsigned int frmPeriod)
 {
 	union FBC_CTRL_2  fbc_ctrl2;
-	unsigned int     delta_wcnt = 0, wridx = 0
+	unsigned int     delta_wcnt = 0, wridx = 0;
 	unsigned int     wridx_prev1 = 0, wridx_prev2 = 0, i = 0;
 	unsigned int     delta_time = 0, max_delta_time = 0;
 	struct S_START_T   time_prev1, time_prev2;
