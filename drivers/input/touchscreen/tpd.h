@@ -25,8 +25,8 @@
 #include <linux/pinctrl/consumer.h>
 
 /*debug macros */
-#define TPD_DEBUG
-#define TPD_DEBUG_CODE
+//#define TPD_DEBUG
+//#define TPD_DEBUG_CODE
 /* #define TPD_DEBUG_TRACK */
 #define TPD_DMESG(a, arg...) \
 	pr_info(TPD_DEVICE ":[%s:%d] " a, __func__, __LINE__, ##arg)

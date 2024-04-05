@@ -767,7 +767,6 @@ static int himax_common_local_init(void)
 	I("[Himax] Himax_ts SPI Touchscreen Driver local init end!\n");
 
 	I("%s end.\n", __func__);
-	tpd_type_cap = 1;
 	return 0;
 }
 
