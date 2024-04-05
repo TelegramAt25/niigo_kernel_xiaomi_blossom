@@ -78,84 +78,12 @@ static inline void calc_irq_info_per_q(
 
 static inline void ccif_debug_print_irq_info(void)
 {
-	struct queue_recv_info q_inofs[CCIF_CH_NUM] = {0};
-	int i;
-
-	calc_irq_info_per_q(&q_inofs[0], 0,	RECV_DATA_SIZE - 1);
-
-	for (i = 0; i < CCIF_CH_NUM; i++)
-		if (q_inofs[i].count)
-			CCCI_NORMAL_LOG(-1, TAG,
-				"[%s] qno=%d; cou=%d; ft=%lld; lt=%lld\n",
-				__func__, i, q_inofs[i].count,
-				q_inofs[i].first_time, q_inofs[i].last_time);
-
-	/* clear irq info, re-start save irq info */
-	s_total_info.ring_Read = 0;
-	s_total_info.ring_Write = 0;
-	s_total_info.repeat_count = 0;
-	s_total_info.pre_time = 0;
 }
 
 void ccif_debug_save_irq(u8 qno, u64 cur_time)
 {
-	unsigned long flags;
-	int last_write;
-
-	spin_lock_irqsave(&s_recv_data_info_lock, flags);
-
-	if (s_total_info.pre_time == cur_time)
-		s_total_info.repeat_count++;
-	else
-		s_total_info.pre_time = cur_time;
-
-	if (s_total_info.ring_Write < 0 ||
-		s_total_info.ring_Write >= RECV_DATA_SIZE) {
-		CCCI_NORMAL_LOG(-1, TAG,
-			"invalid array index = %d\n",
-			s_total_info.ring_Write);
-		spin_unlock_irqrestore(&s_recv_data_info_lock, flags);
-		return;
-	}
-	s_total_info.times[s_total_info.ring_Write].qno = qno;
-	s_total_info.times[s_total_info.ring_Write].recv_time = cur_time;
-
-	last_write = s_total_info.ring_Write;
-
-	if ((s_total_info.ring_Write + 1) < RECV_DATA_SIZE)
-		s_total_info.ring_Write++;
-	else
-		s_total_info.ring_Write = 0;
-
-	if (s_total_info.ring_Read == s_total_info.ring_Write) {
-		/* ring buffer is full */
-		if ((s_total_info.ring_Read + 1) < RECV_DATA_SIZE)
-			s_total_info.ring_Read++;
-		else
-			s_total_info.ring_Read = 0;
-
-		if (s_total_info.times[last_write].recv_time -
-			s_total_info.times[s_total_info.ring_Write].recv_time
-				<= 1000000000) {/* spend time <= 1s ? */
-
-			CCCI_NORMAL_LOG(-1, TAG,
-				"[%s] error: occur irq burst(c:%d; s:%d; r:%d; w:%d; rt:%lld; wt:%lld).\n",
-				__func__, s_total_info.repeat_count,
-				RECV_DATA_SIZE,
-				s_total_info.ring_Write, last_write,
-				s_total_info.times[
-					s_total_info.ring_Write].recv_time,
-				s_total_info.times[last_write].recv_time);
-
-			ccif_debug_print_irq_info();
-		}
-	}
-
-	spin_unlock_irqrestore(&s_recv_data_info_lock, flags);
 }
 
 void ccif_debug_info_init(void)
 {
-	spin_lock_init(&s_recv_data_info_lock);
-	memset(&s_total_info, 0, sizeof(struct total_recv_info));
 }
