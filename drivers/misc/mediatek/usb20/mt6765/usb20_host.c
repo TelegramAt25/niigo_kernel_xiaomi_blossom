@@ -17,11 +17,14 @@
 #include "usb20.h"
 #include <linux/of_irq.h>
 #include <linux/of_address.h>
+#include "charger_class.h"
+static struct charger_device *primary_charger;
 #ifdef CONFIG_MTK_USB_TYPEC
 #ifdef CONFIG_TCPC_CLASS
 #include "tcpm.h"
 #include <linux/workqueue.h>
 #include <linux/mutex.h>
+
 static struct notifier_block otg_nb;
 static struct tcpc_device *otg_tcpc_dev;
 static struct delayed_work register_otg_work;
@@ -124,11 +127,12 @@ bool usb20_check_vbus_on(void)
 
 static void _set_vbus(int is_on)
 {
-	if (!reg_vbus) {
-		DBG(0, "vbus_init\n");
-		reg_vbus = regulator_get(mtk_musb->controller, "usb-otg-vbus");
-		if (IS_ERR_OR_NULL(reg_vbus)) {
-			DBG(0, "failed to get vbus\n");
+	if (!primary_charger) {
+		DBG(0, "vbus_init<%d>\n", vbus_on);
+
+		primary_charger = get_charger_by_name("primary_chg");
+		if (!primary_charger) {
+			DBG(0, "get primary charger device failed\n");
 			return;
 		}
 	}
@@ -139,22 +143,15 @@ static void _set_vbus(int is_on)
 		 * host mode correct used by PMIC
 		 */
 		vbus_on = true;
-
-		if (regulator_set_voltage(reg_vbus, 5000000, 5000000))
-			DBG(0, "vbus regulator set voltage failed\n");
-
-		if (regulator_set_current_limit(reg_vbus, 1500000, 1800000))
-			DBG(0, "vbus regulator set current limit failed\n");
-
-		if (regulator_enable(reg_vbus))
-			DBG(0, "vbus regulator enable failed\n");
-
+		charger_dev_enable_otg(primary_charger, true);
+		charger_dev_set_boost_current_limit(primary_charger, 1500000);
 	} else if (!is_on && vbus_on) {
 		/* disable VBUS 1st then update flag
 		 * to make host mode correct used by PMIC
 		 */
 		vbus_on = false;
-		regulator_disable(reg_vbus);
+
+		charger_dev_enable_otg(primary_charger, false);
 	}
 }
 

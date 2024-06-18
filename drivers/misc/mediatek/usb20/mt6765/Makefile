@@ -16,6 +16,8 @@
 #
 ccflags-$(CONFIG_USB_MTK_HDRC) += -I$(srctree)/drivers/misc/mediatek/usb20
 
+ccflags-y += -I$(srctree)/drivers/power/supply/
+
 # for battery related
 ccflags-y += -I$(srctree)/drivers/misc/mediatek/include/mt-plat
 
