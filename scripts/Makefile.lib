@@ -311,6 +311,11 @@ $(obj)/%.dtbo: $(src)/%.dts $(DTC) FORCE
 
 dtc-tmp = $(subst $(comma),_,$(dot-target).dts.tmp)
 
+# mkdtboimg
+#----------------------------------------------------------------------------
+quiet_cmd_mkdtboimg = DTBOIMG $@
+cmd_mkdtboimg = mkdtboimg.py create $@ --page_size=4096 $(filter-out FORCE,$^)
+
 # Bzip2
 # ---------------------------------------------------------------------------
 
