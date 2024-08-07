@@ -314,7 +314,7 @@ dtc-tmp = $(subst $(comma),_,$(dot-target).dts.tmp)
 # mkdtboimg
 #----------------------------------------------------------------------------
 quiet_cmd_mkdtboimg = DTBOIMG $@
-cmd_mkdtboimg = python2 $(srctree)/scripts/dtc/libfdt/mkdtboimg.py create $@ --page_size=4096 $(filter-out FORCE,$^)
+cmd_mkdtboimg = python3 $(srctree)/scripts/dtc/libfdt/mkdtboimg.py create $@ --page_size=4096 $(filter-out FORCE,$^)
 
 # Bzip2
 # ---------------------------------------------------------------------------
