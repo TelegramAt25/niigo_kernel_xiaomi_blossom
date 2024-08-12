@@ -1004,6 +1004,14 @@ config RELR
 	  well as compatible NM and OBJCOPY utilities (llvm-nm and llvm-objcopy
 	  are compatible).
 
+config LLVM_POLLY
+	bool "Enable LLVM's polyhedral loop optimizer (Polly)"
+	help
+	  This option enables LLVM's polyhedral loop optimizer known as Polly.
+	  Polly is able to optimize various loops throughout the kernel for
+	  maximum cache locality. This requires an LLVM toolchain explicitly
+	  compiled with Polly support.
+
 source "kernel/gcov/Kconfig"
 
 source "scripts/gcc-plugins/Kconfig"

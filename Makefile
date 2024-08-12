@@ -699,6 +699,22 @@ endif
 KBUILD_CFLAGS	+= $(OPT_FLAGS)
 KBUILD_AFLAGS	+= $(OPT_FLAGS)
 
+ifdef CONFIG_LLVM_POLLY
+KBUILD_CFLAGS	+= -mllvm -polly \
+		   -mllvm -polly-ast-use-context \
+		   -mllvm -polly-invariant-load-hoisting \
+		   -mllvm -polly-isl-arg=--no-schedule-serialize-sccs \
+		   -mllvm -polly-loopfusion-greedy=1 \
+		   -mllvm -polly-num-threads=0 \
+		   -mllvm -polly-omp-backend=LLVM \
+		   -mllvm -polly-postopts=1 \
+		   -mllvm -polly-reschedule=1 \
+		   -mllvm -polly-run-inliner \
+		   -mllvm -polly-scheduling-chunksize=1 \
+		   -mllvm -polly-scheduling=dynamic \
+		   -mllvm -polly-vectorizer=stripmine
+endif
+
 # Tell gcc to never replace conditional load with a non-conditional one
 KBUILD_CFLAGS	+= $(call cc-option,--param=allow-store-data-races=0)
 KBUILD_CFLAGS	+= $(call cc-option,-fno-allow-store-data-races)
