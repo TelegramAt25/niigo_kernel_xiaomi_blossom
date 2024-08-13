@@ -415,13 +415,13 @@ static void lcm_get_params(struct LCM_PARAMS *params)
 
 static void lcm_init_power(void)
 {
-	no_printk("[LCM]%s\n",__func__);
+	pr_info("[LCM]%s\n",__func__);
 	lcd_bl_en = 1;
 }
 
 static void lcm_suspend_power(void)
 {
-	no_printk("[LCM]%s\n",__func__);
+	pr_info("[LCM]%s\n",__func__);
 
 	disp_dts_gpio_select_state(DTS_GPIO_STATE_LCD_BIAS_ENN0);
 	MDELAY(2);
@@ -430,10 +430,7 @@ static void lcm_suspend_power(void)
 
 static void lcm_resume_power(void)
 {
-	no_printk("[LCM]%s\n",__func__);
-	disp_dts_gpio_select_state(DTS_GPIO_STATE_LCD_BIAS_ENP1);
-	
-	disp_dts_gpio_select_state(DTS_GPIO_STATE_LCD_BIAS_ENN1);
+	pr_info("[LCM]%s\n",__func__);
 }
 
 static void lcm_init(void)
@@ -442,7 +439,7 @@ static void lcm_init(void)
 	unsigned char data = 0xFF;
 	int ret = 0;
 	disp_dts_gpio_select_state(DTS_GPIO_STATE_LCM_RST_OUT0);
-	
+	MDELAY(1);
 	disp_dts_gpio_select_state(DTS_GPIO_STATE_LCD_BIAS_ENP1);
 	MDELAY(2);
 	disp_dts_gpio_select_state(DTS_GPIO_STATE_LCD_BIAS_ENN1);
@@ -451,16 +448,30 @@ static void lcm_init(void)
 
 	ret = tps65132_write_bytes(cmd, data);
 
+	if (ret < 0)
+		pr_debug("[LCM]hx83102d--tps6132--cmd=%0x--i2c write error--\n",
+				cmd);
+	else
+		pr_debug("[LCM]hx83102d--tps6132--cmd=%0x--i2c write success--\n",
+				cmd);
+
 	cmd = 0x01;
 	data = 0x13;
 
 	ret = tps65132_write_bytes(cmd, data);
 
-	
+	if (ret < 0)
+		pr_debug("[LCM]hx83102d--tps6132--cmd=%0x--i2c write error--\n",
+				cmd);
+	else
+		pr_debug("[LCM]hx83102d--tps6132--cmd=%0x--i2c write success--\n",
+				cmd);
+
+	MDELAY(1);
 	disp_dts_gpio_select_state(DTS_GPIO_STATE_LCM_RST_OUT1);
 	MDELAY(5);
 	disp_dts_gpio_select_state(DTS_GPIO_STATE_LCM_RST_OUT0);
-	
+	MDELAY(1);
 	disp_dts_gpio_select_state(DTS_GPIO_STATE_LCM_RST_OUT1);
 	MDELAY(60);
 
@@ -468,7 +479,7 @@ static void lcm_init(void)
 		strlen(saved_command_line))){
 	push_table(bc07_init_setting, sizeof(bc07_init_setting) /
 		sizeof(struct LCM_setting_table), 1);
-	no_printk("[LCM]hx83102d %s,read BC = 0x7\n", __func__);
+	pr_info("[LCM]hx83102d %s,read BC = 0x7\n", __func__);
 	}
 	else
 	push_table(init_setting, sizeof(init_setting) /
@@ -477,7 +488,7 @@ static void lcm_init(void)
 
 static void lcm_suspend(void)
 {
-	no_printk("[LCM]%s,tpd_gesture_flag = %d\n",__func__,tpd_gesture_flag);
+	pr_info("[LCM]%s,tpd_gesture_flag = %d\n",__func__,tpd_gesture_flag);
 #if defined(CONFIG_TOUCHSCREEN_COMMON)
         if (tpd_gesture_flag){
 		push_table(lcm_suspend_gesture_setting,
@@ -497,7 +508,7 @@ static void lcm_suspend(void)
 
 static void lcm_resume(void)
 {
-	no_printk("[LCM]%s\n",__func__);
+	pr_info("[LCM]%s\n",__func__);
 	lcm_init();
 }
 
@@ -548,7 +559,7 @@ static unsigned int lcm_compare_id(void)
 
 	SET_RESET_PIN(1);
 	SET_RESET_PIN(0);
-	
+	MDELAY(1);
 
 	SET_RESET_PIN(1);
 	MDELAY(20);
@@ -563,7 +574,7 @@ static unsigned int lcm_compare_id(void)
 	read_reg_v2(0xDC, buffer, 2);
 	id2 = buffer[0];     /* we only need ID */
 
-	no_printk("[LCM]%s,hx83102d id0 = 0x%x,id1 = 0x%x, id2 = 0x%x\n",
+	pr_info("[LCM]%s,hx83102d id0 = 0x%x,id1 = 0x%x, id2 = 0x%x\n",
 		 __func__, id0,id1,id2);
 	if(id0 == 0x83 && id1 == 0x10 && id2 == 0x2d)
 		return 1;
@@ -586,10 +597,10 @@ static unsigned int lcm_esd_check(void)
 	read_reg_v2(0x0A, buffer, 1);
 
 	if (buffer[0] != 0x9D) {
-		no_printk("[LCM][LCM ERROR] [0x0A]=0x%02x\n", buffer[0]);
+		pr_debug("[LCM][LCM ERROR] [0x0A]=0x%02x\n", buffer[0]);
 		return TRUE;
 	}
-	no_printk("[LCM][LCM NORMAL] [0x0A]=0x%02x\n", buffer[0]);
+	pr_debug("[LCM][LCM NORMAL] [0x0A]=0x%02x\n", buffer[0]);
 	return FALSE;
 #else
 	return FALSE;
@@ -612,7 +623,7 @@ static unsigned int lcm_ata_check(unsigned char *buffer)
 	unsigned int data_array[3];
 	unsigned char read_buf[4];
 
-	no_printk("[LCM]ATA check size = 0x%x,0x%x,0x%x,0x%x\n",
+	pr_debug("[LCM]ATA check size = 0x%x,0x%x,0x%x,0x%x\n",
 			x0_MSB, x0_LSB, x1_MSB, x1_LSB);
 	data_array[0] = 0x0005390A;	/* HS packet */
 	data_array[1] = (x1_MSB << 24) | (x0_LSB << 16) | (x0_MSB << 8) | 0x2a;
@@ -652,6 +663,7 @@ static unsigned int lcm_ata_check(unsigned char *buffer)
 static void lcm_setbacklight_cmdq(void *handle, unsigned int level)
 {
 
+	pr_info("[LCM]%s,hx83102d backlight: level = %d\n", __func__, level);
 	level = level*72/100;
 #ifdef CONFIG_BACKLIGHT_SUPPORT_2047_FEATURE
 	level = level << 1;
