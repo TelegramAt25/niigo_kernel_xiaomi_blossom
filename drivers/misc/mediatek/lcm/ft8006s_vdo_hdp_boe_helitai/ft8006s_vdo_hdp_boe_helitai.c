@@ -309,14 +309,14 @@ static void lcm_get_params(struct LCM_PARAMS *params)
 
 static void lcm_init_power(void)
 {
-	no_printk("[LCM]%s\n",__func__);
+	pr_info("[LCM]%s\n",__func__);
 	lcd_bl_en = 1;
 }
 
 
 static void lcm_suspend_power(void)
 {
-	no_printk("[LCM]%s\n",__func__);
+	pr_info("[LCM]%s\n",__func__);
 	disp_dts_gpio_select_state(DTS_GPIO_STATE_LCD_BIAS_ENN0);
 	MDELAY(2);
 	disp_dts_gpio_select_state(DTS_GPIO_STATE_LCD_BIAS_ENP0);
@@ -325,10 +325,7 @@ static void lcm_suspend_power(void)
 
 static void lcm_resume_power(void)
 {
-	no_printk("[LCM]%s\n",__func__);
-	disp_dts_gpio_select_state(DTS_GPIO_STATE_LCD_BIAS_ENP1);
-	MDELAY(1);
-	disp_dts_gpio_select_state(DTS_GPIO_STATE_LCD_BIAS_ENN1);
+	pr_info("[LCM]%s\n",__func__);
 }
 
 static void lcm_init(void)
@@ -347,11 +344,25 @@ static void lcm_init(void)
 	disp_dts_gpio_select_state(DTS_GPIO_STATE_LCD_BIAS_ENN1);
 
 	ret = tps65132_write_bytes(cmd, data);
+	if (ret < 0)
+		pr_debug("[LCM]ft8006s--tps6132--cmd=%0x--i2c write error--\n",
+				cmd);
+	else
+		pr_debug("[LCM]ft8006s--tps6132--cmd=%0x--i2c write success--\n",
+				cmd);
+
 	cmd = 0x01;
 	data = 0x13;
 
 	ret = tps65132_write_bytes(cmd, data);
-	MDELAY(4);
+	if (ret < 0)
+		pr_debug("[LCM]ft8006s--tps6132--cmd=%0x--i2c write error--\n",
+				cmd);
+	else
+		pr_debug("[LCM]ft8006s--tps6132--cmd=%0x--i2c write success--\n",
+				cmd);
+	MDELAY(2);
+	MDELAY(9);
 	disp_dts_gpio_select_state(DTS_GPIO_STATE_TP_RST_OUT1);
 	MDELAY(2);
 	disp_dts_gpio_select_state(DTS_GPIO_STATE_LCM_RST_OUT1);
@@ -363,7 +374,7 @@ static void lcm_init(void)
 
 static void lcm_suspend(void)
 {
-	no_printk("[LCM]%s\n",__func__);
+	pr_info("[LCM]%s\n",__func__);
 	push_table(lcm_suspend_setting,
 		sizeof(lcm_suspend_setting) / sizeof(struct LCM_setting_table),
 			1);
@@ -371,7 +382,7 @@ static void lcm_suspend(void)
 
 static void lcm_resume(void)
 {
-	no_printk("[LCM]%s\n",__func__);
+	pr_info("[LCM]%s\n",__func__);
 	lcm_init();
 }
 
@@ -436,7 +447,7 @@ static unsigned int lcm_compare_id(void)
 	id1 = buffer[0];     /* we only need ID */
 	read_reg_v2(0xDC, buffer, 2);
 	id2 = buffer[0];     /* we only need ID */
-	no_printk("%s,ft8006s debug: ft8006s id0 = 0x%x, id1 = 0x%x, id2 = 0x%x\n", __func__, id0,id1,id2);
+	pr_info("%s,ft8006s debug: ft8006s id0 = 0x%x, id1 = 0x%x, id2 = 0x%x\n", __func__, id0,id1,id2);
 	if(id0 == 0x00 && id1 ==0x00 && id2 == 0x00)
 	return 1;
 	else
@@ -459,10 +470,10 @@ static unsigned int lcm_esd_check(void)
 	read_reg_v2(0x0A, buffer, 1);
 
 	if (buffer[0] != 0x9C) {
-		no_printk("[LCM][LCM ERROR] [0x0A]=0x%02x\n", buffer[0]);
+		pr_debug("[LCM][LCM ERROR] [0x0A]=0x%02x\n", buffer[0]);
 		return TRUE;
 	}
-	no_printk("[LCM][LCM NORMAL] [0x0A]=0x%02x\n", buffer[0]);
+	pr_debug("[LCM][LCM NORMAL] [0x0A]=0x%02x\n", buffer[0]);
 	return FALSE;
 #else
 	return FALSE;
@@ -485,7 +496,7 @@ static unsigned int lcm_ata_check(unsigned char *buffer)
 	unsigned int data_array[3];
 	unsigned char read_buf[4];
 
-	no_printk("[LCM]ATA check size = 0x%x,0x%x,0x%x,0x%x\n",
+	pr_debug("[LCM]ATA check size = 0x%x,0x%x,0x%x,0x%x\n",
 			x0_MSB, x0_LSB, x1_MSB, x1_LSB);
 	data_array[0] = 0x0005390A;	/* HS packet */
 	data_array[1] = (x1_MSB << 24) | (x0_LSB << 16) | (x0_MSB << 8) | 0x2a;
@@ -525,6 +536,7 @@ static unsigned int lcm_ata_check(unsigned char *buffer)
 static void lcm_setbacklight_cmdq(void *handle, unsigned int level)
 {
 
+	pr_info("[LCM]%s,ft8006s backlight: level = %d lcd_bl_en = %d\n", __func__, level,lcd_bl_en);
 	level = level*72/100;
 #ifdef CONFIG_BACKLIGHT_SUPPORT_2047_FEATURE
 	level = level << 1;
