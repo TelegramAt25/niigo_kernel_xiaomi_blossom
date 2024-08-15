@@ -522,7 +522,7 @@ static unsigned int lcm_esd_check(void)
 	read_reg_v2(0x0A, buffer, 1);
 
 	if (buffer[0] != 0x9C) {
-		pr_no_warn("[LCM][LCM ERROR] [0x0A]=0x%02x\n", buffer[0]);
+		pr_warn("[LCM][LCM ERROR] [0x0A]=0x%02x\n", buffer[0]);
 		return TRUE;
 	}
 	no_printk("[LCM][LCM NORMAL] [0x0A]=0x%02x\n", buffer[0]);
