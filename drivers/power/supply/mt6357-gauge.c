@@ -1961,7 +1961,6 @@ static int boot_zcv_get(struct mtk_gauge *gauge_dev,
 	int _hw_ocv_chgin_rdy = 0;
 	int now_temp;
 	int now_thr;
-	int tmp_hwocv_chgin = 0;
 	bool fg_is_charger_exist;
 	struct mtk_battery *gm;
 	struct zcv_data *zcvinfo;
