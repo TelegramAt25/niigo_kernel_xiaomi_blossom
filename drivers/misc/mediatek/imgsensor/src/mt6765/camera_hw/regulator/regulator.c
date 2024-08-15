@@ -70,9 +70,6 @@ static struct regulator *regVCAMAF;
 static int regulator_oc_notify(
 	struct notifier_block *nb, unsigned long event, void *data)
 {
-		struct reg_oc_debug_t *reg_oc_dbg =
-			container_of(nb, struct reg_oc_debug_t, nb);
-
 		if (event != REGULATOR_EVENT_OVER_CURRENT)
 			return NOTIFY_OK;
 
