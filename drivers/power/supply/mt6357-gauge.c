@@ -1925,27 +1925,6 @@ static int zcv_get(struct mtk_gauge *gauge_dev,
 	return 0;
 }
 
-static int get_charger_zcv(struct mtk_gauge *gauge_dev)
-{
-	struct power_supply *chg_psy;
-	union power_supply_propval val;
-	int ret = 0;
-
-	chg_psy = power_supply_get_by_name("mtk-master-charger");
-
-	if (chg_psy == NULL) {
-		bm_err("[%s] can get charger psy\n", __func__);
-		return -ENODEV;
-	}
-
-	ret = power_supply_get_property(chg_psy,
-		POWER_SUPPLY_PROP_VOLTAGE_BOOT, &val);
-
-	bm_err("[%s]_hw_ocv_chgin=%d, ret=%d\n", __func__, val.intval, ret);
-
-	return val.intval;
-}
-
 static int boot_zcv_get(struct mtk_gauge *gauge_dev,
 	struct mtk_gauge_sysfs_field_info *attr, int *val)
 {
