@@ -5577,18 +5577,6 @@ int32_t mtk_cfg80211_process_str_cmd(IN struct wiphy *wiphy,
 
 #if (CFG_SUPPORT_SINGLE_SKU == 1)
 
-#if (CFG_BUILT_IN_DRIVER == 1)
-/* in kernel-x.x/net/wireless/reg.c */
-#else
-bool is_world_regdom(const char *alpha2)
-{
-	if (!alpha2)
-		return false;
-
-	return (alpha2[0] == '0') && (alpha2[1] == '0');
-}
-#endif
-
 enum regd_state regd_state_machine(IN struct regulatory_request *pRequest)
 {
 	switch (pRequest->initiator) {
