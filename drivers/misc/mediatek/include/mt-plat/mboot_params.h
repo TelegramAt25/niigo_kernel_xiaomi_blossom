@@ -934,10 +934,12 @@ static inline void aee_rr_rec_set_bit_pmic_ext_buck(int bit, int loc)
 
 static inline int aee_rr_init_thermal_temp(int num)
 {
+	return 0;
 }
 
 static inline int aee_rr_rec_thermal_temp(int index, s8 val)
 {
+	return 0;
 }
 
 static inline void aee_rr_rec_thermal_status(u8 val)
@@ -1005,11 +1007,6 @@ static inline void aee_rr_rec_cpu_dead_ktime(u64 val)
 }
 
 static inline void aee_rr_rec_cpu_post_dead_ktime(u64 val)
-{
-}
-
-static inline void aee_rr_rec_hang_detect_timeout_count(
-		unsigned int timeout)
 {
 }
 
