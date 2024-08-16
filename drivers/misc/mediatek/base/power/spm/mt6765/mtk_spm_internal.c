@@ -167,16 +167,10 @@ unsigned int __spm_output_wake_reason(
 
 	if (wakesta->assert_pc != 0) {
 		/* add size check for vcoredvfs */
-		aee_sram_printk("PCM ASSERT AT 0x%x (%s), r13 = 0x%x, ",
-			  wakesta->assert_pc, scenario, wakesta->r13);
-
 		log_size += scnprintf(log_buf + log_size,
 			LOG_BUF_OUT_SZ - log_size,
 			"[name:spm&][SPM] PCM ASSERT AT 0x%x (%s), r13 = 0x%x, ",
 			wakesta->assert_pc, scenario, wakesta->r13);
-
-		aee_sram_printk(" debug_flag = 0x%x 0x%x\n",
-			wakesta->debug_flag, wakesta->debug_flag1);
 
 		log_size += scnprintf(log_buf + log_size,
 			LOG_BUF_OUT_SZ - log_size,
@@ -270,7 +264,6 @@ unsigned int __spm_output_wake_reason(
 	if (!suspend)
 		printk_deferred("[name:spm&][SPM] %s", log_buf);
 	else {
-		aee_sram_printk("%s", log_buf);
 		printk_deferred("[name:spm&][SPM] %s", log_buf);
 	}
 
@@ -305,7 +298,6 @@ u32 __spm_get_wake_period(int pwake_time, unsigned int last_wr)
 		}
 	} else {
 		period = pwake_time;
-		aee_sram_printk("pwake = %d\n", pwake_time);
 		printk_deferred("[name:spm&][SPM] pwake = %d\n", pwake_time);
 	}
 
