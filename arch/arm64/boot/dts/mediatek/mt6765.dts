@@ -2712,6 +2712,8 @@ firmware_class.path=/vendor/firmware";
 			reg = <0x210 0x4>;
 		};
 		u2_phy_data: u2_phy_data@1ac {
+			reg = <0x1ac 0x4>;
+		};
 		efuse_analog7: efuse_analog7@1ac {
 			reg = <0x1ac 0x4>;
 		};
