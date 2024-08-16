@@ -38,21 +38,21 @@ ifneq ($(KERNELRELEASE),)
         ccflags-y += -D CFG_CONNADP_BUILD_IN
     endif
 
-    # for gen4m options
-    export CONFIG_MTK_COMBO_WIFI_HIF=axi
-    export MTK_COMBO_CHIP=CONNAC
-    export WLAN_CHIP_ID=6765
-    export MTK_ANDROID_WMT=y
-    # export MTK_ANDROID_EMI=y
-    export WIFI_IP_SET=1
-    export WIFI_ECO_VER=1
-    export CFG_FM_CHIP_ID=6765
-    export CFG_FM_CHIP=mt6631
-
     # Do build-in for Makefile checking
     # export CONFIG_WLAN_DRV_BUILD_IN=y
 
     ifeq ($(CONFIG_WLAN_DRV_BUILD_IN),y)
+        # for gen4m options
+        export CONFIG_MTK_COMBO_WIFI_HIF=axi
+        export MTK_COMBO_CHIP=CONNAC
+        export WLAN_CHIP_ID=6765
+        export MTK_ANDROID_WMT=y
+        # export MTK_ANDROID_EMI=y
+        export WIFI_IP_SET=1
+        export WIFI_ECO_VER=1
+        export CFG_FM_CHIP_ID=6765
+        export CFG_FM_CHIP=mt6631
+
         # Do build-in for xxx.c checking
         subdir-ccflags-y += -D MTK_WCN_REMOVE_KERNEL_MODULE
         subdir-ccflags-y += -D MTK_WCN_BUILT_IN_DRIVER
@@ -60,13 +60,6 @@ ifneq ($(KERNELRELEASE),)
         obj-y += wlan/adaptor/
         obj-y += wlan/core/gen4m/
     endif
-
-    obj-$(CONFIG_MTK_COMBO) += common/
-    obj-$(CONFIG_MTK_COMBO_WIFI) += wlan/adaptor/
-    obj-$(CONFIG_MTK_COMBO_CHIP_CONSYS_6765) += wlan/core/gen4m/
-    obj-$(CONFIG_MTK_BTIF) += bt/mt66xx/legacy/
-    obj-$(CONFIG_MTK_COMBO_GPS) += gps/
-    obj-$(CONFIG_MTK_FMRADIO) += fmradio/
 
 # Bluetooth
 obj-$(CONFIG_MTK_COMBO_BT) += bt/mt66xx/legacy/
