@@ -11,3 +11,8 @@ arch/arm64/boot/Image.gz
 vmlinux
 System.map
 "
+. ${ROOT_DIR}/common/build.config.common
+. ${ROOT_DIR}/common/build.config.aarch64
+
+DEFCONFIG=cuttlefish_defconfig
+POST_DEFCONFIG_CMDS="check_defconfig"

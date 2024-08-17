@@ -284,6 +284,7 @@ static inline void cleanup_symbol_name(char *s)
 	if (res)
 		*res = '\0';
 #endif
+
 	res = strrchr(s, '.');
 	if (res && !strcmp(res, ".cfi"))
 		*res = '\0';
