@@ -205,6 +205,12 @@ static int mt_usb_psy_init(struct musb *musb)
 	struct device *dev = musb->controller->parent;
 
 	musb->usb_psy = devm_power_supply_get_by_phandle(dev, "charger");
+#ifdef CONFIG_CHARGER_BQ2560X
+	if (IS_ERR_OR_NULL(musb->usb_psy)) {
+		musb->usb_psy = power_supply_get_by_name("bq2560x");
+		DBG(0, "get usb_psy\n");
+	}
+#endif
 	if (IS_ERR_OR_NULL(musb->usb_psy)) {
 		DBG(0, "couldn't get usb_psy\n");
 		return -EINVAL;
