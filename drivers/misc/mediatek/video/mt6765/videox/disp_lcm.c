@@ -1672,7 +1672,7 @@ int disp_lcm_esd_recover(struct disp_lcm_handle *plcm)
 }
 
 #if defined(CONFIG_TOUCHSCREEN_COMMON)
-extern tpd_gesture_flag;
+extern int tpd_gesture_flag;
 #endif
 int disp_lcm_suspend(struct disp_lcm_handle *plcm)
 {
