@@ -4977,8 +4977,10 @@ static int32_t wlanProbe(void *pvData, void *pvDriverData)
 		       eFailReason);
 		switch (eFailReason) {
 		case FAIL_BY_RESET:
+#if CFG_MET_PACKET_TRACE_SUPPORT
 		case FAIL_MET_INIT_PROCFS:
 			kalMetRemoveProcfs();
+#endif
 		case PROC_INIT_FAIL:
 			wlanNetUnregister(prWdev);
 			/* Unregister notifier callback */
