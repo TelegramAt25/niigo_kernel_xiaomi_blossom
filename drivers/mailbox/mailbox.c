@@ -90,6 +90,7 @@ exit:
 
 static void msg_submit(struct mbox_chan *chan)
 {
+	unsigned long flags;
 	int err = 0;
 
 	/*
