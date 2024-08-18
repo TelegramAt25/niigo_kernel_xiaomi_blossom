@@ -46,7 +46,6 @@
 
 // #include <trace/events/mtk_events.h>
 #include <mtk_gpu_utility.h>
-#include "mtk_mfg_counter.h"
 
 #define mfg_readl(addr) readl(addr)
 #define mfg_writel(val, addr) \
