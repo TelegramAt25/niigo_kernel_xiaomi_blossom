@@ -60,7 +60,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <linux/anon_inodes.h>
 
 /* MTK: sync log */
-#include "mtk_pp.h"
 static uint32_t MTKGetCurrentProcessIDKM(void)
 {
 	if (in_interrupt())
