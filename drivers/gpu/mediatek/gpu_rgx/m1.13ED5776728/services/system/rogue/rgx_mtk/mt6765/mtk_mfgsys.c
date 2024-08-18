@@ -188,8 +188,8 @@ static void MTKWriteBackFreqToRGX(PVRSRV_DEVICE_NODE *psDevNode,
 #ifndef MTK_BRINGUP
 #define MTKCLK_prepare_enable(clk) \
 	do { \
-		if (clk) { \
-			clk_prepare_enable(clk) \
+		if (clk) \
+			clk_prepare_enable(clk); \
 	} while (0)
 
 #define MTKCLK_disable_unprepare(clk) \
