@@ -143,7 +143,7 @@ static inline void _pvr_kfree(const void* pvAddr)
 	kfree(pvAddr);
 }
 
-static inline void _pvr_alloc_stats_add(void *pvAddr, IMG_UINT32 ui32Size DEBUG_MEMSTATS_PARAMS)
+static inline void _pvr_alloc_stats_add(void *pvAddr, IMG_UINT32 ui32Size)
 {
 #if !defined(PVRSRV_ENABLE_PROCESS_STATS)
 	PVR_UNREFERENCED_PARAMETER(pvAddr);
@@ -225,7 +225,7 @@ static inline void _pvr_alloc_stats_remove(void *pvAddr)
 #endif /* !defined(PVRSRV_ENABLE_PROCESS_STATS) */
 }
 
-void *(OSAllocMem)(IMG_UINT32 ui32Size DEBUG_MEMSTATS_PARAMS)
+void *(OSAllocMem)(IMG_UINT32 ui32Size)
 {
 	void *pvRet = NULL;
 
@@ -255,7 +255,7 @@ void *(OSAllocMem)(IMG_UINT32 ui32Size DEBUG_MEMSTATS_PARAMS)
 	return pvRet;
 }
 
-void *(OSAllocZMem)(IMG_UINT32 ui32Size DEBUG_MEMSTATS_PARAMS)
+void *(OSAllocZMem)(IMG_UINT32 ui32Size)
 {
 	void *pvRet = NULL;
 
