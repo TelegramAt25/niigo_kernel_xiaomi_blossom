@@ -25,7 +25,6 @@ $(PVRSRVKM_NAME)-y += \
 	services/server/common/vz_vmm_pvz.o \
 	services/server/common/vz_vmm_vm.o \
 	services/system/rogue/$(PVR_SYSTEM)/ion_support.o \
-	services/system/rogue/$(PVR_SYSTEM)/mtk_pp.o \
 	services/system/rogue/$(PVR_SYSTEM)/sysconfig.o \
 	services/system/rogue/$(PVR_SYSTEM)/$(MTK_PLATFORM)/mtk_mfgsys.o
 
