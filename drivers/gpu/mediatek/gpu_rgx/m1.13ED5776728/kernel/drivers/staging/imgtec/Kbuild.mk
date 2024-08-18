@@ -41,10 +41,8 @@
 ccflags-y := \
  -I$(TOP)/kernel/drivers/staging/imgtec \
  -I$(TOP)/kernel/drivers/staging/imgtec/tc \
- -I$(TOP)/kernel/drivers/staging/imgtec/rk3368 \
  -I$(TOP)/kernel/drivers/staging/imgtec/plato \
  -I$(TOP)/kernel/drivers/staging/imgtec/plato/hdmi \
- -I$(TOP)/kernel/drivers/staging/imgtec/sunxi \
  -I$(TOP)/include/$(PVR_ARCH)/system/rgx_tc -I$(TOP)/include/system/rgx_tc \
  -I$(TOP)/include/drm \
  -I$(TOP)/hwdefs/$(PVR_ARCH) \
@@ -77,10 +75,6 @@ tc-y += \
  kernel/drivers/staging/imgtec/tc/ion_lma_heap.o \
  kernel/drivers/staging/imgtec/ion_fbcdc_clear.o
 endif
-
-adf_sunxi-y += \
- kernel/drivers/staging/imgtec/sunxi/adf_sunxi.o \
- kernel/drivers/staging/imgtec/adf_common.o
 
 drm_nulldisp-y += \
  kernel/drivers/staging/imgtec/drm_nulldisp_drv.o \
@@ -118,11 +112,3 @@ drm_pdp2_hdmi-y += \
  kernel/drivers/staging/imgtec/plato/hdmi/hdmi_video.o \
  kernel/drivers/staging/imgtec/plato/hdmi/hdmi_i2c.o \
  kernel/drivers/staging/imgtec/plato/hdmi/hdmi_phy.o
-
-drm_rk-y += \
-  kernel/drivers/staging/imgtec/rk3368/drm_rk_drv.o \
-  kernel/drivers/staging/imgtec/rk3368/drm_rk_gem.o \
-  kernel/drivers/staging/imgtec/rk3368/drm_rk_modeset.o \
-  kernel/drivers/staging/imgtec/rk3368/drm_rk_crtc.o \
-  kernel/drivers/staging/imgtec/rk3368/drm_rk_hdmi.o \
-  kernel/drivers/staging/imgtec/rk3368/drm_rk_encoder.o
