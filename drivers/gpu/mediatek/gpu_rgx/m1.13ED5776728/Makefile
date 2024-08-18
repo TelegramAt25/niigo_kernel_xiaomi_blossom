@@ -4,12 +4,6 @@ $(info [GPU_DEBUG] MTK_PLATFORM = $(MTK_PLATFORM))
 
 ifeq ($(MTK_PLATFORM),mt6765)
 	ccflags-y += -DCONFIG_MACH_MT6765
-else ifeq ($(MTK_PLATFORM),mt6779)
-	ccflags-y += -DCONFIG_MACH_MT6779
-else ifeq ($(MTK_PLATFORM),mt6761)
-	ccflags-y += -DCONFIG_MACH_MT6761
-else ifeq ($(MTK_PLATFORM),mt6739)
-	ccflags-y += -DCONFIG_MACH_MT6739
 endif
 
 ccflags-$(CONFIG_MTK_TINYSYS_SSPM_SUPPORT) += -DSSPM_DEBUG
@@ -24,15 +18,7 @@ endif
 
 RGX_TOP := $(dir $(lastword $(MAKEFILE_LIST)))
 
-#MTK_DDK_DEBUG := y
-
-ifeq ($(MTK_DDK_DEBUG),y)
-	ccflags-y += -include $(RGX_TOP)/include/config_kernel_debug_$(MTK_PLATFORM)$(ECO).h
-else ifeq ($(CONFIG_MTK_ENG_BUILD),y)
-	ccflags-y += -include $(RGX_TOP)/include/config_kernel_eng_$(MTK_PLATFORM)$(ECO).h
-else
-	ccflags-y += -include $(RGX_TOP)/include/config_kernel_user_$(MTK_PLATFORM)$(ECO).h
-endif
+ccflags-y += -include $(RGX_TOP)/include/config_kernel_user_$(MTK_PLATFORM)$(ECO).h
 
 ccflags-y += \
 	-D__linux__ $(OPTIM) -g \
@@ -192,11 +178,6 @@ endif
 pvrsrvkm-$(CONFIG_ARM) += services/server/env/linux/osfunc_arm.o
 pvrsrvkm-$(CONFIG_ARM64) += services/server/env/linux/osfunc_arm64.o
 pvrsrvkm-$(CONFIG_EVENT_TRACING) += services/server/env/linux/trace_events.o
-
-ifeq ($(MTK_PLATFORM),mt6799)
-	pvrsrvkm-y += \
-		services/system/rogue/rgx_mtk/$(MTK_PLATFORM)/mtk_mfg_counter.o
-endif
 
 ccflags-y += \
 	-I$(RGX_TOP)/hwdefs/rogue \
