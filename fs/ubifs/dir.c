@@ -293,9 +293,6 @@ done:
 static int ubifs_prepare_create(struct inode *dir, struct dentry *dentry,
 				struct fscrypt_name *nm)
 {
-	if (fscrypt_is_nokey_name(dentry))
-		return -ENOKEY;
-
 	return fscrypt_setup_filename(dir, &dentry->d_name, 0, nm);
 }
 
