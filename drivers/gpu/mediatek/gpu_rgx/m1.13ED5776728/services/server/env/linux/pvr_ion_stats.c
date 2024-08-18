@@ -360,6 +360,7 @@ static IMG_UINT32 DefaultHashFunc(uintptr_t input)
 	return (IMG_UINT32)input;
 }
 
+#if defined(PVRSRV_ENABLE_PVR_ION_STATS)
 PVRSRV_ERROR PVRSRVIonStatsInitialise(void)
 {
 	PVR_ION_STATS_STATE *psState = &gPvrIonStatsState;
@@ -547,3 +548,4 @@ void PVRSRVIonRemoveMemAllocRecord(struct dma_buf *psDmaBuf)
 out:
 	OSLockRelease(psState->hBuffersLock);
 }
+#endif /* defined(PVRSRV_ENABLE_PVR_ION_STATS) */
