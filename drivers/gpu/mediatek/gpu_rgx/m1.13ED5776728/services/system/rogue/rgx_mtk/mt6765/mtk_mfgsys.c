@@ -93,7 +93,6 @@ static IMG_UINT32 gpu_cust_upbound_freq;
 static IMG_UINT32 gpu_power;
 static IMG_UINT32 gpu_dvfs_enable;
 static IMG_UINT32 boost_gpu_enable;
-static IMG_UINT32 gpu_debug_enable;
 static IMG_UINT32 gpu_dvfs_force_idle;
 static IMG_UINT32 gpu_dvfs_cb_force_idle;
 
@@ -190,9 +189,7 @@ static void MTKWriteBackFreqToRGX(PVRSRV_DEVICE_NODE *psDevNode,
 #define MTKCLK_prepare_enable(clk) \
 	do { \
 		if (clk) { \
-			if (clk_prepare_enable(clk)) \
-				pr_debug("PVR_K: clk_prepare_enable " \
-					"failed when enabling " #clk); } \
+			clk_prepare_enable(clk) \
 	} while (0)
 
 #define MTKCLK_disable_unprepare(clk) \
@@ -204,9 +201,7 @@ static void MTKWriteBackFreqToRGX(PVRSRV_DEVICE_NODE *psDevNode,
 #define MTKCLK_set_parent(clkC, clkP) \
 	do { \
 		if (clkC && clkP) { \
-			if (clk_set_parent(clkC, clkP)) \
-				pr_debug("PVR_K: clk_set_parent " \
-					"failed when enable " #clkC, #clkP); } \
+			clk_set_parent(clkC, clkP) \
 	} while (0)
 #else
 #define MTKCLK_prepare_enable(clk)
@@ -224,16 +219,10 @@ static void MTKEnableMfgMtcmos0(void)
 #ifdef MTK_MFGMTCMOS_AO
 	/* enable mfg mtcmos 0 whenever we need it */
 	if (isPowerOn == false) {
-		if (gpu_debug_enable)
-			PVR_DPF((PVR_DBG_MESSAGE,
-			"%s mfg0 (0x%p)", __func__, mtcmos_mfg0));
 		MTKCLK_prepare_enable(mtcmos_mfg0);
 		isPowerOn = true;
 	}
 #else
-	if (gpu_debug_enable)
-		PVR_DPF((PVR_DBG_MESSAGE,
-		"%s mfg0 (0x%p)", __func__, mtcmos_mfg0));
 	MTKCLK_prepare_enable(mtcmos_mfg0);
 #endif
 }
@@ -243,14 +232,10 @@ static void MTKDisableMfgMtcmos0(void)
 #ifdef MTK_MFGMTCMOS_AO
 	/* disable mfg mtcmos 0 only for suspend */
 	if (isPowerOn == true) {
-		if (gpu_debug_enable)
-			PVR_DPF((PVR_DBG_MESSAGE, "%s mfg0", __func__));
 		MTKCLK_disable_unprepare(mtcmos_mfg0);
 		isPowerOn = false;
 	}
 #else
-	if (gpu_debug_enable)
-		PVR_DPF((PVR_DBG_MESSAGE, "%s mfg0", __func__));
 	MTKCLK_disable_unprepare(mtcmos_mfg0);
 #endif
 }
@@ -270,9 +255,6 @@ static void MTKEnableMfgClock(IMG_BOOL bForce)
 	mt_gpufreq_enable_MTCMOS(true);
 #endif
 #endif
-
-	if (gpu_debug_enable)
-		PVR_DPF((PVR_DBG_ERROR, "MTKEnableMfgClock"));
 
 	ged_dvfs_gpu_clock_switch_notify(1);
 	mtk_notify_gpu_power_change(1);
@@ -300,8 +282,6 @@ static void MTKDisableMfgClock(IMG_BOOL bForce)
 #endif
 	ged_log_buf_print2(_mtk_ged_log, GED_LOG_ATTR_TIME, "BUCK_OFF");
 
-	if (gpu_debug_enable)
-		PVR_DPF((PVR_DBG_ERROR, "MTKDisableMfgClock"));
 }
 
 #if defined(MTK_USE_HW_APM)
@@ -309,12 +289,6 @@ static int MTKInitHWAPM(void)
 {
 	if (!g_pvRegsKM)
 		g_pvRegsKM = OSMapPhysToLin(gsRegsPBase, 0x1000, 0);
-
-	if (gpu_debug_enable) {
-		PVR_DPF((PVR_DBG_ERROR, "g_pvRegsKM = 0x%p", g_pvRegsKM));
-		PVR_DPF((PVR_DBG_ERROR, "LV0 *g_pvRegsKM = 0x%x",
-		mfg_readl(g_pvRegsKM+0x01c)));
-	}
 
 	mfg_writel(0x01a80000, (g_pvRegsKM + 0x504));
 	mfg_writel(0x00080010, (g_pvRegsKM + 0x508));
@@ -329,41 +303,6 @@ static int MTKInitHWAPM(void)
 
 	mfg_writel(0x9004001b, (g_pvRegsKM + 0x24));
 	mfg_writel(0x8004001b, (g_pvRegsKM + 0x24));
-
-	if (gpu_debug_enable) {
-		PVR_DPF((PVR_DBG_ERROR, "HWAPM: *g_pvRegsKM+0x%x = 0x%x",
-		(g_pvRegsKM + 0x504), mfg_readl(g_pvRegsKM + 0x504)));
-
-		PVR_DPF((PVR_DBG_ERROR, "HWAPM: *g_pvRegsKM+0x%x = 0x%x",
-		(g_pvRegsKM + 0x508), mfg_readl(g_pvRegsKM + 0x508)));
-
-		PVR_DPF((PVR_DBG_ERROR, "HWAPM: *g_pvRegsKM+0x%x = 0x%x",
-		(g_pvRegsKM + 0x50c), mfg_readl(g_pvRegsKM + 0x50c)));
-
-		PVR_DPF((PVR_DBG_ERROR, "HWAPM: *g_pvRegsKM+0x%x = 0x%x",
-		(g_pvRegsKM + 0x510), mfg_readl(g_pvRegsKM + 0x510)));
-
-		PVR_DPF((PVR_DBG_ERROR, "HWAPM: *g_pvRegsKM+0x%x = 0x%x",
-		(g_pvRegsKM + 0x514), mfg_readl(g_pvRegsKM + 0x514)));
-
-		PVR_DPF((PVR_DBG_ERROR, "HWAPM: *g_pvRegsKM+0x%x = 0x%x",
-		(g_pvRegsKM + 0x518), mfg_readl(g_pvRegsKM + 0x518)));
-
-		PVR_DPF((PVR_DBG_ERROR, "HWAPM: *g_pvRegsKM+0x%x = 0x%x",
-		(g_pvRegsKM + 0x51c), mfg_readl(g_pvRegsKM + 0x51c)));
-
-		PVR_DPF((PVR_DBG_ERROR, "HWAPM: *g_pvRegsKM+0x%x = 0x%x",
-		(g_pvRegsKM + 0x520), mfg_readl(g_pvRegsKM + 0x520)));
-
-		PVR_DPF((PVR_DBG_ERROR, "HWAPM: *g_pvRegsKM+0x%x = 0x%x",
-		(g_pvRegsKM + 0x524), mfg_readl(g_pvRegsKM + 0x524)));
-
-		PVR_DPF((PVR_DBG_ERROR, "HWAPM: *g_pvRegsKM+0x%x = 0x%x",
-		(g_pvRegsKM + 0x528), mfg_readl(g_pvRegsKM + 0x528)));
-
-		PVR_DPF((PVR_DBG_ERROR, "LV1 *g_pvRegsKM = 0x%x",
-		mfg_readl(g_pvRegsKM+0x01c)));
-	}
 
 	return PVRSRV_OK;
 }
@@ -419,12 +358,6 @@ static IMG_BOOL MTKDoGpuDVFS(IMG_UINT32 ui32NewFreqID, IMG_BOOL bIdleDevice)
 
 		MTKWriteBackFreqToRGX(psDevNode, ui32GPUFreq);
 
-#ifdef MTK_DEBUG
-	if (gpu_debug_enable)
-		pr_debug("PVR_K: 3DFreq=%d, Volt=%d\n",
-		ui32GPUFreq, mt_gpufreq_get_cur_volt());
-#endif
-
 		if (ePowerState != PVRSRV_DEV_POWER_STATE_ON)
 			MTKDisableMfgClock(IMG_TRUE);
 
@@ -470,12 +403,6 @@ static void MTKCommitFreqIdx(unsigned long ui32NewFreqID,
 			gpu_freq = ui32GPUFreq;
 
 			MTKWriteBackFreqToRGX(psDevNode, ui32GPUFreq);
-
-	#ifdef MTK_DEBUG
-		if (gpu_debug_enable)
-			pr_debug("PVR_K: 3DFreq=%d, Volt=%d\n",
-			ui32GPUFreq, mt_gpufreq_get_cur_volt());
-	#endif
 
 			if (eResult == PVRSRV_OK)
 				PVRSRVDevicePostClockSpeedChange(psDevNode,
@@ -786,9 +713,6 @@ static void MTKDVFSTimerFuncCB(void *pvData)
 	int i32CurFreqID = (int)mt_gpufreq_get_cur_freq_index();
 	static IMG_UINT32 tmp_sys_dvfs_time_ms;
 
-	if (gpu_debug_enable)
-		PVR_DPF((PVR_DBG_ERROR, "MTKDVFSTimerFuncCB"));
-
 	if (gpu_dvfs_enable == 0) {
 		gpu_power = 0;
 		gpu_loading = 0;
@@ -878,9 +802,6 @@ PVRSRV_ERROR MTKDevPrePowerState(IMG_HANDLE hSysData,
 	else if ((eNewPowerState == PVRSRV_DEV_POWER_STATE_OFF &&
 			eCurrentPowerState == PVRSRV_DEV_POWER_STATE_OFF) &&
 			bForced == true) {
-		if (gpu_debug_enable)
-			PVR_DPF((PVR_DBG_MESSAGE,
-			"%s MTKDisableMfgMtcmos0", __func__));
 		MTKDisableMfgMtcmos0();
 	}
 #endif
@@ -942,19 +863,12 @@ PVRSRV_ERROR MTKSystemPostPowerState(PVRSRV_SYS_POWER_STATE eNewPowerState)
 #ifdef MTK_GPU_DVFS
 static void MTKBoostGpuFreq(void)
 {
-	if (gpu_debug_enable)
-		PVR_DPF((PVR_DBG_ERROR, "MTKBoostGpuFreq"));
-
 	MTKFreqInputBoostCB(0);
 }
 
 static void MTKSetBottomGPUFreq(unsigned int ui32FreqLevel)
 {
 	unsigned int ui32MaxLevel;
-
-	if (gpu_debug_enable)
-		PVR_DPF((PVR_DBG_ERROR,
-		"%s: freq = %d", __func__, ui32FreqLevel));
 
 	ui32MaxLevel = mt_gpufreq_get_dvfs_table_num() - 1;
 
@@ -987,11 +901,6 @@ static void MTKCustomBoostGpuFreq(unsigned int ui32FreqLevel)
 {
 	unsigned int ui32MaxLevel;
 
-	if (gpu_debug_enable)
-		PVR_DPF((PVR_DBG_ERROR,
-		"%s: freq = %d", __func__, ui32FreqLevel));
-
-
 	ui32MaxLevel = mt_gpufreq_get_dvfs_table_num() - 1;
 
 	if (ui32MaxLevel < ui32FreqLevel)
@@ -1018,10 +927,6 @@ static void MTKCustomBoostGpuFreq(unsigned int ui32FreqLevel)
 static void MTKCustomUpBoundGpuFreq(unsigned int ui32FreqLevel)
 {
 	unsigned int ui32MaxLevel;
-
-	if (gpu_debug_enable)
-		PVR_DPF((PVR_DBG_ERROR,
-		"%s: freq = %d", __func__, ui32FreqLevel));
 
 	ui32MaxLevel = mt_gpufreq_get_dvfs_table_num() - 1;
 
@@ -1223,8 +1128,6 @@ PVRSRV_ERROR MTKMFGSystemInit(void)
 	gpu_cust_upbound_freq =
 	mt_gpufreq_get_frequency_by_level(g_cust_upbound_freq_id);
 
-	gpu_debug_enable = 0;
-
 	mt_gpufreq_input_boost_notify_registerCB(MTKFreqInputBoostCB);
 	mt_gpufreq_power_limit_notify_registerCB(MTKFreqPowerLimitCB);
 
@@ -1392,6 +1295,7 @@ int MTKRGXDeviceDeInit(PVRSRV_DEVICE_CONFIG *psDevConfig)
 
 void MTKFWDump(void)
 {
+#if 0
 	PVRSRV_DEVICE_NODE *psDevNode = MTKGetRGXDevNode();
 
 	if (psDevNode) {
@@ -1399,6 +1303,7 @@ void MTKFWDump(void)
 		PVRSRVDebugRequest(psDevNode, DEBUG_REQUEST_VERBOSITY_MAX, NULL, NULL);
 		MTK_PVRSRVDebugRequestSetSilence(IMG_FALSE);
 	}
+#endif
 }
 EXPORT_SYMBOL(MTKFWDump);
 
@@ -1437,7 +1342,6 @@ module_param(gpu_freq, uint, 0644);
 #endif
 
 module_param(gpu_power, uint, 0644);
-module_param(gpu_debug_enable, uint, 0644);
 
 
 #ifdef CONFIG_MTK_SEGMENT_TEST
