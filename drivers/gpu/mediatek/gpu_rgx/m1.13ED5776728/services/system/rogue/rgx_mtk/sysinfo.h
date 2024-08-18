@@ -75,19 +75,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #define SYS_PHYS_HEAP_COUNT		1
 
-#if defined(CONFIG_MACH_MT8173)
-#define SYS_RGX_OF_COMPATIBLE	"mediatek,mt8173-han"
-#elif defined(CONFIG_MACH_MT8167)
-#define SYS_RGX_OF_COMPATIBLE	"mediatek,mt8167-clark"
-#elif defined(CONFIG_MACH_MT6739)
-#define SYS_RGX_OF_COMPATIBLE	"mediatek,AUCKLAND"
-#elif defined(CONFIG_MACH_MT6765)
+#if defined(CONFIG_MACH_MT6765)
 #define SYS_RGX_OF_COMPATIBLE	"mediatek,doma"
-#elif defined(CONFIG_MACH_MT6761)
-#define SYS_RGX_OF_COMPATIBLE   "mediatek,clark"
-#elif defined(CONFIG_MACH_MT6779)
-#define SYS_RGX_OF_COMPATIBLE   "mediatek,lorne"
-#else
 #endif
 
 #if defined(__linux__)

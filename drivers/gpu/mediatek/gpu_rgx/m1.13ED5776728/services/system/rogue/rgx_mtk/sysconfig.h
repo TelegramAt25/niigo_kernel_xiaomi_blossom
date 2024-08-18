@@ -55,25 +55,9 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #define RGX_HW_SYSTEM_NAME "RGX HW"
 
-#if defined(CONFIG_MACH_MT8173)
-#define RGX_HW_CORE_CLOCK_SPEED			(455000000)
-#define SYS_RGX_ACTIVE_POWER_LATENCY_MS (30)
-#elif defined(CONFIG_MACH_MT8167)
-#define RGX_HW_CORE_CLOCK_SPEED			(500000000)
-#define SYS_RGX_ACTIVE_POWER_LATENCY_MS (50)
-#elif defined(CONFIG_MACH_MT6739)
-#define RGX_HW_CORE_CLOCK_SPEED			(481000000)
-#define SYS_RGX_ACTIVE_POWER_LATENCY_MS (3)
-#elif defined(CONFIG_MACH_MT6765)
+#if defined(CONFIG_MACH_MT6765)
 #define RGX_HW_CORE_CLOCK_SPEED			(400000000)
 #define SYS_RGX_ACTIVE_POWER_LATENCY_MS (3)
-#elif defined(CONFIG_MACH_MT6761)
-#define RGX_HW_CORE_CLOCK_SPEED			(460000000)
-#define SYS_RGX_ACTIVE_POWER_LATENCY_MS (3)
-#elif defined(CONFIG_MACH_MT6779)
-#define RGX_HW_CORE_CLOCK_SPEED			(100000000)
-#define SYS_RGX_ACTIVE_POWER_LATENCY_MS (3)
-#else
 #endif
 
 #if defined(MTK_CONFIG_OF) && defined(CONFIG_OF)
@@ -86,17 +70,8 @@ int MTKSysGetIRQ(void);
 #define SYS_MTK_RGX_REGS_SYS_PHYS_BASE      0x13000000
 #define SYS_MTK_RGX_REGS_SIZE               0x80000
 
-#if defined(CONFIG_MACH_MT8173)
-#define SYS_MTK_RGX_IRQ                     0x102
-#elif defined(CONFIG_MACH_MT8167)
-#define SYS_MTK_RGX_IRQ                     0xDB
-#elif defined(CONFIG_MACH_MT6739)
-#define SYS_MTK_RGX_IRQ                     0x150
-#elif defined(CONFIG_MACH_MT6765)
+#if defined(CONFIG_MACH_MT6765)
 #define SYS_MTK_RGX_IRQ                     0x103
-#elif defined(CONFIG_MACH_MT6779)
-#define SYS_MTK_RGX_IRQ                     0x130
-#else
 #endif
 
 #endif
