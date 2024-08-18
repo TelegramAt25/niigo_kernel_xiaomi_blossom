@@ -29,11 +29,6 @@ $(PVRSRVKM_NAME)-y += \
 	services/system/rogue/$(PVR_SYSTEM)/sysconfig.o \
 	services/system/rogue/$(PVR_SYSTEM)/$(MTK_PLATFORM)/mtk_mfgsys.o
 
-ifeq ($(MTK_PLATFORM),mt6739)
-$(PVRSRVKM_NAME)-y += \
-	services/system/rogue/$(PVR_SYSTEM)/$(MTK_PLATFORM)/mtk_mfg_counter.o
-endif
-
 ccflags-y += \
 	-I$(TOP)/services/system/rogue/$(PVR_SYSTEM) \
 	-I$(TOP)/services/system/rogue/$(PVR_SYSTEM)/$(MTK_PLATFORM) \
