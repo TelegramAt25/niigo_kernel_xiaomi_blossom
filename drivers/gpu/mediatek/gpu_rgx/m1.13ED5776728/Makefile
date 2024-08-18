@@ -65,7 +65,6 @@ pvrsrvkm-y += \
 	services/system/rogue/rgx_mtk/ion_support.o \
 	services/system/rogue/rgx_mtk/sysconfig.o \
 	services/system/rogue/rgx_mtk/$(MTK_PLATFORM)/mtk_mfgsys.o \
-	services/system/rogue/rgx_mtk/mtk_pp.o \
 	services/system/rogue/common/vmm_type_stub.o \
 	services/system/rogue/common/env/linux/interrupt_support.o \
 	services/system/rogue/common/env/linux/dma_support.o \
