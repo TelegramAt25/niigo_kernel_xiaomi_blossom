@@ -12,10 +12,8 @@
 #define ENABLE_MPU	1
 #define ENABLE_ELM	1
 #define ENABLE_MBW	0
-#define DECS_ON_SSPM
 /* #define ENABLE_BWL_CONFIG */
 /* #define ENABLE_MPU_SLVERR */
-#define DBG_INFO_READY  1
 
 /* IRQ from device tree */
 #define MPU_IRQ_INDEX	0
