@@ -25,11 +25,6 @@
 #include <smi_public.h>
 #include <smi_pmqos.h>
 #include <mmdvfs_pmqos.h>
-#if IS_ENABLED(CONFIG_MTK_EMI)
-#include <plat_debug_api.h>
-#elif IS_ENABLED(CONFIG_MTK_EMI_BWL)
-#include <emi_mbw.h>
-#endif
 #if IS_ENABLED(CONFIG_MTK_IOMMU_V2)
 //#include <mach/mt_iommu.h>
 #elif IS_ENABLED(CONFIG_MTK_M4U)
@@ -471,9 +466,6 @@ s32 smi_debug_bus_hang_detect(const bool gce, const char *user)
 	u32 time = 5, busy[SMI_DEV_NUM] = {0};
 	s32 i, j, ret = 0;
 
-#if IS_ENABLED(CONFIG_MTK_EMI) || IS_ENABLED(CONFIG_MTK_EMI_BWL)
-	dump_emi_outstanding();
-#endif
 #if IS_ENABLED(CONFIG_MTK_IOMMU_V2)
 	//mtk_dump_reg_for_hang_issue();
 #elif IS_ENABLED(CONFIG_MTK_M4U)
