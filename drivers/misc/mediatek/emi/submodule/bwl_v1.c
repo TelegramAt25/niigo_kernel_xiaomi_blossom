@@ -16,9 +16,6 @@
 #include <mt_emi.h>
 #include <bwl_platform.h>
 #include "bwl_v1.h"
-#if DBG_INFO_READY
-#include <plat_dbg_info.h>
-#endif
 #ifdef DECS_ON_SSPM
 #include <dramc.h>
 #endif
@@ -324,10 +321,6 @@ void bwl_init(struct platform_driver *emi_ctrl)
 	CEN_EMI_BASE = mt_cen_emi_base_get();
 	for (i = 0; i < MAX_CH; i++)
 		CHN_EMI_BASE[i] = mt_chn_emi_base_get(i);
-
-#if (defined(DECS_ON_SSPM) && DBG_INFO_READY)
-	LAST_EMI_BASE = get_dbg_info_base(0xE31C);
-#endif
 
 	env = decode_bwl_env(get_dram_type(), get_ch_num(), get_rk_num());
 	env_cen_reg = cen_reg[env];
