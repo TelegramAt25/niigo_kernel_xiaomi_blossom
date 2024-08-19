@@ -299,7 +299,7 @@ static void write_cmos_sensor(kal_uint32 addr, kal_uint32 para)
 {
 	char pu_send_cmd[2] = {(char)(addr & 0xFF), (char)(para & 0xFF)};
 
-	pr_no_err("addr val = 0x%x, value = 0x%x=======================================\n",
+	pr_err("addr val = 0x%x, value = 0x%x=======================================\n",
 		addr, para);
 	iWriteRegI2C(pu_send_cmd, 2, imgsensor.i2c_write_id);
 }
