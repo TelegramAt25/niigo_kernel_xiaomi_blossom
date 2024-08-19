@@ -161,13 +161,13 @@
  * ESD check & protection
  * default: disable
  */
-#define FTS_ESDCHECK_EN                         1
+#define FTS_ESDCHECK_EN                         0
 
 /*
  * Production test enable
  * 1: enable, 0:disable(default)
  */
-#define FTS_TEST_EN                             1
+#define FTS_TEST_EN                             0
 
 /*
  * Pinctrl enable
