@@ -1207,6 +1207,7 @@ EXPORT_SYMBOL(lct_fts_get_tpfwver);
 int lct_fts_tp_selftest_callback(unsigned char cmd)
 {
     int ret = 0;
+#if FTS_TEST_EN
     switch (cmd) {
     case TP_SELFTEST_CMD_LONGCHEER_MMI:
         ret = lct_tp_selftest_all();
@@ -1223,6 +1224,7 @@ int lct_fts_tp_selftest_callback(unsigned char cmd)
     default:
         break;
     }
+#endif
     return ret;
 }
 EXPORT_SYMBOL(lct_fts_tp_selftest_callback);
