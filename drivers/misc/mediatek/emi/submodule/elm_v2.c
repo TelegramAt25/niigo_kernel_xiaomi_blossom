@@ -19,9 +19,6 @@
 #include <mt-plat/sync_write.h>
 #include <emi_io.h>
 #include <mt_emi.h>
-#if DBG_INFO_READY
-#include <plat_dbg_info.h>
-#endif
 
 static struct dentry *emi_mbw_dir;
 static struct dentry *dump_buf;
@@ -66,11 +63,7 @@ void elm_init(struct platform_driver *emi_ctrl, struct platform_device *pdev)
 
 	pr_info("[ELM] initialize EMI ELMv2\n");
 
-#if DBG_INFO_READY
-	LAST_EMI_BASE = get_dbg_info_base(0xE31C);
-#else
 	LAST_EMI_BASE = NULL;
-#endif
 	if (!LAST_EMI_BASE) {
 		pr_err("[ELM] get LAST_EMI_BASE fail\n");
 		return;
