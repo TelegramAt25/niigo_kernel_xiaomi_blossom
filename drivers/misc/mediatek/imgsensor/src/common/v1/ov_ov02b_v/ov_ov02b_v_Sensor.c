@@ -1223,7 +1223,7 @@ static kal_uint32 get_imgsensor_id(UINT32 *sensor_id)
     kal_uint8 flag = 0;
     flag = read_vendor_id_ov02b();
     if (0 == flag){
-        pr_no_err("%s %d ov02b_i match vendor id failed\n",__func__, __LINE__);
+        pr_err("%s %d ov02b_i match vendor id failed\n",__func__, __LINE__);
         return ERROR_SENSOR_CONNECT_FAIL;
         }
     while (imgsensor_info.i2c_addr_table[i] != 0xff) {
