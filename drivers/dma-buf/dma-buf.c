@@ -126,50 +126,6 @@ static struct file_system_type dma_buf_fs_type = {
 	.kill_sb = kill_anon_super,
 };
 
-static int dma_buf_release(struct inode *inode, struct file *file)
-{
-	struct dma_buf *dmabuf;
-	int dtor_ret = 0;
-
-	if (!is_dma_buf_file(file))
-		return -EINVAL;
-
-	dmabuf = file->private_data;
-
-	BUG_ON(dmabuf->vmapping_counter);
-
-	/*
-	 * Any fences that a dma-buf poll can wait on should be signaled
-	 * before releasing dma-buf. This is the responsibility of each
-	 * driver that uses the reservation objects.
-	 *
-	 * If you hit this BUG() it means someone dropped their ref to the
-	 * dma-buf while still having pending operation to the buffer.
-	 */
-	BUG_ON(dmabuf->cb_shared.active || dmabuf->cb_excl.active);
-
-	mutex_lock(&db_list.lock);
-	list_del(&dmabuf->list_node);
-	mutex_unlock(&db_list.lock);
-
-	if (dmabuf->dtor)
-		dtor_ret = dmabuf->dtor(dmabuf, dmabuf->dtor_data);
-
-	if (!dtor_ret)
-		dmabuf->ops->release(dmabuf);
-	else
-		pr_warn_ratelimited("Leaking dmabuf %s because destructor failed error:%d\n",
-				    dmabuf->name, dtor_ret);
-
-	if (dmabuf->resv == (struct reservation_object *)&dmabuf[1])
-		reservation_object_fini(dmabuf->resv);
-
-	module_put(dmabuf->owner);
-	kfree(dmabuf->name);
-	kfree(dmabuf);
-	return 0;
-}
-
 static int dma_buf_mmap_internal(struct file *file, struct vm_area_struct *vma)
 {
 	struct dma_buf *dmabuf;
