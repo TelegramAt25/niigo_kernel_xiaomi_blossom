@@ -876,7 +876,7 @@ void rebuild_sched_domains(void)
 {
 	get_online_cpus();
 	mutex_lock(&cpuset_mutex);
-	rebuild_sched_domains_locked();
+	rebuild_sched_domains_cpuslocked();
 	mutex_unlock(&cpuset_mutex);
 	put_online_cpus();
 }
