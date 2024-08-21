@@ -320,14 +320,14 @@ static void lcm_get_params(struct LCM_PARAMS *params)
 
 static void lcm_init_power(void)
 {
-	pr_info("[LCM]%s\n",__func__);
+	pr_debug("[LCM]%s\n",__func__);
 	lcd_bl_en = 1;
 }
 
 
 static void lcm_suspend_power(void)
 {
-	pr_info("[LCM]%s\n",__func__);
+	pr_debug("[LCM]%s\n",__func__);
 
 	disp_dts_gpio_select_state(DTS_GPIO_STATE_LCD_BIAS_ENN0);
 	MDELAY(2);
@@ -337,7 +337,7 @@ static void lcm_suspend_power(void)
 
 static void lcm_resume_power(void)
 {
-	pr_info("[LCM]%s\n",__func__);
+	pr_debug("[LCM]%s\n",__func__);
 
 }
 
@@ -391,7 +391,7 @@ static void lcm_init(void)
 
 static void lcm_suspend(void)
 {
-	pr_info("[LCM]%s\n",__func__);
+	pr_debug("[LCM]%s\n",__func__);
 	push_table(lcm_suspend_setting,
 		sizeof(lcm_suspend_setting) / sizeof(struct LCM_setting_table),
 			1);
@@ -399,7 +399,7 @@ static void lcm_suspend(void)
 
 static void lcm_resume(void)
 {
-	pr_info("[LCM]%s\n",__func__);
+	pr_debug("[LCM]%s\n",__func__);
 	lcm_init();
 }
 
@@ -463,7 +463,7 @@ static unsigned int lcm_compare_id(void)
 	id1 = buffer[1];     /* we only need ID */
 	id2 = buffer[2];     /* we only need ID */
 
-	pr_info("[LCM]%s,nt36525b id0 = 0x%x,id1 = 0x%x, id2 = 0x%x\n",
+	pr_debug("[LCM]%s,nt36525b id0 = 0x%x,id1 = 0x%x, id2 = 0x%x\n",
 		 __func__, id0,id1,id2);
 	if(id0 == 0x00 && id1 == 0x80 && id2 == 0x00)
 		return 1;
@@ -552,7 +552,7 @@ static unsigned int lcm_ata_check(unsigned char *buffer)
 static void lcm_setbacklight_cmdq(void *handle, unsigned int level)
 {
 
-	pr_info("[LCM]%s,nt36525b backlight: level = %d lcd_bl_en = %d\n", __func__, level,lcd_bl_en);
+	pr_debug("[LCM]%s,nt36525b backlight: level = %d lcd_bl_en = %d\n", __func__, level,lcd_bl_en);
 	if((0 != level) && (level <= 14))
 		level = 14;
 	level = level*72/100;
