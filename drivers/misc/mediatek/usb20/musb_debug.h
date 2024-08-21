@@ -30,7 +30,7 @@
 #define xprintk(level,  format, args...) do { \
 		pr_debug("[MUSB]%s %d: " format, \
 			__func__, __LINE__, ## args); \
-	} } while (0)
+	} while (0)
 
 extern unsigned int musb_debug;
 extern unsigned int musb_debug_limit;
@@ -48,7 +48,7 @@ static inline int _dbg_level(unsigned int level)
 
 #define DBG_LIMIT(FREQ, fmt, args...) do {\
 		DBG(0, fmt "<unlimit>\n", ## args);\
-} while (0)\
+} while (0)
 
 /* extern const char *otg_state_string(struct musb *); */
 extern int musb_init_debugfs(struct musb *musb)  __attribute__((weak));
