@@ -338,13 +338,13 @@ static void lcm_get_params(struct LCM_PARAMS *params)
 
 static void lcm_init_power(void)
 {
-	no_printk("[LCM]%s\n",__func__);
+	pr_debug("[LCM]%s\n",__func__);
 	lcd_bl_en = 1;
 }
 
 static void lcm_suspend_power(void)
 {
-	no_printk("[LCM]%s\n",__func__);
+	pr_debug("[LCM]%s\n",__func__);
 
 	if (tpd_gesture_flag) {
 		return;
@@ -358,7 +358,7 @@ static void lcm_suspend_power(void)
 
 static void lcm_resume_power(void)
 {
-	no_printk("[LCM]%s\n",__func__);
+	pr_debug("[LCM]%s\n",__func__);
 }
 
 static void lcm_init(void)
@@ -396,7 +396,7 @@ static void lcm_init(void)
 
 static void lcm_suspend(void)
 {
-	no_printk("[LCM]%s,tpd_gesture_flag = %d\n",__func__,tpd_gesture_flag);
+	pr_debug("[LCM]%s,tpd_gesture_flag = %d\n",__func__,tpd_gesture_flag);
 #if defined(CONFIG_TOUCHSCREEN_COMMON)
 	if (tpd_gesture_flag){
 		push_table(lcm_suspend_gesture_setting,
@@ -416,7 +416,7 @@ static void lcm_suspend(void)
 
 static void lcm_resume(void)
 {
-	no_printk("[LCM]%s\n",__func__);
+	pr_debug("[LCM]%s\n",__func__);
 	lcm_init();
 }
 
@@ -478,7 +478,7 @@ static unsigned int lcm_compare_id(void)
 	id1 = buffer[1];     /* we only need ID */
 	id2 = buffer[2];     /* we only need ID */
 
-	no_printk("[LCM]%s,icnl9911c id0 = 0x%x,id1 = 0x%x, id2 = 0x%x\n",
+	pr_debug("[LCM]%s,icnl9911c id0 = 0x%x,id1 = 0x%x, id2 = 0x%x\n",
 		 __func__, id0,id1,id2);
 	if(id0 == 0x00 && id1 == 0x80 && id2 == 0x00)
 		return 1;
@@ -501,10 +501,10 @@ static unsigned int lcm_esd_check(void)
 	read_reg_v2(0x0A, buffer, 1);
 
 	if (buffer[0] != 0x9C) {
-		pr_warn("[LCM][LCM ERROR] [0x0A]=0x%02x\n", buffer[0]);
+		pr_debug("[LCM][LCM ERROR] [0x0A]=0x%02x\n", buffer[0]);
 		return TRUE;
 	}
-	no_printk("[LCM][LCM NORMAL] [0x0A]=0x%02x\n", buffer[0]);
+	pr_debug("[LCM][LCM NORMAL] [0x0A]=0x%02x\n", buffer[0]);
 	return FALSE;
 #else
 	return FALSE;
@@ -527,7 +527,7 @@ static unsigned int lcm_ata_check(unsigned char *buffer)
 	unsigned int data_array[3];
 	unsigned char read_buf[4];
 
-	no_printk("[LCM]ATA check size = 0x%x,0x%x,0x%x,0x%x\n",
+	pr_debug("[LCM]ATA check size = 0x%x,0x%x,0x%x,0x%x\n",
 			x0_MSB, x0_LSB, x1_MSB, x1_LSB);
 	data_array[0] = 0x0005390A;	/* HS packet */
 	data_array[1] = (x1_MSB << 24) | (x0_LSB << 16) | (x0_MSB << 8) | 0x2a;
@@ -567,7 +567,7 @@ static unsigned int lcm_ata_check(unsigned char *buffer)
 static void lcm_setbacklight_cmdq(void *handle, unsigned int level)
 {
 
-	no_printk("[LCM]%s,icnl9911c backlight: level = %d lcd_bl_en = %d\n", __func__, level, lcd_bl_en);
+	pr_debug("[LCM]%s,icnl9911c backlight: level = %d lcd_bl_en = %d\n", __func__, level, lcd_bl_en);
 	if((0 != level) && (level <= 14))
 		level = 14;
 	level = level*72/100;
