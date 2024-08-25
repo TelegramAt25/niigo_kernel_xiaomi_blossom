@@ -8139,18 +8139,9 @@ static long ISP_ioctl(struct file *pFile, unsigned int Cmd, unsigned long Param)
 			unsigned long long reg_trans_Time;
 			unsigned long long sum;
 
-			ccu_get_timestamp(&hwTickCnt_ccu_direct[0],
-				&hwTickCnt_ccu_direct[1]);
-
-			pr_debug("hwTickCnt_ccu_direct[0]:%u,hwTickCnt_ccu_direct[1]:%u",
-				hwTickCnt_ccu_direct[0],
-				hwTickCnt_ccu_direct[1]);
-
 			sum =
 			(unsigned long long)hwTickCnt_ccu_direct[0] +
 			((unsigned long long)hwTickCnt_ccu_direct[1]<<32);
-
-			pr_debug("sum of hwTickCnt:%llu", sum);
 
 			if (sum == 0) {
 				globaltime[0] = 0;
