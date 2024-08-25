@@ -133,13 +133,13 @@ static u32 target_clk;
 /*#define ENABLE_WAITIRQ_LOG*/       /* wait irq debug logs */
 /*#define ENABLE_STT_IRQ_LOG*/       /*show STT irq debug logs */
 /* Queue timestamp for deque. Update when non-drop frame @SOF */
-#define TIMESTAMP_QUEUE_EN          (1)
+#define TIMESTAMP_QUEUE_EN          (0)
 #if (TIMESTAMP_QUEUE_EN == 1)
 #define TSTMP_SUBSAMPLE_INTPL		(1)
 #else
 #define TSTMP_SUBSAMPLE_INTPL		(0)
 #endif
-#define ISP_BOTTOMHALF_WORKQ		(0)
+#define ISP_BOTTOMHALF_WORKQ		(1)
 
 #if (ISP_BOTTOMHALF_WORKQ == 1)
 #include <linux/workqueue.h>
