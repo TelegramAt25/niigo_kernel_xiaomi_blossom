@@ -122,7 +122,7 @@
 
 //tp selftest for HUAQIN only
 //use: cat /sys/device/platform/tp_wake_switch/factory_check
-#define CONFIG_CTS_TEST_FOR_HQ
+//#define CONFIG_CTS_TEST_FOR_HQ
 
 
 /* ESD protection */
