@@ -36,7 +36,7 @@
 * Macro definitions using #define
 *****************************************************************************/
 
-#define FTS_TP_DATA_DUMP_EN                     //create procfs /proc/tp_data_dump
+//#define FTS_TP_DATA_DUMP_EN                     //create procfs /proc/tp_data_dump
 
 #define FTS_INI_FILE_PATH                       "/vendor/firmware"
 #define FTS_TEST_FILE_PATH                      "/data/vendor/touchpad/"
