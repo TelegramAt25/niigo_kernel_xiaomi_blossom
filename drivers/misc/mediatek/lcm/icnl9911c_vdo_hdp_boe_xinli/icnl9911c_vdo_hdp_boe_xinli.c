@@ -365,7 +365,6 @@ static void lcm_init(void)
 {
 	unsigned char cmd = 0x0;
 	unsigned char data = 0xFF;
-	int ret = 0;
 
 	disp_dts_gpio_select_state(DTS_GPIO_STATE_LCD_BIAS_ENP1);
 	UDELAY(250);
