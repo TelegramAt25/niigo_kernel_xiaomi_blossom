@@ -26,11 +26,9 @@
 #define mtktspmic_info(fmt, args...)   do {} while (0)
 
 
-#define mtktspmic_dprintk(fmt, args...)   \
-	do {								\
-		if (mtktspmic_debug_log == 1) {				\
-			pr_notice("[Thermal/TZ/PMIC] " fmt, ##args); \
-		}							\
+#define mtktspmic_dprintk(fmt, args...)   			\
+	do {							\
+		pr_debug("[Thermal/TZ/PMIC] " fmt, ##args);	\
 	} while (0)
 
 extern int mtktspmic_debug_log;

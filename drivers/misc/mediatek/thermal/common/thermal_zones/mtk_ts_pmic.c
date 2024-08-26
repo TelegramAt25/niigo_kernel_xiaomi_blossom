@@ -674,7 +674,7 @@ static int mtk_ts_pmic_probe(struct platform_device *pdev)
 	struct proc_dir_entry *mtktspmic_dir = NULL;
 	struct mt6397_chip *chip;
 
-	mtktspmic_debug_log = 1;
+	mtktspmic_debug_log = 0;
 
 	chip = (struct mt6397_chip *)dev_get_drvdata(pdev->dev.parent);
 	mtktspmic_info("[%s]\n", __func__);
