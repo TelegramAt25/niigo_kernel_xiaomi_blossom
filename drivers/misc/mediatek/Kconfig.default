@@ -8,7 +8,6 @@ config ANDROID_DEFAULT_SETTING
 	select ANDROID_BINDER_IPC
 	select ARMV8_DEPRECATED if ARM64
 	select ASHMEM
-	select AUDIT
 	select BINFMT_ELF
 	select BINFMT_SCRIPT
 	select BLK_DEV_DM
