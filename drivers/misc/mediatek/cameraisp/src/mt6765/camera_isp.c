@@ -14244,6 +14244,7 @@ irqreturn_t ISP_Irq_CAM_A(signed int Irq, void *DeviceId)
 	if ((IrqStatus & HW_PASS1_DON_ST) || (IrqStatus & SOF_INT_ST))
 		cur_v_cnt = ISP_RD32_TG_CAM_FRM_CNT(module, reg_module);
 
+#if 0
 	if ((IrqStatus & HW_PASS1_DON_ST) && (IrqStatus & SOF_INT_ST)) {
 		if (cur_v_cnt != sof_count[module])
 			IRQ_LOG_KEEPER(module, m_CurrentPPB, _LOG_INF,
@@ -14258,6 +14259,7 @@ irqreturn_t ISP_Irq_CAM_A(signed int Irq, void *DeviceId)
 			    (sof_count[module]) ?
 			    (sof_count[module] - 1) : (sof_count[module]));
 	}
+#endif
 
 	spin_lock(&(IspInfo.SpinLockIrq[module]));
 	if (IrqStatus & VS_INT_ST) {
@@ -14277,6 +14279,7 @@ irqreturn_t ISP_Irq_CAM_A(signed int Irq, void *DeviceId)
 		IspInfo.IrqInfo.LastestSigTime_sec[module][10] =
 			(unsigned int)(sec);
 
+#if 0
 		if (IspInfo.DebugMask & ISP_DBG_INT) {
 			/*SW p1_don is not reliable*/
 			if (FrameStatus[module] != CAM_FST_DROP_FRAME) {
@@ -14291,6 +14294,7 @@ irqreturn_t ISP_Irq_CAM_A(signed int Irq, void *DeviceId)
 					(unsigned int)(fbc_ctrl2[1].Raw));
 			}
 		}
+#endif
 
 		#if (TSTMP_SUBSAMPLE_INTPL == 1)
 		if (g1stSwP1Done[module] == MTRUE) {
@@ -14600,6 +14604,7 @@ irqreturn_t ISP_Irq_CAM_A(signed int Irq, void *DeviceId)
 			}
 			#endif /* (TIMESTAMP_QUEUE_EN == 1) */
 
+#if 0
 			IRQ_LOG_KEEPER(module, m_CurrentPPB, _LOG_INF,
 				"CAMA P1_SOF_%d_%d(0x%x_0x%x,0x%x_0x%x,0x%x,0x%x,0x%x),int_us:%d,cq:0x%x\n",
 				   sof_count[module], cur_v_cnt,
@@ -14631,16 +14636,18 @@ irqreturn_t ISP_Irq_CAM_A(signed int Irq, void *DeviceId)
 				    ISP_RD32(CAM_REG_FBC_PSO_CTL1(reg_module)),
 				    ISP_RD32(CAM_REG_FBC_PSO_CTL2(reg_module)));
 #endif
+#endif
 			/* keep current time */
 			m_sec = sec;
 			m_usec = usec;
 
+#if 0
 			/* dbg information only */
 			if (cur_v_cnt !=
 			    ISP_RD32_TG_CAM_FRM_CNT(module, reg_module))
 				IRQ_LOG_KEEPER(module, m_CurrentPPB, _LOG_INF,
 					"SW ISR right on next hw p1_done\n");
-
+#endif
 		}
 
 		/* update SOF time stamp for eis user(need match with the time
