@@ -188,11 +188,7 @@ ccflags-y += -D WMT_UART_RX_MODE_WORK=0 # 1. work thread 0. tasklet
 ccflags-y += -D WMT_SDIO_MODE=1
 ccflags-y += -D WMT_CREATE_NODE_DYNAMIC=1
 
-ifneq ($(TARGET_BUILD_VARIANT),eng)
-ifeq ($(CONFIG_EXTREME_LOW_RAM), y)
 ccflags-y += -DLOG_STP_DEBUG_DISABLE
-endif
-endif
 
 ifneq ($(TARGET_BUILD_VARIANT), user)
     ccflags-y += -D WMT_DBG_SUPPORT=1
