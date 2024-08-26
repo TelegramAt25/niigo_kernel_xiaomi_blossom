@@ -1411,7 +1411,6 @@ s32 cmdq_mdp_handle_flush(struct cmdqRecStruct *handle)
 {
 	s32 status;
 
-	CMDQ_TRACE_FORCE_BEGIN("%s %llx\n", __func__, handle->engineFlag);
 	CMDQ_MSG("%s %llx\n", __func__, handle->engineFlag);
 	if (handle->profile_exec)
 		cmdq_pkt_perf_end(handle->pkt);
@@ -1438,7 +1437,6 @@ s32 cmdq_mdp_handle_flush(struct cmdqRecStruct *handle)
 	 */
 	CMDQ_MSG("%s flush impl\n", __func__);
 	status = cmdq_mdp_flush_async_impl(handle);
-	CMDQ_TRACE_FORCE_END();
 	return status;
 }
 
@@ -1450,8 +1448,6 @@ s32 cmdq_mdp_flush_async(struct cmdqCommandStruct *desc, bool user_space,
 	s32 err;
 	u32 copy_size;
 	const u64 inorder_mask = 1ll << CMDQ_ENG_INORDER;
-
-	CMDQ_TRACE_FORCE_BEGIN("%s\n", __func__);
 
 	cmdq_task_create(desc->scenario, &handle);
 	/* force assign buffer pool since mdp task assign clients later
@@ -1500,7 +1496,6 @@ s32 cmdq_mdp_flush_async(struct cmdqCommandStruct *desc, bool user_space,
 			copy_size, user_space);
 		if (err < 0) {
 			cmdq_task_destroy(handle);
-			CMDQ_TRACE_FORCE_END();
 			return err;
 		}
 	}
@@ -1517,7 +1512,6 @@ s32 cmdq_mdp_flush_async(struct cmdqCommandStruct *desc, bool user_space,
 			(u32 *)(unsigned long)desc->regRequest.regAddresses);
 		if (err < 0) {
 			cmdq_task_destroy(handle);
-			CMDQ_TRACE_FORCE_END();
 			return err;
 		}
 	}
@@ -1541,7 +1535,6 @@ s32 cmdq_mdp_flush_async(struct cmdqCommandStruct *desc, bool user_space,
 		2 * CMDQ_INST_SIZE, user_space);
 	if (err < 0) {
 		cmdq_task_destroy(handle);
-		CMDQ_SYSTRACE_END();
 		return err;
 	}
 
@@ -1556,8 +1549,6 @@ s32 cmdq_mdp_flush_async(struct cmdqCommandStruct *desc, bool user_space,
 	 * holds same engines.
 	 */
 	cmdq_mdp_flush_async_impl(handle);
-
-	CMDQ_TRACE_FORCE_END();
 
 	return 0;
 }
@@ -1625,8 +1616,6 @@ s32 cmdq_mdp_wait(struct cmdqRecStruct *handle,
 	u32 i;
 	u64 exec_cost;
 
-	CMDQ_TRACE_FORCE_BEGIN("%s\n", __func__);
-
 	/* we have to wait handle has valid thread first */
 	if (handle->thread == CMDQ_INVALID_THREAD) {
 		CMDQ_LOG("pid:%d handle:0x%p wait for valid thread first\n",
@@ -1653,7 +1642,6 @@ s32 cmdq_mdp_wait(struct cmdqRecStruct *handle,
 				 */
 				list_del_init(&handle->list_entry);
 				mutex_unlock(&mdp_task_mutex);
-				CMDQ_TRACE_FORCE_END();
 				return -ETIMEDOUT;
 			}
 			/* valid thread, so we keep going */
@@ -1697,8 +1685,6 @@ s32 cmdq_mdp_wait(struct cmdqRecStruct *handle,
 
 	/* consume again since maybe more conflict task in waiting */
 	cmdq_mdp_add_consume_item();
-
-	CMDQ_TRACE_FORCE_END();
 
 	return status;
 }

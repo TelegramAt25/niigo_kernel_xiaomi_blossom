@@ -17,11 +17,6 @@
 #include "mtk_perfmgr_internal.h"
 #include "load_track.h"
 
-#ifdef CONFIG_TRACING
-#include <linux/kallsyms.h>
-#include <linux/trace_events.h>
-#endif
-
 #define MAX_NR_FREQ 16
 
 /* Configurable */
@@ -92,16 +87,7 @@ static void set_cfp_ppm(struct ppm_limit_data *desired_freq, int headroom_opp)
 		} else {
 			cfp_freq[clu_idx].max = desired_freq[clu_idx].max;
 		}
-#ifdef CONFIG_TRACING
-		perfmgr_trace_count(cfp_freq[clu_idx].min,
-			"cfp_min%d", clu_idx);
-		perfmgr_trace_count(cfp_freq[clu_idx].max,
-			"cfp_max%d", clu_idx);
-#endif
 	}
-#ifdef CONFIG_TRACING
-	perfmgr_trace_count(cc_is_ceiled, "cfp_ceiled");
-#endif
 	mt_ppm_userlimit_cpu_freq(perfmgr_clusters, cfp_freq);
 }
 
@@ -139,12 +125,6 @@ static void cfp_lt_callback(int loading)
 			set_cfp_ppm(cc_freq, cfp_curr_headroom_opp);
 		}
 	}
-#ifdef CONFIG_TRACING
-	perfmgr_trace_count(cfp_curr_loading, "cfp_loading");
-	perfmgr_trace_count(cfp_curr_headroom_opp, "cfp_headroom_opp");
-	perfmgr_trace_count(cfp_curr_up_time, "cfp_up_time");
-	perfmgr_trace_count(cfp_curr_down_time, "cfp_down_time");
-#endif
 
 	cfp_unlock(__func__);
 }

@@ -17,11 +17,6 @@
 //#include <mt-plat/mtk_sched.h>
 #include <linux/sched.h>
 
-#ifdef CONFIG_TRACING
-#include <linux/kallsyms.h>
-#include <linux/trace_events.h>
-#endif
-
 /* boost value */
 static struct mutex boost_eas;
 

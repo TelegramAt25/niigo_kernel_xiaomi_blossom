@@ -4907,9 +4907,6 @@ s32 cmdq_pkt_wait_flush_ex_result(struct cmdqRecStruct *handle)
 	}
 
 
-	CMDQ_SYSTRACE_BEGIN("%s_wait_done\n", __func__);
-	handle->beginWait = sched_clock();
-
 	client = cmdq_clients[(u32)handle->thread];
 	if (!client->chan->mbox || !client->chan->mbox->dev)
 		CMDQ_AEE("CMDQ",
@@ -4964,9 +4961,6 @@ s32 cmdq_pkt_wait_flush_ex_result(struct cmdqRecStruct *handle)
 		count++;
 	} while (1);
 
-	handle->wakedUp = sched_clock();
-	CMDQ_SYSTRACE_END();
-
 	if (handle->profile_exec) {
 		u32 *va = cmdq_pkt_get_perf_ret(handle->pkt);
 
@@ -4999,11 +4993,9 @@ s32 cmdq_pkt_wait_flush_ex_result(struct cmdqRecStruct *handle)
 		MMPROFILE_FLAG_PULSE, ((unsigned long)handle),
 		handle->wakedUp - handle->beginWait);
 
-	CMDQ_SYSTRACE_BEGIN("%s_wait_release\n", __func__);
 	cmdq_core_track_handle_record(handle, handle->thread);
 	cmdq_pkt_release_handle(handle);
 
-	CMDQ_SYSTRACE_END();
 	CMDQ_PROF_MMP(cmdq_mmp_get_event()->wait_task_clean,
 		MMPROFILE_FLAG_PULSE, ((unsigned long)handle->pkt),
 		(unsigned long)handle->pkt);
@@ -5144,7 +5136,6 @@ static s32 cmdq_pkt_flush_async_ex_impl(struct cmdqRecStruct *handle,
 	/* TODO: remove pmqos in seure path */
 	if (!handle->secData.is_secure) {
 		/* PMQoS */
-		CMDQ_SYSTRACE_BEGIN("%s_pmqos\n", __func__);
 		mutex_lock(&cmdq_thread_mutex);
 		ctx = cmdq_core_get_context();
 		handle_count = ctx->thread[(u32)handle->thread].handle_count;
@@ -5166,10 +5157,8 @@ static s32 cmdq_pkt_flush_async_ex_impl(struct cmdqRecStruct *handle,
 		kfree(pmqos_handle_list);
 		ctx->thread[(u32)handle->thread].handle_count++;
 		mutex_unlock(&cmdq_thread_mutex);
-		CMDQ_SYSTRACE_END();
 	}
 
-	CMDQ_SYSTRACE_BEGIN("%s\n", __func__);
 	cmdq_core_replace_v3_instr(handle, handle->thread);
 	if (handle->pkt->cl != client) {
 		CMDQ_LOG("cl:%p not same client:%p\n", handle->pkt->cl, client);
@@ -5177,7 +5166,6 @@ static s32 cmdq_pkt_flush_async_ex_impl(struct cmdqRecStruct *handle,
 	}
 	err = cmdq_pkt_flush_async(handle->pkt, cmdq_pkt_flush_handler,
 		(void *)handle);
-	CMDQ_SYSTRACE_END();
 
 	if (err < 0) {
 		CMDQ_ERR("pkt flush failed err:%d pkt:0x%p\n",
@@ -5219,9 +5207,7 @@ s32 cmdq_pkt_flush_async_ex(struct cmdqRecStruct *handle,
 	if (handle->pkt->loop)
 		handle->running_task = (void *)handle;
 
-	CMDQ_SYSTRACE_BEGIN("%s\n", __func__);
 	err = cmdq_pkt_flush_async_ex_impl(handle, cb, user_data);
-	CMDQ_SYSTRACE_END();
 
 	if (err < 0) {
 		if (handle->thread == CMDQ_INVALID_THREAD || err == -EBUSY)

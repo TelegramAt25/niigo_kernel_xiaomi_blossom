@@ -185,33 +185,6 @@ do {if (1) mmprofile_log_ex(args); } while (0);	\
 #define CMDQ_PROF_MMP(args...)
 #endif
 
-/* CMDQ FTRACE */
-#define CMDQ_TRACE_FORCE_BEGIN(fmt, args...) do { \
-	preempt_disable(); \
-	event_trace_printk(cmdq_get_tracing_mark(), \
-		"B|%d|"fmt, current->tgid, ##args); \
-	preempt_enable();\
-} while (0)
-
-#define CMDQ_TRACE_FORCE_END() do { \
-	preempt_disable(); \
-	event_trace_printk(cmdq_get_tracing_mark(), "E\n"); \
-	preempt_enable(); \
-} while (0)
-
-
-#define CMDQ_SYSTRACE_BEGIN(fmt, args...) do { \
-	if (cmdq_core_ftrace_enabled()) { \
-		CMDQ_TRACE_FORCE_BEGIN(fmt, ##args); \
-	} \
-} while (0)
-
-#define CMDQ_SYSTRACE_END() do { \
-	if (cmdq_core_ftrace_enabled()) { \
-		CMDQ_TRACE_FORCE_END(); \
-	} \
-} while (0)
-
 #define CMDQ_GET_TIME_IN_MS(start, end, duration)	\
 {	\
 CMDQ_TIME _duration = end - start;	\
@@ -958,7 +931,6 @@ struct ContextStruct *cmdq_core_get_context(void);
 struct CmdqCBkStruct *cmdq_core_get_group_cb(void);
 dma_addr_t cmdq_core_get_pc(s32 thread);
 dma_addr_t cmdq_core_get_end(s32 thread);
-unsigned long cmdq_get_tracing_mark(void);
 const struct cmdq_controller *cmdq_core_get_controller(void);
 
 

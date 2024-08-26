@@ -104,10 +104,6 @@ int mtk_cmdq_err = 1;
 EXPORT_SYMBOL(mtk_cmdq_err);
 module_param(mtk_cmdq_log, int, 0644);
 
-int cmdq_trace;
-EXPORT_SYMBOL(cmdq_trace);
-module_param(cmdq_trace, int, 0644);
-
 struct cmdq_task {
 	struct cmdq		*cmdq;
 	struct list_head	list_entry;
@@ -177,8 +173,6 @@ static void cmdq_init(struct cmdq *cmdq)
 {
 	int i;
 
-	cmdq_trace_ex_begin("%s", __func__);
-
 	writel(CMDQ_THR_ACTIVE_SLOT_CYCLES, cmdq->base + CMDQ_THR_SLOT_CYCLES);
 	for (i = 0; i <= CMDQ_EVENT_MAX; i++)
 		writel(i, cmdq->base + CMDQ_SYNC_TOKEN_UPD);
@@ -187,8 +181,6 @@ static void cmdq_init(struct cmdq *cmdq)
 	for (i = 0; i < cmdq->token_cnt; i++)
 		writel(cmdq->tokens[i] | BIT(16),
 			cmdq->base + CMDQ_SYNC_TOKEN_UPD);
-
-	cmdq_trace_ex_end();
 }
 
 static inline void cmdq_mmp_init(void)
@@ -216,8 +208,6 @@ static inline void cmdq_mmp_init(void)
 
 static void cmdq_lock_wake_lock(struct cmdq *cmdq, bool lock)
 {
-	cmdq_trace_ex_begin("%s", __func__);
-
 	if (lock) {
 		if (!cmdq->wake_locked) {
 			__pm_stay_awake(&cmdq->wake_lock);
@@ -240,16 +230,12 @@ static void cmdq_lock_wake_lock(struct cmdq *cmdq, bool lock)
 		}
 
 	}
-
-	cmdq_trace_ex_end();
 }
 
 static s32 cmdq_clk_enable(struct cmdq *cmdq)
 {
 	s32 usage, err, err_timer;
 	unsigned long flags;
-
-	cmdq_trace_ex_begin("%s", __func__);
 
 	spin_lock_irqsave(&cmdq->lock, flags);
 
@@ -280,8 +266,6 @@ static s32 cmdq_clk_enable(struct cmdq *cmdq)
 
 	spin_unlock_irqrestore(&cmdq->lock, flags);
 
-	cmdq_trace_ex_end();
-
 	return err;
 }
 
@@ -289,8 +273,6 @@ static void cmdq_clk_disable(struct cmdq *cmdq)
 {
 	s32 usage;
 	unsigned long flags;
-
-	cmdq_trace_ex_begin("%s", __func__);
 
 	spin_lock_irqsave(&cmdq->lock, flags);
 
@@ -315,8 +297,6 @@ static void cmdq_clk_disable(struct cmdq *cmdq)
 	clk_disable(cmdq->clock);
 
 	spin_unlock_irqrestore(&cmdq->lock, flags);
-
-	cmdq_trace_ex_end();
 }
 
 dma_addr_t cmdq_thread_get_pc(struct cmdq_thread *thread)
@@ -1289,8 +1269,6 @@ void cmdq_thread_dump_all_seq(void *mbox_cmdq, struct seq_file *seq)
 	u32 en, curr_pa, end_pa;
 	s32 usage = atomic_read(&cmdq->usage);
 
-	seq_printf(seq, "[cmdq] cmdq:%#x usage:%d\n",
-		(u32)cmdq->base_pa, usage);
 	if (usage <= 0)
 		return;
 
@@ -1306,9 +1284,6 @@ void cmdq_thread_dump_all_seq(void *mbox_cmdq, struct seq_file *seq)
 
 		curr_pa = cmdq_thread_get_pc(thread);
 		end_pa = cmdq_thread_get_end(thread);
-
-		seq_printf(seq, "[cmdq] thd idx:%u pc:%#x end:%#x\n",
-			thread->idx, curr_pa, end_pa);
 	}
 
 }
@@ -1519,9 +1494,7 @@ static int cmdq_remove(struct platform_device *pdev)
 
 static int cmdq_mbox_send_data(struct mbox_chan *chan, void *data)
 {
-	cmdq_trace_begin("%s", __func__);
 	cmdq_task_exec(data, chan->con_priv);
-	cmdq_trace_end();
 	return 0;
 }
 
@@ -2164,17 +2137,6 @@ void cmdq_event_verify(void *chan, u16 event_id)
 	cmdq_msg("end debug event for %u", event_id);
 }
 EXPORT_SYMBOL(cmdq_event_verify);
-
-unsigned long cmdq_get_tracing_mark(void)
-{
-	static unsigned long __read_mostly tracing_mark_write_addr;
-
-	if (unlikely(tracing_mark_write_addr == 0))
-		tracing_mark_write_addr =
-			kallsyms_lookup_name("tracing_mark_write");
-
-	return tracing_mark_write_addr;
-}
 
 #if IS_ENABLED(CMDQ_MMPROFILE_SUPPORT)
 void cmdq_mmp_wait(struct mbox_chan *chan, void *pkt)

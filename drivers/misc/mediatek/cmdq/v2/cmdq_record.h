@@ -740,12 +740,6 @@ extern "C" {
 #define CMDQ_CLT_MDP 0
 #define CMDQ_MAX_USER_PROP_SIZE		(1024)
 #define MDP_META_IN_LEGACY_V2
-#define CMDQ_SYSTRACE_BEGIN(fmt, args...) do { \
-} while (0)
-
-#define CMDQ_SYSTRACE_END() do { \
-} while (0)
-
 /* tablet use */
 /*
  * Set secure mode to prevent m4u translation fault

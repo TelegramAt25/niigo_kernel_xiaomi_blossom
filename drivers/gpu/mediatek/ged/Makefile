@@ -143,10 +143,6 @@ else
 $(info $[GED]CONFIG_FPGA_EARLY_PORTING is [${CONFIG_FPGA_EARLY_PORTING}])
 endif
 
-ifeq ($(CONFIG_MTK_FTRACE_DEFAULT_ENABLE),y)
-ccflags-y += -DENABLE_GED_SYSTRACE_UTIL
-endif
-
 ccflags-y += -DGED_DVFS_DEBUG_BUF
 
 ifeq ($(VER),eng)

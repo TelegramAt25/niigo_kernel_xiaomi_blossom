@@ -11,7 +11,6 @@
 #define EARA_THRM_SYSFS_DIR_NAME "eara_thermal"
 
 struct kobject *thrm_kobj;
-static unsigned long __read_mostly mark_addr;
 
 void eara_thrm_systrace(pid_t pid, int val, const char *fmt, ...)
 {
@@ -29,10 +28,6 @@ void eara_thrm_systrace(pid_t pid, int val, const char *fmt, ...)
 
 	if (len == 256)
 		log[255] = '\0';
-
-	preempt_disable();
-	event_trace_printk(mark_addr, "C|%d|%s|%d\n", pid, log, val);
-	preempt_enable();
 }
 
 void eara_thrm_tracelog(const char *fmt, ...)
@@ -71,8 +66,6 @@ void eara_thrm_sysfs_remove_file(struct kobj_attribute *kobj_attr)
 
 int eara_thrm_base_init(void)
 {
-	mark_addr = kallsyms_lookup_name("tracing_mark_write");
-
 	if (kernel_kobj == NULL)
 		return -1;
 

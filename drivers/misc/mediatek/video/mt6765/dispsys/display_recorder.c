@@ -497,73 +497,6 @@ void dprec_logger_event_init(struct dprec_logger_event *p, char *name,
 	}
 }
 
-#ifdef CONFIG_TRACING
-
-unsigned long disp_get_tracing_mark(void)
-{
-	static unsigned long __read_mostly tracing_mark_write_addr;
-
-	if (unlikely(tracing_mark_write_addr == 0))
-		tracing_mark_write_addr =
-			kallsyms_lookup_name("tracing_mark_write");
-
-	return tracing_mark_write_addr;
-
-}
-
-static void mmp_kernel_trace_begin(char *name)
-{
-#ifdef DISP_SYSTRACE_BEGIN
-	DISP_SYSTRACE_BEGIN("%s\n", name);
-#endif
-}
-
-void mmp_kernel_trace_counter(char *name, int count)
-{
-	preempt_disable();
-	event_trace_printk(disp_get_tracing_mark(), "C|%d|%s|%d\n",
-		in_interrupt() ? -1 : current->tgid, name, count);
-	preempt_enable();
-}
-
-static void mmp_kernel_trace_end(void)
-{
-
-#ifdef DISP_SYSTRACE_END
-	DISP_SYSTRACE_END();
-#endif
-}
-
-void dprec_logger_frame_seq_begin(unsigned int session_id,
-	unsigned int frm_sequence)
-{
-	unsigned int device_type = DISP_SESSION_TYPE(session_id);
-
-	if (frm_sequence <= 0 || session_id <= 0)
-		return;
-	if (device_type > DISP_SESSION_MEMORY) {
-		pr_info("seq_begin session_id(0x%x) error, seq(%d)\n",
-			session_id, frm_sequence);
-		return;
-	}
-}
-
-void dprec_logger_frame_seq_end(unsigned int session_id,
-	unsigned int frm_sequence)
-{
-	unsigned int device_type = DISP_SESSION_TYPE(session_id);
-
-	if (frm_sequence <= 0 || session_id <= 0)
-		return;
-	if (device_type > DISP_SESSION_MEMORY) {
-		pr_info("seq_end session_id(0x%x) , seq(%d)\n",
-			session_id, frm_sequence);
-		return;
-	}
-}
-
-#else
-
 unsigned long disp_get_tracing_mark(void)
 {
 	return 0UL;
@@ -580,7 +513,6 @@ void dprec_logger_frame_seq_end(unsigned int session_id,
 {
 
 }
-#endif
 
 void dprec_start(struct dprec_logger_event *event, unsigned int val1,
 	unsigned int val2)
@@ -615,18 +547,6 @@ void dprec_start(struct dprec_logger_event *event, unsigned int val1,
 			pr_debug("DISP/%s start,0x%08x,0x%08x\n",
 				event->name, val1, val2);
 
-#ifdef CONFIG_TRACING
-		if (event->level & DPREC_LOGGER_LEVEL_SYSTRACE &&
-			_control.systrace) {
-			char name[256];
-
-			scnprintf(name, ARRAY_SIZE(name) / sizeof(name[0]),
-				"K_%s_0x%x_0x%x",
-				event->name, val1, val2);
-
-			mmp_kernel_trace_begin(name);
-		}
-#endif
 	}
 }
 
@@ -670,14 +590,6 @@ void dprec_done(struct dprec_logger_event *event, unsigned int val1,
 		if (event->level & DPREC_LOGGER_LEVEL_UART_LOG)
 			pr_debug("DISP/%s done,0x%08x,0x%08x\n",
 				event->name, val1, val2);
-
-#ifdef CONFIG_TRACING
-		if (event->level & DPREC_LOGGER_LEVEL_SYSTRACE &&
-			_control.systrace) {
-			mmp_kernel_trace_end();
-			/* trace_printk("E|%s\n", event->name); */
-		}
-#endif
 	}
 }
 
@@ -727,19 +639,6 @@ void dprec_trigger(struct dprec_logger_event *event, unsigned int val1,
 		if (event->level & DPREC_LOGGER_LEVEL_UART_LOG)
 			pr_debug("DISP/%s trigger,0x%08x,0x%08x\n",
 				event->name, val1, val2);
-
-#ifdef CONFIG_TRACING
-		if (event->level & DPREC_LOGGER_LEVEL_SYSTRACE &&
-			_control.systrace) {
-			char name[256];
-
-			scnprintf(name, ARRAY_SIZE(name) / sizeof(name[0]),
-				"K_%s_0x%x_0x%x",
-				event->name, val1, val2);
-			mmp_kernel_trace_begin(name);
-			mmp_kernel_trace_end();
-		}
-#endif
 	}
 }
 
@@ -1413,24 +1312,10 @@ unsigned int dprec_error_log_len;
 unsigned int dprec_error_log_buflen = DPREC_ERROR_LOG_BUFFER_LENGTH;
 unsigned int dprec_error_log_id;
 
-#ifdef CONFIG_TRACING
-unsigned long disp_get_tracing_mark(void)
-{
-	static unsigned long __read_mostly tracing_mark_write_addr;
-
-	if (unlikely(tracing_mark_write_addr == 0))
-		tracing_mark_write_addr =
-				kallsyms_lookup_name("tracing_mark_write");
-
-	return tracing_mark_write_addr;
-
-}
-#else
 unsigned long disp_get_tracing_mark(void)
 {
 	return 0UL;
 }
-#endif
 
 int dprec_init(void)
 {
@@ -1609,23 +1494,7 @@ void init_log_buffer(void)
 
 void disp_irq_trace(unsigned int irq_bit)
 {
-#ifndef CONFIG_TRACING
 	return;
-#endif
-	if (!_control.systrace)
-		return;
-
-	if (irq_bit == DDP_IRQ_RDMA0_START) {
-		static int cnt;
-
-		cnt ^= 1;
-		_DISP_TRACE_CNT(0, cnt, "rdma0-start");
-	} else if (irq_bit == DDP_IRQ_WDMA0_FRAME_COMPLETE) {
-		static int cnt;
-
-		cnt ^= 1;
-		_DISP_TRACE_CNT(0, cnt, "wdma0-done");
-	}
 }
 
 void dprec_stub_irq(unsigned int irq_bit)

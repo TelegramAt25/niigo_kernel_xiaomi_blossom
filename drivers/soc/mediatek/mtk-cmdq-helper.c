@@ -1808,7 +1808,6 @@ int cmdq_pkt_wait_complete(struct cmdq_pkt *pkt)
 	}
 
 	pkt->rec_wait = sched_clock();
-	cmdq_trace_begin("%s", __func__);
 
 #if IS_ENABLED(CONFIG_MTK_SEC_VIDEO_PATH_SUPPORT) || \
 	IS_ENABLED(CONFIG_MTK_CAM_SECURITY_SUPPORT)
@@ -1820,7 +1819,6 @@ int cmdq_pkt_wait_complete(struct cmdq_pkt *pkt)
 	cmdq_pkt_wait_complete_loop(pkt);
 #endif
 
-	cmdq_trace_end();
 	cmdq_util_track(pkt);
 
 	return item->err;

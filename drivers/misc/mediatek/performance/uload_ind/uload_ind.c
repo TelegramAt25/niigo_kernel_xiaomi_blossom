@@ -94,23 +94,17 @@ static bool sentuevent(const char *src)
 	if (uevent_enable) {
 		strlcpy(event_string, src, string_size);
 		if (event_string[0] == '\0') { /*string is null*/
-
-			perfmgr_trace_printk("cpu_loading", "string is null");
 			return false;
 		}
 		ret = kobject_uevent_env(
 				&cpu_loading_object.this_device->kobj,
 				KOBJ_CHANGE, envp);
 		if (ret != 0) {
-			perfmgr_trace_printk("cpu_loading", "uevent failed");
 			show_debug("uevent failed");
 
 			return false;
 		}
 		show_debug("sent uevent success:%s", src);
-
-		perfmgr_trace_log("cpu_loading",
-				"sent uevent success:%s", src);
 	}
 	return true;
 }
@@ -122,10 +116,6 @@ static void calculat_loading_callback(int loading)
 	cl_lock(__func__);
 
 	show_debug("update cpu_loading");
-	perfmgr_trace_log("cpu_loading",
-			"loading:%d curr_cpu_loading:%d previous state:%d",
-			loading, curr_cpu_loading, state);
-
 	show_debug("loading:%d curr_cpu_loading:%d previous state:%d\n",
 			loading, curr_cpu_loading, state);
 	if (loading > over_threshold) {
@@ -161,7 +151,6 @@ static void start_calculate_loading(void)
 		curr_cpu_loading = REG_SUCCESS;
 	else
 		curr_cpu_loading = REG_FAIL;
-	perfmgr_trace_log("cpu_loading", "ret_reg:%d\n", ret_reg);
 	state = ULOAD_STATE_MID;
 }
 
@@ -178,7 +167,6 @@ static void stop_calculate_loading(void)
 		curr_cpu_loading = UNREG_SUCCESS;
 	else
 		curr_cpu_loading = UNREG_FAIL;
-	perfmgr_trace_log("cpu_loading", "ret_unreg:%d\n", ret_unreg);
 }
 
 static ssize_t perfmgr_poltime_secs_proc_write(struct file *filp,
