@@ -206,7 +206,7 @@ static int EEPROM_HW_i2c_probe
 #endif
 
 	/* Default EEPROM Slave Address Main= 0xa0 */
-	g_pstI2Cclients[I2C_DEV_IDX_1]->addr = 0x54;
+	g_pstI2Cclients[I2C_DEV_IDX_1]->addr = 0x50;
 	spin_unlock(&g_spinLock);
 
 	return 0;
@@ -239,7 +239,7 @@ static int EEPROM_HW_i2c_probe2
 #endif
 
 	/* Default EEPROM Slave Address sub = 0xa8 */
-	g_pstI2Cclients[I2C_DEV_IDX_2]->addr = 0x51;
+	g_pstI2Cclients[I2C_DEV_IDX_2]->addr = 0x54;
 	spin_unlock(&g_spinLock);
 
 	return 0;
@@ -270,7 +270,7 @@ static int EEPROM_HW_i2c_probe3
 #endif
 
 	/* Default EEPROM Slave Address Main2 = 0xa4 */
-	g_pstI2Cclients[I2C_DEV_IDX_3]->addr = 0x50;
+	g_pstI2Cclients[I2C_DEV_IDX_3]->addr = 0x52;
 	spin_unlock(&g_spinLock);
 
 	return 0;
