@@ -118,7 +118,6 @@ u32 clk_buf_bblpm_enter_cond(void)
 	if (bridge.get_bblpm_enter_cond_cb(&bblpm_cond) == CLK_BUF_OK)
 		return bblpm_cond;
 
-	pr_info("get bblpm_enter condition has some error\n");
 	return BBLPM_SKIP;
 }
 EXPORT_SYMBOL(clk_buf_bblpm_enter_cond);
