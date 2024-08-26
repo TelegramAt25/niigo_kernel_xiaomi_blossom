@@ -70,7 +70,6 @@ static void mt_usb_host_disconnect(int delay);
 struct device_node		*usb_node;
 static int iddig_eint_num;
 static ktime_t ktime_start, ktime_end;
-static struct regulator *reg_vbus;
 
 static struct musb_fifo_cfg fifo_cfg_host[] = {
 { .hw_ep_num = 1, .style = MUSB_FIFO_TX,
