@@ -2565,19 +2565,22 @@ struct ion_buffer *ion_drv_file_to_buffer(struct file *file)
 	struct ion_buffer *buffer = NULL;
 
 	if (!file || !is_dma_buf_file(file))
-		return ERR_PTR(-EINVAL);
+		goto file2buf_exit;
 
 	dmabuf = file->private_data;
 	if (!dmabuf) {
 		IONMSG("%s warnning, dmabuf is NULL\n", __func__);
-		return ERR_PTR(-EINVAL);
+		goto file2buf_exit;
 	}
-	if (dmabuf->ops == &dma_buf_ops) {
+	if (dmabuf->ops == &dma_buf_ops)
 		buffer = dmabuf->priv;
-		return buffer;
-	}
 
-	return ERR_PTR(-EINVAL);
+file2buf_exit:
+
+	if (buffer)
+		return buffer;
+	else
+		return ERR_PTR(-EINVAL);
 }
 
 /* ===================================== */
