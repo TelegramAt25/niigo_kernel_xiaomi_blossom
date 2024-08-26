@@ -199,7 +199,6 @@ config ANDROID_DEFAULT_SETTING
 	select PREEMPT
 	select PROCESS_RECLAIM
 	select PROC_FS
-	select PROFILING
 	select PSI
 	select QFMT_V2
 	select QUOTA
