@@ -5,6 +5,8 @@ menuconfig MTK_FB
 	select FB_CFB_COPYAREA
 	select FB_CFB_IMAGEBLIT
 	select FB_SOFT_CURSOR
+	select FONT_SUPPORT
+	select FONT_8x16
 	help
 	  This selects the MediaTek(R) frame buffer driver.
 	  Meditek Framebuffer Driver is driver display.
