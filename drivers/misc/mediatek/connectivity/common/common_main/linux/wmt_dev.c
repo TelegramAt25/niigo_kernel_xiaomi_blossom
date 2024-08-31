@@ -504,11 +504,7 @@ static UINT32 wmt_dev_tra_poll(VOID)
 	else
 		poll_during_time = 0xffffffff;
 
-	WMT_DBG_FUNC("**jiffies_to_mesecs(0xffffffff) = %d\n", jiffies_to_msecs(0xffffffff));
-
 	if (jiffies_to_msecs(poll_during_time) < TIME_THRESHOLD_TO_TEMP_QUERY) {
-		WMT_DBG_FUNC("**poll_during_time = %d < %d, not to query\n",
-			     jiffies_to_msecs(poll_during_time), TIME_THRESHOLD_TO_TEMP_QUERY);
 		return -1;
 	}
 
@@ -532,8 +528,6 @@ static UINT32 wmt_dev_tra_poll(VOID)
 	}
 
 	if (during_count < COUNT_THRESHOLD_TO_TEMP_QUERY) {
-		WMT_DBG_FUNC("**during_count = %lu < %d, not to query\n", during_count,
-				COUNT_THRESHOLD_TO_TEMP_QUERY);
 		return -2;
 	}
 
@@ -544,9 +538,6 @@ static UINT32 wmt_dev_tra_poll(VOID)
 		(*mtk_wcn_wlan_bus_tx_cnt_clr)();
 	else
 		WMT_ERR_FUNC("WMT-DEV:error chip type(%d)\n", chip_type);
-	WMT_INFO_FUNC("**poll_during_time = %d > %d, during_count = %d > %d, query\n",
-		      jiffies_to_msecs(poll_during_time), TIME_THRESHOLD_TO_TEMP_QUERY,
-		      jiffies_to_msecs(during_count), COUNT_THRESHOLD_TO_TEMP_QUERY);
 
 	return 0;
 }
