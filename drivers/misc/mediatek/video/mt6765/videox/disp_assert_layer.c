@@ -417,7 +417,29 @@ int show_layers_draw_wdma(struct Layer_draw_info *info)
 /* ########################################################################## */
 #else
 #define NOT_REFERENCED(x)   { (x) = (x); }
+
 unsigned int isAEEEnabled;
+unsigned int dump_output;
+unsigned int dump_output_comp;
+void *composed_buf;
+static MFC_HANDLE mfc_handle;
+MFC_HANDLE show_mfc_handle;
+void *show_layers_va;
+
+enum DAL_COLOR color_wdma[24] = {
+	DAL_COLOR_PINK,
+	DAL_COLOR_GREEN,
+	DAL_COLOR_BLUE,
+	DAL_COLOR_RED,
+	DAL_COLOR_MAROON,
+	DAL_COLOR_STEEL_BLUE,
+	DAL_COLOR_DARK_CYAN,
+	DAL_COLOR_OLIVE_GREEN,
+	DAL_COLOR_CORNSILK,
+	DAL_COLOR_TURQUOISE,
+	DAL_COLOR_YELLOW,
+	DAL_COLOR_BLACK,
+	};
 
 uint32_t DAL_GetLayerSize(void)
 {
@@ -468,8 +490,26 @@ enum DAL_STATUS DAL_SetScreenColor(enum DAL_COLOR color)
 }
 EXPORT_SYMBOL(DAL_SetScreenColor);
 
+enum MFC_STATUS DAL_CHECK_MFC_RET(enum MFC_STATUS expr)
+{
+	return MFC_STATUS_OK;
+}
+
+enum DISP_STATUS DAL_CHECK_DISP_RET(enum DISP_STATUS expr)
+{
+	return DISP_STATUS_OK;
+}
+
 int is_DAL_Enabled(void)
 {
+	return 0;
+}
+
+int show_layers_draw_wdma(struct Layer_draw_info *info)
+{
+	if (show_layers_va == NULL || show_mfc_handle == NULL)
+		return -1;
+
 	return 0;
 }
 
