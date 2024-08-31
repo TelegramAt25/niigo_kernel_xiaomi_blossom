@@ -1310,17 +1310,13 @@ static int fb_notifier_callback(struct notifier_block *self,
                                   fb_notif);
 
     if (!(event == FB_EARLY_EVENT_BLANK || event == FB_EVENT_BLANK)) {
-        FTS_INFO("event(%lu) do not need process\n", event);
         return 0;
     }
 
     blank = evdata->data;
-    FTS_INFO("FB event:%lu,blank:%d", event, *blank);
     switch (*blank) {
     case FB_BLANK_UNBLANK:
-        if (FB_EARLY_EVENT_BLANK == event) {
-            FTS_INFO("resume: event = %lu, not care\n", event);
-        } else if (FB_EVENT_BLANK == event) {
+        if (FB_EVENT_BLANK == event) {
             queue_work(fts_data->ts_workqueue, &fts_data->resume_work);
         }
         break;
@@ -1328,12 +1324,9 @@ static int fb_notifier_callback(struct notifier_block *self,
         if (FB_EARLY_EVENT_BLANK == event) {
             cancel_work_sync(&fts_data->resume_work);
             fts_ts_suspend(ts_data->dev);
-        } else if (FB_EVENT_BLANK == event) {
-            FTS_INFO("suspend: event = %lu, not care\n", event);
         }
         break;
     default:
-        FTS_INFO("FB BLANK(%d) do not need process\n", *blank);
         break;
     }
 
