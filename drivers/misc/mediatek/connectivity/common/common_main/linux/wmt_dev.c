@@ -660,13 +660,6 @@ LONG wmt_dev_tm_temp_query(VOID)
 			index = s_idx_temp_table;
 		}
 		osal_unlock_unsleepable_lock(&g_temp_query_spinlock);
-
-		if (index == -1) {
-			WMT_INFO_FUNC("[Thermal] current_temp = 0x%x\n", (current_temp & 0xFF));
-		} else {
-			WMT_ERR_FUNC("Temperature(0x%x) update failed due to modified idx_temp_table(%d, %d)",
-				(current_temp & 0xFF), idx_temp_table, index);
-		}
 	} else {
 		/* Only update temperature if our index hasn't been modified by the concurrent thread */
 		osal_lock_unsleepable_lock(&g_temp_query_spinlock);
@@ -681,14 +674,11 @@ LONG wmt_dev_tm_temp_query(VOID)
 			index = s_idx_temp_table;
 		}
 		osal_unlock_unsleepable_lock(&g_temp_query_spinlock);
-		if (index != -1) {
-			WMT_DBG_FUNC("Use last valid temperature (0x%x) due to modified idx_temp_table(%d, %d)",
-				(current_temp & 0xFF), idx_temp_table, index);
-		}
 	}
 
 	return_temp = ((current_temp & 0x80) == 0x0) ? current_temp : (-1) * (current_temp & 0x7f);
 
+#if 0
 	/*  */
 	/* Dump information */
 	/*  */
@@ -703,6 +693,7 @@ LONG wmt_dev_tm_temp_query(VOID)
 			s_temp_table[0], s_temp_table[1], s_temp_table[2]);
 		osal_unlock_unsleepable_lock(&g_temp_query_spinlock);
 	}
+#endif
 
 	if (return_temp > MAX_TEMP) {
 		return_temp = MAX_TEMP;
