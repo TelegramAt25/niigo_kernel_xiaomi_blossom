@@ -467,10 +467,10 @@ int emmc_execute_dvfs_autok(struct msdc_host *host, u32 opcode)
 #endif
 
 		if (opcode == MMC_SEND_STATUS) {
-			pr_notice("[AUTOK]eMMC HS200 Tune CMD only\n");
+			pr_debug("[AUTOK]eMMC HS200 Tune CMD only\n");
 			ret = hs200_execute_tuning_cmd(host, res);
 		} else {
-			pr_notice("[AUTOK]eMMC HS200 Tune\n");
+			pr_debug("[AUTOK]eMMC HS200 Tune\n");
 			ret = hs200_execute_tuning(host, res);
 		}
 
@@ -486,10 +486,10 @@ int emmc_execute_dvfs_autok(struct msdc_host *host, u32 opcode)
 #endif
 
 		if (opcode == MMC_SEND_STATUS) {
-			pr_notice("[AUTOK]eMMC HS400 Tune CMD only\n");
+			pr_debug("[AUTOK]eMMC HS400 Tune CMD only\n");
 			ret = hs400_execute_tuning_cmd(host, res);
 		} else {
-			pr_notice("[AUTOK]eMMC HS400 Tune\n");
+			pr_debug("[AUTOK]eMMC HS400 Tune\n");
 			ret = hs400_execute_tuning(host, res);
 		}
 		host->is_autok_done = 1;

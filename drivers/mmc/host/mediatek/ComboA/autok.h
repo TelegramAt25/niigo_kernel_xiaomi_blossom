@@ -71,9 +71,7 @@ extern unsigned int autok_debug_level;
 
 #define AUTOK_DBGPRINT(_level, _fmt ...)   \
 ({                                         \
-	if (autok_debug_level >= _level) { \
-		pr_info(_fmt);             \
-	}                                  \
+	pr_debug(_fmt);                    \
 })
 
 #define AUTOK_RAWPRINT(_fmt ...)           \
