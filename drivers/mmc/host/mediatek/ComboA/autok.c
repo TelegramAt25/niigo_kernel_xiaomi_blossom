@@ -1891,7 +1891,6 @@ static int autok_pad_dly_sel(struct AUTOK_REF_INFO *pInfo)
 		pInfo->opt_dly_cnt = uDlySel_F;
 
 	}
-	AUTOK_RAWPRINT("[AUTOK]Analysis Result: 1T = %d\r\n", cycle_cnt);
 	return ret;
 }
 
@@ -2825,6 +2824,7 @@ static int autok_param_apply(struct msdc_host *host, u8 *autok_tune_res)
 
 static int autok_result_dump(struct msdc_host *host, u8 *autok_tune_res)
 {
+#if 0
 	AUTOK_RAWPRINT
 	    ("[AUTOK]CMD [EDGE:%d CMD_FIFO_EDGE:%d DLY1:%d DLY2:%d]\r\n",
 		autok_tune_res[0], autok_tune_res[1],
@@ -2857,6 +2857,7 @@ static int autok_result_dump(struct msdc_host *host, u8 *autok_tune_res)
 			autok_tune_res[20], autok_tune_res[21],
 			autok_tune_res[22], autok_tune_res[23]);
 	}
+#endif
 
 	return 0;
 }
