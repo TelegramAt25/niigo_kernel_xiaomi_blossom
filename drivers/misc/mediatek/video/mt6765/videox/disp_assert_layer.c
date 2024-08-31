@@ -416,6 +416,7 @@ int show_layers_draw_wdma(struct Layer_draw_info *info)
 /* !CONFIG_MTK_FB_SUPPORT_ASSERTION_LAYER */
 /* ########################################################################## */
 #else
+#define NOT_REFERENCED(x)   { (x) = (x); }
 unsigned int isAEEEnabled;
 
 uint32_t DAL_GetLayerSize(void)
