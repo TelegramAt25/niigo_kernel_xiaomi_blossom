@@ -1350,23 +1350,13 @@ static inline INT32 _stp_psm_do_wait(MTKSTP_PSM_T *stp_psm, MTKSTP_PSM_STATE_T s
 #define POLL_WAIT_TIME 2000
 	INT32 i = 0;
 	INT32 limit = POLL_WAIT_TIME / POLL_WAIT;
-	UINT64 sec = 0;
-	ULONG usec = 0;
 
 	if (state < 0 || state >= STP_PSM_MAX_STATE)
 		return STP_PSM_OPERATION_FAIL;
 
-	osal_get_local_time(&sec, &usec);
 	while (_stp_psm_get_state(stp_psm) != state && i < limit && mtk_wcn_stp_is_enable()) {
 		i++;
-		if (i < 3)
-			STP_PSM_PR_INFO("STP is waiting state for %s, i=%d, state = %d\n",
-					  g_psm_state[state], i, _stp_psm_get_state(stp_psm));
 		osal_sleep_ms(POLL_WAIT);
-		if (i == 10) {
-			STP_PSM_PR_WARN("-Wait for %s takes %d msec\n", g_psm_state[state], i * POLL_WAIT);
-			_stp_psm_opid_dbg_out_printk(g_stp_psm_opid_dbg);
-		}
 	}
 	if (mtk_wcn_stp_is_enable() == 0) {
 		STP_PSM_PR_INFO("STP disable, maybe do chip reset");
@@ -1374,14 +1364,10 @@ static inline INT32 _stp_psm_do_wait(MTKSTP_PSM_T *stp_psm, MTKSTP_PSM_STATE_T s
 	}
 
 	if (i == limit) {
-		STP_PSM_PR_WARN("-Wait for %s takes %llu usec\n", g_psm_state[state], osal_elapsed_us(sec, usec));
 		mtk_wcn_wmt_dump_wmtd_backtrace();
 		_stp_psm_opid_dbg_out_printk(g_stp_psm_opid_dbg);
 		return STP_PSM_OPERATION_FAIL;
 	}
-	if (i > 0)
-		STP_PSM_PR_INFO("+Total waits for %s takes %llu usec\n",
-					g_psm_state[state], osal_elapsed_us(sec, usec));
 	return STP_PSM_OPERATION_SUCCESS;
 }
 
