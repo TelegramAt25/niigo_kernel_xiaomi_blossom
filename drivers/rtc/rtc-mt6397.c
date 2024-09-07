@@ -664,11 +664,6 @@ static int mtk_rtc_restore_alarm(struct mt6397_rtc *rtc, struct rtc_time *tm)
 	data[RTC_OFFSET_YEAR] = ((data[RTC_OFFSET_YEAR] & ~(RTC_AL_YEA_MASK)) |
 			(tm->tm_year & RTC_AL_YEA_MASK));
 
-	dev_notice(rtc->dev,
-		"restore al time = %04d/%02d/%02d %02d:%02d:%02d\n",
-		tm->tm_year + RTC_MIN_YEAR, tm->tm_mon, tm->tm_mday,
-		tm->tm_hour, tm->tm_min, tm->tm_sec);
-
 	ret = regmap_bulk_write(rtc->regmap, rtc->addr_base + RTC_AL_SEC,
 				data, RTC_OFFSET_COUNT);
 	if (ret < 0)
@@ -887,8 +882,6 @@ static void mtk_rtc_set_pwron_time(struct mt6397_rtc *rtc, struct rtc_time *tm)
 	u32 data[RTC_OFFSET_COUNT];
 	int ret, i;
 
-	dev_notice(rtc->dev, "%s\n", __func__);
-
 	data[RTC_OFFSET_SEC] =
 		((tm->tm_sec << RTC_PWRON_SEC_SHIFT) & RTC_PWRON_SEC_MASK);
 	data[RTC_OFFSET_MIN] =
@@ -923,7 +916,6 @@ void mtk_rtc_save_pwron_time(struct mt6397_rtc *rtc,
 	u32 pdn1 = 0, pdn2 = 0;
 	int ret;
 
-	dev_notice(rtc->dev, "%s\n", __func__);
 	/* set power on time */
 	mtk_rtc_set_pwron_time(rtc, tm);
 
@@ -1104,11 +1096,6 @@ static int mtk_rtc_set_alarm(struct device *dev, struct rtc_wkalrm *alm)
 
 	tm->tm_year -= RTC_MIN_YEAR_OFFSET;
 	tm->tm_mon++;
-
-	dev_notice(rtc->dev,
-		"set al time = %04d/%02d/%02d %02d:%02d:%02d (%d)\n",
-		tm->tm_year + RTC_MIN_YEAR, tm->tm_mon, tm->tm_mday,
-		tm->tm_hour, tm->tm_min, tm->tm_sec, alm->enabled);
 
 	mutex_lock(&rtc->lock);
 
