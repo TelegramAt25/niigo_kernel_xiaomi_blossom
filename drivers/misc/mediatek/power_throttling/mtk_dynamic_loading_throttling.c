@@ -330,11 +330,7 @@ static int get_dlpt_imix(void)
 
 	imix = (curr_avg + (volt_avg - lbatInt1) * 1000 / dlpt.imix_r) / 10;
 
-	pr_info("[%s] %d,%d,%d,%d\n"
-		, __func__, volt_avg, curr_avg, dlpt.imix_r, imix);
-
 	if (imix < 0) {
-		pr_notice("[dlpt] imix= %d < 0\n", imix);
 		return dlpt.imix;
 	}
 	return imix;
@@ -375,10 +371,6 @@ static int dlpt_notify_handler(void *unused)
 			if (dlpt.imix > IMAX_MAX_VALUE)
 				dlpt.imix = IMAX_MAX_VALUE;
 			exec_dlpt_callback(dlpt.imix);
-
-			pr_info("[DLPT_final] %d,%d,%d,%d\n"
-				, dlpt.imix, pre_ui_soc
-				, cur_ui_soc, IMAX_MAX_VALUE);
 		}
 		pre_ui_soc = cur_ui_soc;
 		dlpt.notify_flag = false;
