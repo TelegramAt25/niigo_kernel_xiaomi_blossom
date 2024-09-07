@@ -158,8 +158,6 @@ unsigned int ma_to_mw(unsigned int val)
 	}
 
 	ret_val = (bat_vol * val) / 1000;	/* mW = (mV * mA)/1000 */
-	pr_info("[%s] %d(mV) * %d(mA) = %d(mW)\n",
-		__func__, bat_vol, val, ret_val);
 
 	return ret_val;
 }
