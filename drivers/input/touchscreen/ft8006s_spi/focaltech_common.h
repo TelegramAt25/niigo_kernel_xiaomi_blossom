@@ -158,6 +158,7 @@ struct ts_ic_info {
 #endif
 
 #define FTS_INFO(fmt, args...) do { \
+  if (0)							\
     printk(KERN_INFO "[FTS_TS/I]%s:"fmt"\n", __func__, ##args); \
 } while (0)
 
