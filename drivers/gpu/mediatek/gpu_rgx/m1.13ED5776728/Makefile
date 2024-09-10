@@ -1,20 +1,8 @@
 OPTIM = -Os
 
-$(info [GPU_DEBUG] MTK_PLATFORM = $(MTK_PLATFORM))
+ccflags-y += -DCONFIG_MACH_MT6765
 
-ifeq ($(MTK_PLATFORM),mt6765)
-	ccflags-y += -DCONFIG_MACH_MT6765
-endif
-
-ccflags-$(CONFIG_MTK_TINYSYS_SSPM_SUPPORT) += -DSSPM_DEBUG
-
-ifeq ($(word 2,$(MTK_GPU_VERSION)),marlowe)
-	ECO := v2
-	ccflags-y += -DMTCMOS_MFG3
-	ccflags-y += -DMTK_MARLOWE
-else
-	ECO := ""
-endif
+ECO := ""
 
 RGX_TOP := $(dir $(lastword $(MAKEFILE_LIST)))
 
