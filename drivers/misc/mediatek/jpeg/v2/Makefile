@@ -23,10 +23,6 @@ ifeq (y, $(filter y,$(CONFIG_MACH_MT6885) $(CONFIG_MACH_MT6893)))
   ccflags-y += -DJPEG_HYBRID_DEC_DRIVER
 endif
 
-ifeq (,$(filter y,$(CONFIG_MACH_MT6885) $(CONFIG_MACH_MT6893)))
-  ccflags-y += -DJPEG_ENC_DRIVER
-endif
-
 ccflags-y += -I$(srctree)/drivers/misc/mediatek/smi/
 ccflags-y += -I$(srctree)/drivers/misc/mediatek/smi/$(MTK_PLATFORM)
 ccflags-y += -I$(srctree)/drivers/misc/mediatek/mmdvfs
