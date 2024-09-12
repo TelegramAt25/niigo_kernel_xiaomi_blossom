@@ -183,7 +183,9 @@ static const struct of_device_id jdec_of_ids[] = {
 #endif
 
 #ifndef CONFIG_MTK_CLKMGR
+#ifdef JPEG_ENC_DRIVER
 static struct JpegClk gJpegClk;
+#endif
 #endif
 /* decoder */
 #ifdef JPEG_DEC_DRIVER
