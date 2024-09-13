@@ -112,9 +112,6 @@ config ANDROID_DEFAULT_SETTING
 	select MEMCG
 	select MEMCG_SWAP
 	select MMU
-	select MODULES
-	select MODULE_UNLOAD
-	select MODVERSIONS
 	select MULTIUSER
 	select NAMESPACES
 	select NET
