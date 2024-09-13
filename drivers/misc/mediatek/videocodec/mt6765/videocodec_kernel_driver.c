@@ -1910,11 +1910,6 @@ static long vcodec_set_frame_info(unsigned long arg)
 			 */
 
 			/* input size */
-			if ((rFrameInfo.frame_width * rFrameInfo.frame_height) == 0) {
-				pr_debug("%s, input size failed\n", __func__);
-				mutex_unlock(&DecPMQoSLock);
-				return -EFAULT;
-			}
 			emi_bw += 8 * rFrameInfo.input_size * 100 * 1920 * 1088
 					/ (rFrameInfo.frame_width *
 					rFrameInfo.frame_height);
