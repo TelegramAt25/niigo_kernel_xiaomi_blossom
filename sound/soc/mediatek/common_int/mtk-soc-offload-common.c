@@ -745,8 +745,9 @@ static int offloadservice_copydatatoram(void __user *buf, size_t count)
 				AUDIO_IPI_PAYLOAD,
 				AUDIO_IPI_MSG_BYPASS_ACK,
 				AUDIO_DSP_TASK_DLCOPY,
-				sizeof(dsp->dsp_mem[ID].msg_atod_share_buf.phy_addr),
-				0,
+				sizeof(unsigned int),
+				(unsigned int)
+				dsp->dsp_mem[ID].msg_atod_share_buf.phy_addr,
 				(char *)
 				&dsp->dsp_mem[ID].msg_atod_share_buf.phy_addr);
 #ifdef DEBUG_VERBOSE
