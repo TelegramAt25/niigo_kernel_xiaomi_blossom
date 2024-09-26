@@ -107,4 +107,4 @@
 
 /* CHARGER end */
 
-#include <dandelion/cust.dtsi>
+#include "mediatek/dandelion/cust.dtsi"
