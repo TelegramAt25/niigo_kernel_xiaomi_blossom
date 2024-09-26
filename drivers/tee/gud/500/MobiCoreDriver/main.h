@@ -38,7 +38,7 @@
 #define mc_dev_devel(fmt, ...) \
 	dev_info(g_ctx.mcd, "%s: " fmt "\n", __func__, ##__VA_ARGS__)
 #else /* DEBUG */
-#define mc_dev_devel(...)		do {} while (0)
+#define mc_dev_devel(...)		((void)0)
 #endif /* !DEBUG */
 
 #define TEEC_TT_LOGIN_KERNEL	0x80000000

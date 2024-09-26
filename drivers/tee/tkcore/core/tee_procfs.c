@@ -31,7 +31,7 @@
 #include <linux/of_irq.h>
 #endif
 
-#define PROC_DBG(fmt, ...) do {} while (0)
+#define PROC_DBG(fmt, ...) ((void)0)
 
 struct tkcore_trace {
 	int level;

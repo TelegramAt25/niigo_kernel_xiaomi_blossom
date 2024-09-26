@@ -150,7 +150,7 @@ void OSFreeMemNoStats(void *pvCpuVAddr);
 #define ALLOCMEM_ASSERT(exp) PVR_ASSERT(exp)
 #else
 #define double_free_sentinel NULL
-#define ALLOCMEM_ASSERT(exp) do {} while (0)
+#define ALLOCMEM_ASSERT(exp) ((void)0)
 #endif
 /*! @endcond */
 

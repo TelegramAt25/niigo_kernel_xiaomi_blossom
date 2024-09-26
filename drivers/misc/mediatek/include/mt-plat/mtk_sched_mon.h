@@ -54,7 +54,7 @@ DECLARE_PER_CPU(struct irq_handle_status, softirq_note);
 		aee_str, "\n%s\n", msg)); \
 } while (0)
 #else
-#define schedule_monitor_aee(msg_str, item) do {} while (0)
+#define schedule_monitor_aee(msg_str, item) ((void)0)
 #endif
 
 #define WARN_INFO ": process time %llums, from %ld.%06ld to %ld.%06ld"
@@ -146,49 +146,49 @@ DECLARE_PER_CPU(struct irq_handle_status, softirq_note);
 #ifdef CONFIG_MTK_AEE_IPANIC
 #define pr_aee_sram(msg) aee_sram_fiq_log(msg)
 #else
-#define pr_aee_sram(msg) do {} while (0)
+#define pr_aee_sram(msg) ((void)0)
 #endif
 
 void show_irq_handle_info(int output);
 #ifdef CONFIG_MTK_IRQ_COUNT_TRACER
 void show_irq_count_info(int output);
 #else
-#define show_irq_count_info(output) do {} while (0)
+#define show_irq_count_info(output) ((void)0)
 #endif
 
 #ifdef CONFIG_MTK_IRQ_OFF_TRACER
 void trace_hardirqs_off_time(void);
 void trace_hardirqs_on_time(void);
 #else
-#define trace_hardirqs_off_time() do {} while (0)
-#define trace_hardirqs_on_time() do {} while (0)
+#define trace_hardirqs_off_time() ((void)0)
+#define trace_hardirqs_on_time() ((void)0)
 #endif
 
 #ifdef CONFIG_MTK_PREEMPT_TRACER
 void trace_preempt_off_time(void);
 void trace_preempt_on_time(void);
 #else
-#define trace_preempt_off_time() do {} while (0)
-#define trace_preempt_on_time() do {} while (0)
+#define trace_preempt_off_time() ((void)0)
+#define trace_preempt_on_time() ((void)0)
 #endif
 
 void mt_aee_dump_sched_traces(void);
 
 #else /* !CONFIG_MTK_SCHED_MONITOR */
 #define check_start_time(time) ((void)time)
-#define check_process_time(msg, ts, ...) do {} while (0)
+#define check_process_time(msg, ts, ...) ((void)0)
 #define check_start_time_preempt(type, count, time, irq_id) do { \
 	(void)time; \
 	(void)count; \
 } while (0)
-#define check_process_time_preempt(type, count, msg, ts, ...) do {} while (0)
-#define trace_hardirqs_off_time() do {} while (0)
-#define trace_hardirqs_on_time() do {} while (0)
-#define trace_preempt_off_time() do {} while (0)
-#define trace_preempt_on_time() do {} while (0)
-#define show_irq_handle_info(output) do {} while (0)
-#define show_irq_count_info(output) do {} while (0)
-#define mt_aee_dump_sched_traces() do {} while (0)
+#define check_process_time_preempt(type, count, msg, ts, ...) ((void)0)
+#define trace_hardirqs_off_time() ((void)0)
+#define trace_hardirqs_on_time() ((void)0)
+#define trace_preempt_off_time() ((void)0)
+#define trace_preempt_on_time() ((void)0)
+#define show_irq_handle_info(output) ((void)0)
+#define show_irq_count_info(output) ((void)0)
+#define mt_aee_dump_sched_traces() ((void)0)
 #endif /* CONFIG_MTK_SCHED_MONITOR */
 
 const char *irq_to_name(int irq);

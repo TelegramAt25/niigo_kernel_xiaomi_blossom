@@ -52,7 +52,7 @@ extern struct device tui_dev;
 #define tui_dev_devel(fmt, ...) \
 	dev_info(&tui_dev, "%s: " fmt "\n", __func__, ##__VA_ARGS__)
 #else /* DEBUG */
-#define tui_dev_devel(...)		do {} while (0)
+#define tui_dev_devel(...)		((void)0)
 #endif /* !DEBUG */
 
 #endif /* TLCTUI_H_ */

@@ -71,7 +71,7 @@ static void hacc_test(void)
 	     test_keysz << 3);
 }
 #else
-#define hacc_test()      do {} while (0)
+#define hacc_test()      ((void)0)
 #endif
 
 /******************************************************************************

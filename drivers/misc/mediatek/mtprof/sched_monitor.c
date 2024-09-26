@@ -421,8 +421,8 @@ static DEFINE_PER_CPU(int, tracing_irq_cpu);
 #define irqsoff_on_tracing()      this_cpu_read(tracing_irq_cpu)
 #define irqsoff_not_on_tracing()  !this_cpu_read(tracing_irq_cpu)
 #else
-#define irqsoff_tracing_lock()    do {} while (0)
-#define irqsoff_tracing_unlock()  do {} while (0)
+#define irqsoff_tracing_lock()    ((void)0)
+#define irqsoff_tracing_unlock()  ((void)0)
 #define irqsoff_on_tracing()      0
 #define irqsoff_not_on_tracing()  0
 #endif

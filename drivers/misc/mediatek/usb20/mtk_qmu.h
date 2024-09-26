@@ -151,10 +151,10 @@ static inline int mtk_dbg_level(unsigned int level)
 	pr_notice("QMU_DBG,<%s %d>, " format, __func__, __LINE__, ## args);  } \
 	while (0)
 #else
-#define QMU_ERR(format, args...) do {} while (0)
-#define QMU_WARN(format, args...) do {} while (0)
-#define QMU_INFO(format, args...) do {} while (0)
-#define QMU_DBG(format, args...) do {} while (0)
+#define QMU_ERR(format, args...) ((void)0)
+#define QMU_WARN(format, args...) ((void)0)
+#define QMU_INFO(format, args...) ((void)0)
+#define QMU_DBG(format, args...) ((void)0)
 #endif
 
 

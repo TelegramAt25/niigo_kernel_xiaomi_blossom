@@ -149,7 +149,7 @@ static inline ktime_t sync_pt_get_timestamp(struct sync_pt *pt)
 #ifdef DEBUG_OUTPUT
 #define DPF(fmt, ...) pr_err("pvr_sync2: " fmt "\n", __VA_ARGS__)
 #else
-#define DPF(fmt, ...) do {} while (0)
+#define DPF(fmt, ...) ((void)0)
 #endif
 
 #define PVR_DUMPDEBUG_LOG(pfnDumpDebugPrintf, pvDumpDebugFile, ...) \

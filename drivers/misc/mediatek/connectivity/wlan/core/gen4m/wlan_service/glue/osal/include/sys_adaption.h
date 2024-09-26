@@ -271,7 +271,7 @@ typedef uint32_t (*wlan_oid_handler_t) (void *winfos,
 #define SERV_OS_ALLOCATE_SPIN_LOCK(__lock)		\
 				spin_lock_init((spinlock_t *)(__lock))
 #define SERV_OS_FREE_SPIN_LOCK(lock)			\
-				do {} while (0)
+				((void)0)
 #define SERV_OS_SEM_LOCK(__lock)			\
 				spin_lock_bh((spinlock_t *)(__lock))
 

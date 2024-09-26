@@ -19,7 +19,7 @@
 #ifdef MEMSTAT_DEBUG
 #define debug_memstat(fmt, arg...) pr_debug(fmt, ##arg)
 #else
-#define debug_memstat(fmt, arg...) do {} while (0)
+#define debug_memstat(fmt, arg...) ((void)0)
 #endif
 
 struct metdevice met_memstat;

@@ -204,11 +204,11 @@ while (0)
 	## args);  } \
 while (0)
 #else
-#define C2K_ERR(format, args...) do {} while (0)
-#define C2K_WARN(format, args...) do {} while (0)
-#define C2K_NOTE(format, args...) do {} while (0)
-#define C2K_INFO(format, args...) do {} while (0)
-#define C2K_DBG(format, args...) do {} while (0)
+#define C2K_ERR(format, args...) ((void)0)
+#define C2K_WARN(format, args...) ((void)0)
+#define C2K_NOTE(format, args...) ((void)0)
+#define C2K_INFO(format, args...) ((void)0)
+#define C2K_DBG(format, args...) ((void)0)
 #endif
 
 extern unsigned int upstream_data[_MAX_TID];

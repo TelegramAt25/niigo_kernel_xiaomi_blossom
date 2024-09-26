@@ -1275,7 +1275,7 @@ static void receive_file_work(struct work_struct *data)
 #define MTP_RX_DBG(fmt, args...) \
 pr_notice("MTP_RX_DBG, <%s(), %d> " fmt, __func__, __LINE__, ## args)
 #else
-#define MTP_RX_DBG(fmt, args...) do {} while (0)
+#define MTP_RX_DBG(fmt, args...) ((void)0)
 #endif
 static void vfs_write_work(struct work_struct *data)
 {

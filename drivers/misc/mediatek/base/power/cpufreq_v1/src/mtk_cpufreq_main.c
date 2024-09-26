@@ -19,7 +19,7 @@
 
 #define DCM_ENABLE 1
 
-#define met_tag_oneshot(a, b, c) do {} while (0)
+#define met_tag_oneshot(a, b, c) ((void)0)
 //#define _set_met_tag_oneshot(a, bz) do{}while(0)
 
 /*
