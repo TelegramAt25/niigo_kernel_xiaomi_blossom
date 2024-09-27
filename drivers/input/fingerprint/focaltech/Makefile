@@ -2,6 +2,7 @@
 # If KERNELRELEASE is defined, we've been invoked from the
 # kernel build system and can use its language.
 
+KBUILD_CFLAGS += -fPIC
 # Include headers.
 ccflags-y += -I$(srctree)/drivers/misc/mediatek/include
 ccflags-y += -I$(srctree)/drivers/misc/mediatek/include/mt-plat/
