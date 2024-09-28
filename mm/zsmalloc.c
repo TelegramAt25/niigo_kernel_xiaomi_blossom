@@ -17,10 +17,10 @@
  *
  * Usage of struct page fields:
  *	page->private: points to zspage
- *	page->index: links together all component pages of a zspage
+ *	page->freelist(index): links together all component pages of a zspage
  *		For the huge page, this is always 0, so we use this field
  *		to store handle.
- *	page->page_type: first object offset in a subpage of zspage
+ *	page->units: first object offset in a subpage of zspage
  *
  * Usage of struct page flags:
  *	PG_private: identifies the first component page
@@ -404,10 +404,7 @@ static int zs_zpool_malloc(void *pool, size_t size, gfp_t gfp,
 			unsigned long *handle)
 {
 	*handle = zs_malloc(pool, size, gfp);
-
-	if (IS_ERR((void *)(*handle)))
-		return PTR_ERR((void *)*handle);
-	return 0;
+	return *handle ? 0 : -1;
 }
 static void zs_zpool_free(void *pool, unsigned long handle)
 {
@@ -498,12 +495,12 @@ static inline struct page *get_first_page(struct zspage *zspage)
 
 static inline int get_first_obj_offset(struct page *page)
 {
-	return page->page_type;
+	return page->units;
 }
 
 static inline void set_first_obj_offset(struct page *page, int offset)
 {
-	page->page_type = offset;
+	page->units = offset;
 }
 
 static inline unsigned int get_freeobj(struct zspage *zspage)
@@ -855,7 +852,7 @@ static struct page *get_next_page(struct page *page)
 	if (unlikely(PageHugeObject(page)))
 		return NULL;
 
-	return (struct page *)page->index;
+	return page->freelist;
 }
 
 /**
@@ -929,7 +926,7 @@ static void reset_page(struct page *page)
 	set_page_private(page, 0);
 	page_mapcount_reset(page);
 	ClearPageHugeObject(page);
-	page->index = 0;
+	page->freelist = NULL;
 }
 
 static int trylock_zspage(struct zspage *zspage)
@@ -1055,7 +1052,7 @@ static void create_page_chain(struct size_class *class, struct zspage *zspage,
 
 	/*
 	 * Allocate individual pages and link them together as:
-	 * 1. all pages are linked together using page->index
+	 * 1. all pages are linked together using page->freelist
 	 * 2. each sub-page point to zspage using page->private
 	 *
 	 * we set PG_private to identify the first page (i.e. no other sub-page
@@ -1064,7 +1061,7 @@ static void create_page_chain(struct size_class *class, struct zspage *zspage,
 	for (i = 0; i < nr_pages; i++) {
 		page = pages[i];
 		set_page_private(page, (unsigned long)zspage);
-		page->index = 0;
+		page->freelist = NULL;
 		if (i == 0) {
 			zspage->first_page = page;
 			SetPagePrivate(page);
@@ -1072,7 +1069,7 @@ static void create_page_chain(struct size_class *class, struct zspage *zspage,
 					class->pages_per_zspage == 1))
 				SetPageHugeObject(page);
 		} else {
-			prev_page->index = (unsigned long)page;
+			prev_page->freelist = page;
 		}
 		prev_page = page;
 	}
@@ -1474,7 +1471,7 @@ static unsigned long obj_malloc(struct size_class *class,
  * @gfp: gfp flags when allocating object
  *
  * On success, handle to the allocated object is returned,
- * otherwise an ERR_PTR().
+ * otherwise 0.
  * Allocation requests with size > ZS_MAX_ALLOC_SIZE will fail.
  */
 unsigned long zs_malloc(struct zs_pool *pool, size_t size, gfp_t gfp)
@@ -1485,11 +1482,11 @@ unsigned long zs_malloc(struct zs_pool *pool, size_t size, gfp_t gfp)
 	struct zspage *zspage;
 
 	if (unlikely(!size || size > ZS_MAX_ALLOC_SIZE))
-		return (unsigned long)ERR_PTR(-EINVAL);
+		return 0;
 
 	handle = cache_alloc_handle(pool, gfp);
 	if (!handle)
-		return (unsigned long)ERR_PTR(-ENOMEM);
+		return 0;
 
 	/* extra space in chunk to keep the handle */
 	size += ZS_HANDLE_SIZE;
@@ -1512,7 +1509,7 @@ unsigned long zs_malloc(struct zs_pool *pool, size_t size, gfp_t gfp)
 	zspage = alloc_zspage(pool, class, gfp);
 	if (!zspage) {
 		cache_free_handle(pool, handle);
-		return (unsigned long)ERR_PTR(-ENOMEM);
+		return 0;
 	}
 
 	spin_lock(&class->lock);
@@ -1854,7 +1851,11 @@ static void lock_zspage(struct zspage *zspage)
 static struct dentry *zs_mount(struct file_system_type *fs_type,
 				int flags, const char *dev_name, void *data)
 {
-	return mount_pseudo(fs_type, "zsmalloc:", NULL, NULL, ZSMALLOC_MAGIC);
+	static const struct dentry_operations ops = {
+		.d_dname = simple_dname,
+	};
+
+	return mount_pseudo(fs_type, "zsmalloc:", NULL, &ops, ZSMALLOC_MAGIC);
 }
 
 static struct file_system_type zsmalloc_fs = {
