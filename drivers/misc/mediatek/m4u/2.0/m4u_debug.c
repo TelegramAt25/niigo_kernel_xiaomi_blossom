@@ -46,11 +46,6 @@ int m4u_test_reclaim(unsigned int size)
 	return 0;
 }
 
-static int m4u_test_map_kernel(void)
-{
-	return 0;
-}
-
 int __attribute__((weak)) ddp_mem_test(void)
 {
 	return 0;
