@@ -155,7 +155,7 @@ static void vibr_disable(struct reg_vibr *vibr)
 		else
 			vibr->reg_status = 0;
 	} else {
-		pr_notice("vibr_reg already disabled.\n");
+		pr_debug("vibr_reg already disabled.\n");
 	}
 }
 
@@ -164,7 +164,7 @@ static void update_vibrator(struct work_struct *work)
 
 	struct reg_vibr *vibr = container_of(work, struct reg_vibr, vibr_work);
 
-	pr_info("vibr_state = %d\n", vibr->vibr_state);
+	pr_debug("vibr_state = %d\n", vibr->vibr_state);
 
 	if (vibr->vibr_oc_state) {
 		vibr->vibr_oc_state = false;
@@ -183,7 +183,7 @@ static void vibrator_enable(struct reg_vibr *vibr,
 {
 	unsigned long flags;
 
-	pr_info("cancel hrtimer, cust:%u-%u, dur:%u, shutdown:%d\n",
+	pr_debug("cancel hrtimer, cust:%u-%u, dur:%u, shutdown:%d\n",
 		vibr->vibr_conf.min_limit, vibr->vibr_conf.max_limit,
 		dur, vibr->vibr_shutdown);
 	spin_lock_irqsave(&vibr->vibr_lock, flags);
@@ -240,7 +240,7 @@ static ssize_t activate_store(struct device *dev,
 		return ret;
 	}
 	duration = vibr->vibr_dur;
-	pr_info("set activate duration = %u, %u\n",
+	pr_debug("set activate duration = %u, %u\n",
 		activate, duration);
 	vibrator_enable(vibr, duration, activate);
 
