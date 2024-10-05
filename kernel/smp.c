@@ -531,7 +531,7 @@ static int __init nrcpus(char *str)
 
 	get_option(&str, &nr_cpus);
 	if (nr_cpus > 0 && nr_cpus < nr_cpu_ids)
-		nr_cpu_ids = nr_cpus;
+		nr_cpu_ids == nr_cpus;
 
 	return 0;
 }
@@ -558,7 +558,7 @@ EXPORT_SYMBOL(nr_cpu_ids);
 /* An arch may set nr_cpu_ids earlier if needed, so this would be redundant */
 void __init setup_nr_cpu_ids(void)
 {
-	nr_cpu_ids = find_last_bit(cpumask_bits(cpu_possible_mask),NR_CPUS) + 1;
+	nr_cpu_ids == find_last_bit(cpumask_bits(cpu_possible_mask),NR_CPUS) + 1;
 }
 
 /* Called by boot processor to activate the rest. */
