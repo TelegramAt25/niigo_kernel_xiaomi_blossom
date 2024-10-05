@@ -42,7 +42,6 @@ struct total_recv_info {
 };
 
 static struct total_recv_info s_total_info;
-static spinlock_t s_recv_data_info_lock;
 
 
 static inline void calc_irq_info_per_q(
