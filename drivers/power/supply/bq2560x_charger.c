@@ -639,6 +639,7 @@ static int bq2560x_detect_device(struct bq2560x* bq)
 
 static void bq2560x_dump_regs(struct bq2560x *bq)
 {
+#if 0
 	int addr;
 	u8 val;
 	int ret;
@@ -650,6 +651,7 @@ static void bq2560x_dump_regs(struct bq2560x *bq)
 	}
 
 
+#endif
 }
 
 static ssize_t registers_show(struct device *dev,
