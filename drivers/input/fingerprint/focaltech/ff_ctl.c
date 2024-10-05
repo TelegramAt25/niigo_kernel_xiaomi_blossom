@@ -252,7 +252,7 @@ static irqreturn_t ff_ctl_device_irq(int irq, void *dev_id)
     disable_irq_nosync(irq);
 
     if (likely(irq == ctx->irq_num)) {
-        if (g_config && g_config->enable_fasync && g_context->async_queue) {
+        if (g_config->enable_fasync && g_context->async_queue) {
             kill_fasync(&g_context->async_queue, SIGIO, POLL_IN);
         } else {
             schedule_work(&ctx->work_queue);
