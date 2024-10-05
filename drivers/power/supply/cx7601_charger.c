@@ -610,6 +610,7 @@ static int cx7601_detect_device(struct cx7601 *bq)
 
 static void cx7601_dump_regs(struct cx7601 *bq)
 {
+#if 0
 	int addr;
 	u8 val;
 	int ret;
@@ -619,6 +620,7 @@ static void cx7601_dump_regs(struct cx7601 *bq)
 		if (ret == 0)
 			pr_err("Reg[%.2x] = 0x%.2x\n", addr, val);
 	}
+#endif
 }
 
 static ssize_t registers_show(struct device *dev,
