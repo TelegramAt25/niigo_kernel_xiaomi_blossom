@@ -373,9 +373,6 @@ pvr_sync_create_fence(const char *fence_name,
 		err = PVRSRV_ERROR_OUT_OF_MEMORY;
 		goto err_destroy_fence;
 	}
-	strlcpy(sync_file_user_name(sync_file),
-		pvr_fence->name,
-		sizeof(sync_file_user_name(sync_file)));
 	dma_fence_put(&pvr_fence->base);
 
 	*new_fence = new_fence_fd;
