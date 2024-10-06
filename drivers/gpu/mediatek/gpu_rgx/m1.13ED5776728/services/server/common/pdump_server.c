@@ -77,7 +77,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #define PRM_FILE_SIZE_MAX	0x7FDFFFFFU /*!< Default maximum file size to split output files, 2GB-2MB as fwrite limits it to 2GB-1 on 32bit systems */
 
-#define MAX_PDUMP_WRITE_RETRIES	200	/*!< Max number of retries to dump pdump data in to respective buffers */
+#define MAX_PDUMP_WRITE_RETRIES	1	/*!< Max number of retries to dump pdump data in to respective buffers */
 
 static ATOMIC_T		g_sConnectionCount;
 
