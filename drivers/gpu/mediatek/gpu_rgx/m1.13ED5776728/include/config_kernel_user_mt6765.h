@@ -13,7 +13,6 @@
 #define PVRSYNC_MODNAME "pvr_sync"
 #define SUPPORT_RGX 1
 #define RELEASE
-#define SUPPORT_PHYSMEM_TEST
 #define RGX_BVNC_CORE_KM_HEADER "cores/rgxcore_km_22.87.104.18.h"
 #define RGX_BNC_CONFIG_KM_HEADER "configs/rgxconfig_km_22.V.104.18.h"
 #define SUPPORT_DBGDRV_EVENT_OBJECTS
