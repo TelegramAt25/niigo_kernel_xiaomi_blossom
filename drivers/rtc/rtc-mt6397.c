@@ -727,12 +727,6 @@ bool mtk_rtc_is_pwron_alarm(struct mt6397_rtc *rtc,
 
 		} while (sec < nowtm->tm_sec);
 
-		dev_notice(rtc->dev,
-			"get now time = %04d/%02d/%02d %02d:%02d:%02d\n",
-			nowtm->tm_year + RTC_MIN_YEAR, nowtm->tm_mon,
-			nowtm->tm_mday, nowtm->tm_hour,
-			nowtm->tm_min, nowtm->tm_sec);
-
 		/*get power on time from SPARE */
 		ret = regmap_read(rtc->regmap,
 				rtc->addr_base + RTC_SPAR0, &spar0);
@@ -748,10 +742,6 @@ bool mtk_rtc_is_pwron_alarm(struct mt6397_rtc *rtc,
 					rtc->addr_base + RTC_PDN2, &pdn2);
 		if (ret < 0)
 			goto exit;
-		dev_notice(rtc->dev,
-			"spar0=0x%x, spar1=0x%x, pdn2=0x%x\n",
-			spar0, spar1, pdn2);
-
 		tm->tm_sec =
 			(spar0 & RTC_PWRON_SEC_MASK) >> RTC_PWRON_SEC_SHIFT;
 		tm->tm_min =
@@ -764,11 +754,6 @@ bool mtk_rtc_is_pwron_alarm(struct mt6397_rtc *rtc,
 			(pdn2 & RTC_PWRON_MTH_MASK) >> RTC_PWRON_MTH_SHIFT;
 		tm->tm_year =
 			(pdn2 & RTC_PWRON_YEA_MASK) >> RTC_PWRON_YEA_SHIFT;
-
-		dev_notice(rtc->dev,
-		"get pwron time = %04d/%02d/%02d %02d:%02d:%02d\n",
-		tm->tm_year + RTC_MIN_YEAR, tm->tm_mon, tm->tm_mday,
-		tm->tm_hour, tm->tm_min, tm->tm_sec);
 
 		return true;
 	}
@@ -783,8 +768,6 @@ static irqreturn_t mtk_rtc_irq_handler_thread(int irq, void *data)
 	struct mt6397_rtc *rtc = data;
 	bool pwron_alm = false, isAlarmIrq = false, pwron_alarm = false;
 	struct rtc_time nowtm, tm;
-
-	dev_notice(rtc->dev, "%s\n", __func__);
 
 	mutex_lock(&rtc->lock);
 	isAlarmIrq = mtk_rtc_is_alarm_irq(rtc);
@@ -843,10 +826,6 @@ static irqreturn_t mtk_rtc_irq_handler_thread(int irq, void *data)
 out:
 	if (rtc->rtc_dev != NULL)
 		rtc_update_irq(rtc->rtc_dev, 1, RTC_IRQF | RTC_AF);
-
-	if (rtc_show_alarm)
-		dev_notice(rtc->dev, "%s time is up\n",
-					pwron_alm ? "power-on" : "alarm");
 
 	return IRQ_NONE;
 }
