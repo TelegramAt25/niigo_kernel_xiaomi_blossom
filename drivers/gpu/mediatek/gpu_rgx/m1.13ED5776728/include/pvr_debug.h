@@ -353,6 +353,7 @@ PVRSRVDebugAssertFail(const IMG_CHAR *pszFile,
 		MSC_SUPPRESS_4127\
 		} while (0)
 
+#if 0
 /*************************************************************************/ /*!
 @Function       PVRSRVDebugPrintf
 @Description    Output a debug message to the user, using an OS-specific
@@ -382,6 +383,13 @@ IMG_EXPORT void IMG_CALLCONV PVRSRVDebugPrintf(IMG_UINT32 ui32DebugLevel,
                                                IMG_UINT32 ui32Line,
                                                const IMG_CHAR *pszFormat,
                                                ...) __printf(4, 5);
+#else
+IMG_EXPORT inline void IMG_CALLCONV PVRSRVDebugPrintf(IMG_UINT32 ui32DebugLevel,
+                                                      const IMG_CHAR *pszFileName,
+                                                      IMG_UINT32 ui32Line,
+                                                      const IMG_CHAR *pszFormat,
+                                                      ...) __printf(4, 5);
+#endif
 
 /*************************************************************************/ /*!
 @Function       PVRSRVDebugPrintfDumpCCB
