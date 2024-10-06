@@ -74,16 +74,8 @@ extern "C" {
 #define DBGPRIV_DEBUG     0x100UL  /*!< Debug-AdHoc-Debug. Never submitted. Privately used by pvr_debug. */
 #define DBGPRIV_LAST      0x100UL  /*!< Always set to highest mask value. Privately used by pvr_debug. */
 
-#if !defined(PVRSRV_NEED_PVR_ASSERT) && defined(DEBUG)
-#define PVRSRV_NEED_PVR_ASSERT
-#endif
-
 #if defined(PVRSRV_NEED_PVR_ASSERT) && !defined(PVRSRV_NEED_PVR_DPF)
 #define PVRSRV_NEED_PVR_DPF
-#endif
-
-#if !defined(PVRSRV_NEED_PVR_TRACE) && (defined(DEBUG) || defined(TIMING))
-#define PVRSRV_NEED_PVR_TRACE
 #endif
 
 #if !defined(DOXYGEN)
@@ -132,16 +124,7 @@ const IMG_CHAR *PVRSRVGetErrorString(PVRSRV_ERROR eError);
 /* In Linux kernel mode, use WARN_ON() directly. This produces the
  * correct filename and line number in the warning message.
  */
-#define PVR_ASSERT(EXPR) do											\
-	{																\
-		if (unlikely(!(EXPR)))										\
-		{															\
-			PVRSRVDebugPrintf(DBGPRIV_FATAL, __FILE__, __LINE__,	\
-							  "Debug assertion failed!");			\
-			WARN_ON(1);												\
-		}															\
-	} while (0)
-
+#define PVR_ASSERT(EXPR) ((void)0)
 #else /* defined(LINUX) && defined(__KERNEL__) */
 
 /*************************************************************************/ /*!
@@ -159,14 +142,7 @@ PVRSRVDebugAssertFail(const IMG_CHAR *pszFile,
                       IMG_UINT32 ui32Line,
                       const IMG_CHAR *pszAssertion);
 
-#define PVR_ASSERT(EXPR) do										\
-	{															\
-		if (unlikely(!(EXPR)))									\
-		{														\
-			PVRSRVDebugAssertFail(__FILE__, __LINE__, #EXPR);	\
-		}														\
-	} while (0)
-
+#define PVR_ASSERT(EXPR) ((void)0)
 #endif /* defined(LINUX) && defined(__KERNEL__) */
 #endif /* defined(_WIN32) */
 #endif /* defined(__KLOCWORK__) */

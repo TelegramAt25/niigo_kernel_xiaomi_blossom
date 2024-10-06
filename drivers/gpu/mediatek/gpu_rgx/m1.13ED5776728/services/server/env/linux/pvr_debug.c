@@ -140,6 +140,7 @@ AddToBufferCCB(const IMG_CHAR *pszFileName, IMG_UINT32 ui32Line,
 
 void PVRSRVDebugPrintfDumpCCB(void)
 {
+#if 0
 	int i;
 	unsigned long uiFlags;
 
@@ -170,6 +171,7 @@ void PVRSRVDebugPrintfDumpCCB(void)
 	}
 
 	spin_unlock_irqrestore(&gsDebugCCBLock, uiFlags);
+#endif
 }
 
 #else /* defined(PVRSRV_DEBUG_CCB_MAX) */
