@@ -4719,10 +4719,10 @@ static void DPE_ScheduleDveWork(struct work_struct *data)
 	if (bResulst == MFALSE)
 		ConfigDVEFrameByReqIdx(g_DVE_RequestRing.HWProcessIdx);
 
-		LOG_INF("DVE:bFound:%d, DveWriteIdx:%d, WriteIdx:%d\n",
+	LOG_INF("DVE:bFound:%d, DveWriteIdx:%d, WriteIdx:%d\n",
 		bFound, DveWriteIdx,
 		g_DVE_RequestRing.WriteIdx);
-		LOG_INF("DVE:gDveCnt:%d,RequestState:%d,HWIdx:%d\n",
+	LOG_INF("DVE:gDveCnt:%d,RequestState:%d,HWIdx:%d\n",
 		gDveCnt,
 		g_DVE_RequestRing.DVEReq_Struct[DveWriteIdx].RequestState,
 		g_DVE_RequestRing.HWProcessIdx);
