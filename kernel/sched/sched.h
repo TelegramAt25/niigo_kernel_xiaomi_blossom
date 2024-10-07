@@ -2347,7 +2347,7 @@ static inline void cpufreq_update_util(struct rq *rq, unsigned int flags) {}
 extern struct mutex uclamp_mutex;
 
 unsigned long uclamp_eff_value(struct task_struct *p, enum uclamp_id clamp_id);
-inline void uclamp_se_set(struct uclamp_se *uc_se,
+void uclamp_se_set(struct uclamp_se *uc_se,
 				 unsigned int value, bool user_defined);
 void
 uclamp_update_active_tasks(struct cgroup_subsys_state *css,
