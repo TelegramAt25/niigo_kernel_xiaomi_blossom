@@ -384,11 +384,11 @@ IMG_EXPORT void IMG_CALLCONV PVRSRVDebugPrintf(IMG_UINT32 ui32DebugLevel,
                                                const IMG_CHAR *pszFormat,
                                                ...) __printf(4, 5);
 #else
-IMG_EXPORT inline void IMG_CALLCONV PVRSRVDebugPrintf(IMG_UINT32 ui32DebugLevel,
-                                                      const IMG_CHAR *pszFileName,
-                                                      IMG_UINT32 ui32Line,
-                                                      const IMG_CHAR *pszFormat,
-                                                      ...) __printf(4, 5);
+IMG_EXPORT void IMG_CALLCONV PVRSRVDebugPrintf(IMG_UINT32 ui32DebugLevel,
+                                               const IMG_CHAR *pszFileName,
+                                               IMG_UINT32 ui32Line,
+                                               const IMG_CHAR *pszFormat,
+                                               ...) __printf(4, 5);
 #endif
 
 /*************************************************************************/ /*!
