@@ -38,7 +38,6 @@
 #define PK_DBG_FUNC(fmt, arg...)  pr_debug(TAG_NAME "%s: " fmt, __func__, ##arg)
 #define PK_ERR(fmt, arg...)       pr_info(TAG_NAME "%s: " fmt, __func__, ##arg)
 
-#define DEBUG_LEDS_STROBE
 #ifdef DEBUG_LEDS_STROBE
 #define PK_INF(fmt, arg...)       pr_info(TAG_NAME "%s is called.\n" fmt, __func__, ##arg)
 #define PK_DBG                    PK_DBG_FUNC
