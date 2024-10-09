@@ -2041,7 +2041,7 @@ uint32_t wlanGetConnacTailerInfo(IN struct ADAPTER
 
 	kalMemZero(aucBuf, 32);
 	kalStrnCpy(aucBuf, prComTailer->aucRamVersion,
-		   sizeof(prComTailer->aucRamVersion));
+		   strlen(prComTailer->aucRamVersion));
 
 	/* Dump image information */
 	DBGLOG(INIT, INFO,
