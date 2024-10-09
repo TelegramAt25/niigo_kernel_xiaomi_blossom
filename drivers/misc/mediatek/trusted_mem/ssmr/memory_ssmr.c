@@ -600,7 +600,7 @@ static int memory_region_offline(struct SSMR_Feature *feature, phys_addr_t *pa,
 #else
 		if (feature->phy_addr == U32_MAX) {
 #endif
-			pr_info("[SSMR-ALLOCATION]: pa=0x%lx, ssmr retry\n", feature->phy_addr);
+			pr_info("[SSMR-ALLOCATION]: pa=0x%llx, ssmr retry\n", feature->phy_addr);
 			feature->phy_addr = 0;
 		}
 
