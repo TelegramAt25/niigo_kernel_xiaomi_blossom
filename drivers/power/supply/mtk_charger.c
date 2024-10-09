@@ -1843,10 +1843,6 @@ static int psy_charger_get_property(struct power_supply *psy,
 
 	info = (struct mtk_charger *)power_supply_get_drvdata(psy);
 
-	chr_err("%s psp:%d\n",
-		__func__, psp);
-
-
 	if (info->psy1 != NULL &&
 		info->psy1 == psy)
 		chg = info->chg1_dev;
@@ -1909,8 +1905,6 @@ int psy_charger_set_property(struct power_supply *psy,
 {
 	struct mtk_charger *info;
 	int idx;
-
-	chr_err("%s: prop:%d %d\n", __func__, psp, val->intval);
 
 	info = (struct mtk_charger *)power_supply_get_drvdata(psy);
 
