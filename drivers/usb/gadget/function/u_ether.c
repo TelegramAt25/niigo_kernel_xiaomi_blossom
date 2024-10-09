@@ -26,9 +26,6 @@
 #include "u_ether.h"
 #include "rndis.h"
 /* #include "rps_perf.h" */
-#ifdef CONFIG_MEDIATEK_SOLUTION
-#include "usb_boost.h"
-#endif
 
 /*
  * This component encapsulates the Ethernet link glue needed to provide
