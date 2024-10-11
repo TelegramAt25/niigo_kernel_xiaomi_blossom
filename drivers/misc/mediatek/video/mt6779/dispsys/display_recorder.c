@@ -50,7 +50,7 @@
 #include "ddp_mmp.h"
 #include <linux/trace_events.h>
 
-#if defined(CONFIG_MTK_ENG_BUILD) || !defined(CONFIG_MTK_GMO_RAM_OPTIMIZE)
+#if defined(CONFIG_MTK_ENG_BUILD)
 unsigned int gCapturePriLayerEnable;
 unsigned int gCaptureWdmaLayerEnable;
 unsigned int gCaptureRdmaLayerEnable;
@@ -1207,7 +1207,7 @@ char *debug_buffer;
 
 int debug_buffer_size(void)
 {
-#if defined(CONFIG_MT_ENG_BUILD) || !defined(CONFIG_MTK_GMO_RAM_OPTIMIZE)
+#if defined(CONFIG_MT_ENG_BUILD)
 	static int size;
 
 	if (size == 0) {
@@ -1387,7 +1387,7 @@ int dprec_logger_get_buf(enum DPREC_LOGGER_PR_TYPE type, char *stringbuf,
 	return n;
 }
 
-#else /* !(CONFIG_MTK_ENG_BUILD) || !(CONFIG_MTK_GMO_RAM_OPTIMIZE)) */
+#else /* !(CONFIG_MTK_ENG_BUILD)) */
 
 unsigned int gCapturePriLayerEnable;
 unsigned int gCaptureWdmaLayerEnable;
@@ -1586,4 +1586,4 @@ void init_log_buffer(void)
 {
 }
 
-#endif /* CONFIG_MTK_ENG_BUILD) || !(CONFIG_MTK_GMO_RAM_OPTIMIZE) */
+#endif /* CONFIG_MTK_ENG_BUILD) */
