@@ -35,13 +35,10 @@ int __attribute__((weak)) mtk_idle_cond_append_info(
 /* idle ratio */
 static bool idle_ratio_en;
 static unsigned long long idle_ratio_profile_start_time;
-static unsigned long long idle_ratio_profile_duration;
 
 /* idle block information */
 static unsigned long long idle_block_log_prev_time;
 static unsigned int idle_block_log_time_criteria = 5000;    /* 5 sec */
-static unsigned long long idle_cnt_dump_prev_time;
-static unsigned int idle_cnt_dump_criteria = 5000;          /* 5 sec */
 
 /*External weak functions: implemented in mtk_cpufreq_api.c*/
 unsigned int __attribute__((weak))
@@ -56,7 +53,6 @@ struct mtk_idle_buf {
 	char *p_idx;
 };
 
-static struct mtk_idle_buf idle_log;
 static struct mtk_idle_buf idle_state_log;
 
 #define reset_idle_buf(idle) \
@@ -279,6 +275,7 @@ void mtk_idle_enable_ratio_calc(void)
 	}
 }
 
+#if 0
 static void mtk_idle_dump_cnt(int type)
 {
 	static struct mtk_idle_buf buf;
@@ -322,6 +319,7 @@ static void mtk_idle_dump_cnt(int type)
 }
 
 static DEFINE_SPINLOCK(idle_dump_cnt_spin_lock);
+#endif
 
 void mtk_idle_dump_cnt_in_interval(void)
 {
