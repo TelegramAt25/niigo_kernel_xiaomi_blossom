@@ -501,9 +501,6 @@ static void disp_irq_rdma_underflow_aee_trigger(void)
 #if 0	/*SHANG: TODO: wait smi offer this API */
 				smi_dumpDebugMsg();
 #endif
-				DDPAEE("RDMA0 underflow!cnt=%d,sys_tim=%u\n",
-					cnt_rdma_underflow[0],
-					(u32)arch_counter_get_cntvct());
 				considerable_cnt = 0;
 			}
 			last_timer = sched_clock();
