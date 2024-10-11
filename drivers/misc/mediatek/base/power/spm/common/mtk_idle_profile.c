@@ -53,7 +53,6 @@ struct mtk_idle_buf {
 	char *p_idx;
 };
 
-static struct mtk_idle_buf idle_log;
 static struct mtk_idle_buf idle_state_log;
 
 #define reset_idle_buf(idle) \
