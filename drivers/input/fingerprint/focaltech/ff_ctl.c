@@ -517,15 +517,6 @@ static long ff_ctl_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 
 #if 1
     if (g_log_level <= FF_LOG_LEVEL_DBG) {
-        static const char *cmd_names[] = {
-                "FF_IOC_INIT_DRIVER", "FF_IOC_FREE_DRIVER",
-                "FF_IOC_RESET_DEVICE",
-                "FF_IOC_ENABLE_IRQ", "FF_IOC_DISABLE_IRQ",
-                "FF_IOC_ENABLE_SPI_CLK", "FF_IOC_DISABLE_SPI_CLK",
-                "FF_IOC_ENABLE_POWER", "FF_IOC_DISABLE_POWER",
-                "FF_IOC_REPORT_KEY_EVENT", "FF_IOC_SYNC_CONFIG",
-                "FF_IOC_GET_VERSION", "unknown",
-        };
         unsigned int _cmd = _IOC_NR(cmd);
         if (_cmd > _IOC_NR(FF_IOC_GET_VERSION)) {
             _cmd = _IOC_NR(FF_IOC_GET_VERSION) + 1;
