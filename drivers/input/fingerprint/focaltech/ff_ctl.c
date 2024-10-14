@@ -44,12 +44,6 @@
 #ifdef CONFIG_COMPAT
 #include <linux/compat.h>
 #endif
-#if defined(CONFIG_PRIZE_HARDWARE_INFO)
-#include "../../../../misc/mediatek/hardware_info/hardware_info.h"
-extern struct hardware_info current_fingerprint_info;
-static int read_id = 9362;
-
-#endif
 
 //beanpod
 #include "tee_client_api.h"
@@ -596,9 +590,6 @@ static long ff_ctl_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
             err = (-EFAULT);
             break;
         }
-		#if defined(CONFIG_PRIZE_HARDWARE_INFO)
-		sprintf(current_fingerprint_info.id, "%s",&hal_version[0]);
-		#endif
         break;
 	}
 	case FF_IOC_GET_HAL_VERSION: {
@@ -735,13 +726,6 @@ static int __init ff_ctl_driver_init(void)
 		g_context->b_driver_inited = false;
 	}
 #endif
-#if defined(CONFIG_PRIZE_HARDWARE_INFO)
-	//id=mas_connect();
-	sprintf(current_fingerprint_info.chip,"ft9362");
-	sprintf(current_fingerprint_info.id,"0x%x",read_id);
-	strcpy(current_fingerprint_info.vendor,"focaltech");
-	strcpy(current_fingerprint_info.more,"fingerprint");
-	#endif
     FF_LOGI("FocalTech fingerprint device control driver registered.");
     FF_LOGV("'%s' leave.", __func__);
     return err;
