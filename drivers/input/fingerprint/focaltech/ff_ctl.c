@@ -760,7 +760,7 @@ static void __exit ff_ctl_driver_exit(void)
     FF_LOGV("'%s' leave.", __func__);
 }
 
-module_init(ff_ctl_driver_init);
+late_initcall(ff_ctl_driver_init);
 module_exit(ff_ctl_driver_exit);
 
 MODULE_DESCRIPTION("The device control driver for FocalTech's fingerprint sensor.");
