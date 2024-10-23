@@ -3,4 +3,4 @@
 include /usr/share/linux-packaging-snippets/kernel-snippet.mk
 
 %:
-dh $@
+	dh $@
