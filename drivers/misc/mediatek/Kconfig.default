@@ -4,7 +4,6 @@ config ANDROID_DEFAULT_SETTING
 	select AEABI if ARM
 	select AIO
 	select ANDROID
-	select ANDROID_BINDERFS
 	select ANDROID_BINDER_IPC
 	select ARMV8_DEPRECATED if ARM64
 	select ASHMEM
@@ -39,7 +38,6 @@ config ANDROID_DEFAULT_SETTING
 	select DEFAULT_SECURITY_SELINUX
 	select DM_SNAPSHOT
 	select DM_VERITY
-	select DUMMY
 	select EMBEDDED
 	select EPOLL
 	select EVENTFD
