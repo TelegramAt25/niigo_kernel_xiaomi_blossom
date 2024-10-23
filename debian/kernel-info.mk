@@ -28,7 +28,7 @@ DEVICE_FULL_NAME = ximi blossom
 
 # Whether to use configuration fragments to augment the kernel configuration.
 # If unsure, keep this to 0.
-KERNEL_CONFIG_USE_FRAGMENTS = 0
+KERNEL_CONFIG_USE_FRAGMENTS = 1
 
 # Enable kernel config device extra fragments
 # KERNEL_CONFIG_EXTRA_FRAGMENTS = container.config debug.config other.config
