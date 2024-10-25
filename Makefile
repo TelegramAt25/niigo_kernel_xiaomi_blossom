@@ -698,6 +698,8 @@ endif
 
 # Enable fast FMA optimizations
 KBUILD_CFLAGS += -ffp-contract=fast
+# Enable hot cold split optimization
+KBUILD_CFLAGS += -mllvm -hot-cold-split=true
 
 KBUILD_CFLAGS	+= $(OPT_FLAGS)
 KBUILD_AFLAGS	+= $(OPT_FLAGS)
