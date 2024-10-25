@@ -696,6 +696,9 @@ OPT_FLAGS	:= -O2 -march=armv8-a+crc+crypto
 OPT_FLAGS	+= -mtune=cortex-a53
 endif
 
+# Enable fast FMA optimizations
+KBUILD_CFLAGS += -ffp-contract=fast
+
 KBUILD_CFLAGS	+= $(OPT_FLAGS)
 KBUILD_AFLAGS	+= $(OPT_FLAGS)
 
