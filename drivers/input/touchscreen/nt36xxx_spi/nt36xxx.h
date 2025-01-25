@@ -155,9 +155,6 @@ typedef struct touchscreen_usb_plugin_data {
 #define NVT_REG_EDGE_FILTER_ORIENTATION     0xBC00
 /* 2019.12.16 longcheer taocheng add (xiaomi game mode) end */
 
-//new qcom platform use
-//#define _MSM_DRM_NOTIFY_H_
-
 struct nvt_ts_data {
 	struct spi_device *client;
 	struct input_dev *input_dev;
@@ -167,11 +164,7 @@ struct nvt_ts_data {
 #if defined(CONFIG_FB)
 	struct workqueue_struct *workqueue;
 	struct work_struct resume_work;
-#ifdef _MSM_DRM_NOTIFY_H_
-	struct notifier_block drm_notif;
-#else
 	struct notifier_block fb_notif;
-#endif
 #elif defined(CONFIG_HAS_EARLYSUSPEND)
 	struct early_suspend early_suspend;
 #endif
