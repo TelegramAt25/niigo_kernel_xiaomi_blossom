@@ -21,26 +21,9 @@
 
 extern int chr_get_debug_level(void);
 
-#define chr_err(fmt, args...)					\
-do {								\
-	if (chr_get_debug_level() >= CHRLOG_ERROR_LEVEL) {	\
-		pr_notice(fmt, ##args);				\
-	}							\
-} while (0)
-
-#define chr_info(fmt, args...)					\
-do {								\
-	if (chr_get_debug_level() >= CHRLOG_INFO_LEVEL) {	\
-		pr_notice_ratelimited(fmt, ##args);		\
-	}							\
-} while (0)
-
-#define chr_debug(fmt, args...)					\
-do {								\
-	if (chr_get_debug_level() >= CHRLOG_DEBUG_LEVEL) {	\
-		pr_notice(fmt, ##args);				\
-	}							\
-} while (0)
+#define chr_err(fmt, args...) ((void)0)
+#define chr_info(fmt, args...) ((void)0)
+#define chr_debug(fmt, args...) ((void)0)
 
 struct mtk_charger;
 #define BATTERY_CV 4350000
