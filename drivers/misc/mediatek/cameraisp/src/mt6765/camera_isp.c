@@ -635,7 +635,6 @@ struct S_START_T {
  */
 static unsigned int g_regScen = 0xa5a5a5a5; /* remove later */
 
-
 static /*volatile*/ wait_queue_head_t P2WaitQueueHead_WaitDeque;
 static /*volatile*/ wait_queue_head_t P2WaitQueueHead_WaitFrame;
 static /*volatile*/ wait_queue_head_t P2WaitQueueHead_WaitFrameEQDforDQ;
@@ -4415,7 +4414,8 @@ static signed int ISP_WriteReg(struct ISP_REG_IO_STRUCT *pRegIo)
 	/* unsigned char* pData = NULL; */
 	struct ISP_REG_STRUCT *pData = NULL;
 
-	if (pRegIo->Count > 0xFFFFFFFF) {
+	if (((pRegIo->Count * sizeof(struct ISP_REG_STRUCT)) > 0xFFFFF000) ||
+		(pRegIo->Count == 0)) {
 		pr_err("pRegIo->Count error");
 		Ret = -EFAULT;
 		goto EXIT;
@@ -4956,7 +4956,8 @@ static long ISP_REF_CNT_CTRL_FUNC(unsigned long Param)
 				ref_cnt_ctrl.ctrl, ref_cnt_ctrl.id);
 
 		/*  */
-		if (ref_cnt_ctrl.id < ISP_REF_CNT_ID_MAX) {
+		if (ref_cnt_ctrl.id < ISP_REF_CNT_ID_MAX &&
+		    ref_cnt_ctrl.id >= 0) {
 			/* //////////////////---add lock here */
 			spin_lock(&(IspInfo.SpinLockIspRef));
 			/* ////////////////// */
@@ -6081,7 +6082,7 @@ static signed int ISP_P2_BufQue_CTRL_FUNC(struct ISP_P2_BUFQUE_STRUCT param)
 				idx, param.property, param.processID,
 				param.callerID);
 				ret =  -EFAULT;
-			} else if (restTime == -512) {
+			} else if (restTime == -SIG_ERESTARTSYS) {
 				pr_err("be stopped, restime(%d)", restTime);
 				ret =  -EFAULT;
 				break;
@@ -6183,7 +6184,7 @@ static signed int ISP_P2_BufQue_CTRL_FUNC(struct ISP_P2_BUFQUE_STRUCT param)
 				param.callerID, idx);
 			ret =  -EFAULT;
 			return ret;
-		} else if (restTime == -512) {
+		} else if (restTime == -SIG_ERESTARTSYS) {
 			pr_err("be stopped, restime(%d)", restTime);
 			ret =  -EFAULT;
 			return ret;
@@ -6239,7 +6240,7 @@ static signed int ISP_P2_BufQue_CTRL_FUNC(struct ISP_P2_BUFQUE_STRUCT param)
 					param.processID, param.callerID);
 				ret =  -EFAULT;
 				break;
-			} else if (restTime == -512) {
+			} else if (restTime == -SIG_ERESTARTSYS) {
 				pr_err("be stopped, restime(%d)", restTime);
 				ret =  -EFAULT;
 				break;
@@ -6347,17 +6348,19 @@ static signed int ISP_REGISTER_IRQ_USERKEY(char *userName)
 static signed int ISP_MARK_IRQ(struct ISP_WAIT_IRQ_STRUCT *irqinfo)
 {
 	unsigned long flags;
-	int idx = my_get_pow_idx(irqinfo->EventInfo.Status);
+	unsigned int idx = my_get_pow_idx(irqinfo->EventInfo.Status);
 
 	unsigned long long  sec = 0;
 	unsigned long       usec = 0;
 
-	if (irqinfo->Type >= ISP_IRQ_TYPE_AMOUNT) {
+	if (irqinfo->Type >= ISP_IRQ_TYPE_AMOUNT ||
+	    irqinfo->Type < 0) {
 		pr_err("MARK_IRQ: type error(%d)", irqinfo->Type);
 		return -EFAULT;
 	}
 
-	if (irqinfo->EventInfo.St_type >= ISP_IRQ_ST_AMOUNT) {
+	if (irqinfo->EventInfo.St_type >= ISP_IRQ_ST_AMOUNT ||
+	    irqinfo->EventInfo.St_type < 0) {
 		pr_err("MARK_IRQ: st_type error(%d)",
 			irqinfo->EventInfo.St_type);
 		return -EFAULT;
@@ -6367,11 +6370,6 @@ static signed int ISP_MARK_IRQ(struct ISP_WAIT_IRQ_STRUCT *irqinfo)
 	    irqinfo->EventInfo.UserKey < 0) {
 		pr_err("MARK_IRQ: userkey error(%d)",
 			irqinfo->EventInfo.UserKey);
-		return -EFAULT;
-	}
-
-	if ((idx < 0) || (idx >= 32)) {
-		pr_info("[Error] %s : Invalid idx = %d",  __func__, idx);
 		return -EFAULT;
 	}
 
@@ -6618,7 +6616,7 @@ static signed int ISP_WaitIrq(struct ISP_WAIT_IRQ_STRUCT *WaitIrq)
 	signed int Ret = 0, Timeout = WaitIrq->EventInfo.Timeout;
 	unsigned long flags;
 	unsigned int irqStatus;
-	int idx;
+	unsigned int idx;
 	bool freeze_passbysigcnt = false;
 
 	if ((WaitIrq->Type >= ISP_IRQ_TYPE_AMOUNT) ||
@@ -6839,9 +6837,7 @@ static signed int ISP_WaitIrq(struct ISP_WAIT_IRQ_STRUCT *WaitIrq)
 	}
 
 	/* check if user is interrupted by system signal */
-	if ((Timeout != 0) && (!ISP_GetIRQState(WaitIrq->Type,
-	    WaitIrq->EventInfo.St_type, WaitIrq->EventInfo.UserKey,
-	    WaitIrq->EventInfo.Status))) {
+	if (Timeout == -SIG_ERESTARTSYS) {
 		pr_info("interrupted by system signal,return value(%d),irq Type/User/Sts(0x%x/%d/0x%x)\n",
 			Timeout, WaitIrq->Type, WaitIrq->EventInfo.UserKey,
 			WaitIrq->EventInfo.Status);
@@ -6925,11 +6921,6 @@ EXIT:
 				      [WaitIrq->EventInfo.St_type]
 				      [WaitIrq->EventInfo.UserKey]) {
 		idx = my_get_pow_idx(WaitIrq->EventInfo.Status);
-		if ((idx < 0) || (idx >= 32)) {
-			pr_info("[Error] : Invalid idx = %d", idx);
-			Ret = -EFAULT;
-			return Ret;
-		}
 		IspInfo.IrqInfo.MarkedFlag[WaitIrq->Type]
 					  [WaitIrq->EventInfo.St_type]
 					  [WaitIrq->EventInfo.UserKey] &=
