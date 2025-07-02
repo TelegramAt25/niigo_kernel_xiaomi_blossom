@@ -26,7 +26,6 @@
 #include <linux/clk/clk-conf.h>
 #include <linux/limits.h>
 #include <linux/property.h>
-#include <linux/bootprof.h>
 #include <linux/kmemleak.h>
 #include <linux/types.h>
 
@@ -475,17 +474,9 @@ EXPORT_SYMBOL_GPL(platform_device_del);
  */
 int platform_device_register(struct platform_device *pdev)
 {
-	int ret;
-#ifdef CONFIG_MTPROF
-	unsigned long long ts;
-#endif
-	BOOTPROF_TIME_LOG_START(ts);
 	device_initialize(&pdev->dev);
 	arch_setup_pdev_archdata(pdev);
-	ret = platform_device_add(pdev);
-	BOOTPROF_TIME_LOG_END(ts);
-	bootprof_pdev_register(ts, pdev);
-	return ret;
+	return platform_device_add(pdev);
 }
 EXPORT_SYMBOL_GPL(platform_device_register);
 
