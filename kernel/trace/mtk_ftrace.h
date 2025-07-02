@@ -51,7 +51,7 @@ struct trace_buffer;
 void print_enabled_events(struct trace_buffer *buf, struct seq_file *m);
 void update_buf_size(unsigned long size);
 bool boot_ftrace_check(unsigned long trace_en);
-#if IS_BUILTIN(CONFIG_MTPROF)
-extern bool mt_boot_finish(void);
+#ifdef CONFIG_MTPROF
+extern int boot_finish;
 #endif
 #endif/* CONFIG_TRACING && CONFIG_MTK_FTRACER */
