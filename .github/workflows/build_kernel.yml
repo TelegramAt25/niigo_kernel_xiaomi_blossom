@@ -55,7 +55,7 @@ jobs:
 
           {
             echo "### Kernel Build Started: $(date)"
-            make O=out ARCH=$ARCH CC="ccache clang" nethunter_defconfig
+            make O=out ARCH=$ARCH CC="ccache clang" blossom_defconfig
             make -j$(nproc) O=out ARCH=$ARCH CC="ccache clang" \
               CROSS_COMPILE=aarch64-linux-gnu- \
               CROSS_COMPILE_ARM32=arm-linux-gnueabi- \
