@@ -211,13 +211,13 @@ static void mtk_check_ne(char *data)
 	for (i = 0; i < size; i++) {
 		if (strcmp(scontext,
 					ne_list[i]) == 0) {
-			pr_notice("SIGQUIT and delay\n");
+			pr_notice("SIGQUIT and sleep\n");
 
-			/* delay after signal sent */
+			/* sleep after signal sent */
 			/* block current thread */
 			/* let other thread to handle stack */
 			send_sig(SIGQUIT, current, 0);
-			mdelay(1000);
+			msleep(1000);
 		}
 	}
 
