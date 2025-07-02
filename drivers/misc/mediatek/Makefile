@@ -105,9 +105,6 @@ obj-$(CONFIG_MTK_MDLA_SUPPORT) += mdla/
 obj-$(CONFIG_MTK_VPU_SUPPORT) += vpu/
 obj-$(CONFIG_MTK_CCU)	+= ccu/src/
 obj-$(CONFIG_MTK_JPEG) += jpeg/
-ifneq ($(wildcard $(srctree)/../vendor/mediatek/internal/selinux_warning_enable),)
-obj-$(CONFIG_MTK_SELINUX_AEE_WARNING)	+= selinux_warning/
-endif
 obj-y += timer/
 obj-$(CONFIG_MTK_GIC_EXT) += ext_gic/
 obj-$(CONFIG_MTK_SYS_CIRQ) += cirq/
