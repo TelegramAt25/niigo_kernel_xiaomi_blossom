@@ -48,7 +48,6 @@
 	ufs_mtk_smc(UFS_MTK_SIP_DEVICE_RESET, high, res)
 
 int ufsdbg_perf_dump = 0;
-static struct ufs_hba *ufs_mtk_hba;
 
 static const struct ufs_mtk_host_cfg ufs_mtk_mt8183_cfg = {
 	.quirks = UFS_MTK_HOST_QUIRK_BROKEN_AUTO_HIBERN8
@@ -875,7 +874,6 @@ static int ufs_mtk_init(struct ufs_hba *hba)
 		goto out;
 	}
 
-	ufs_mtk_hba = hba;
 	host->hba = hba;
 	ufshcd_set_variant(hba, host);
 
@@ -1145,24 +1143,23 @@ static int ufs_mtk_link_set_hpm(struct ufs_hba *hba)
 
 	err = ufshcd_hba_enable(hba);
 	if (err)
-		goto out;
+		return err;
 
 	err = ufs_mtk_unipro_set_pm(hba, false);
 	if (err)
-		goto out;
+		return err;
 
 	err = ufshcd_uic_hibern8_exit(hba);
 	if (!err)
 		ufshcd_set_link_active(hba);
 	else
-		goto out;
+		return err;
 
 	err = ufshcd_make_hba_operational(hba);
-out:
 	if (err)
-		ufshcd_print_info(hba, UFS_INFO_HOST_STATE |
-				  UFS_INFO_HOST_REGS | UFS_INFO_PWR);
-	return err;
+		return err;
+
+	return 0;
 }
 
 static int ufs_mtk_link_set_lpm(struct ufs_hba *hba)
@@ -1171,9 +1168,6 @@ static int ufs_mtk_link_set_lpm(struct ufs_hba *hba)
 
 	err = ufs_mtk_unipro_set_pm(hba, true);
 	if (err) {
-		ufshcd_print_info(hba, UFS_INFO_HOST_STATE |
-				  UFS_INFO_HOST_REGS | UFS_INFO_PWR);
-
 		/* Resume UniPro state for following error recovery */
 		ufs_mtk_unipro_set_pm(hba, false);
 		return err;
@@ -1411,12 +1405,6 @@ static int ufs_mtk_probe(struct platform_device *pdev)
 
 	return err;
 }
-
-struct ufs_hba *ufs_mtk_get_hba(void)
-{
-	return ufs_mtk_hba;
-}
-EXPORT_SYMBOL_GPL(ufs_mtk_get_hba);
 
 /**
  * ufs_mtk_remove - set driver_data of the device to NULL

@@ -8,7 +8,6 @@
 
 #include <linux/bitops.h>
 #include <linux/soc/mediatek/mtk_sip_svc.h>
-#include "ufshcd.h"
 
 /*
  * Vendor specific UFSHCI Registers
@@ -137,8 +136,6 @@ struct ufs_mtk_host {
 	struct rpmb_dev *rawdev_ufs_rpmb;
 	struct mutex rpmb_lock;
 };
-
-struct ufs_hba *ufs_mtk_get_hba(void);
 
 struct rpmb_dev *ufs_mtk_rpmb_get_raw_dev(void);
 void ufs_mtk_rpmb_add(struct ufs_hba *hba, struct scsi_device *sdev_rpmb);
