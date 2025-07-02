@@ -7,8 +7,6 @@
 #define __DFD_H__
 
 #define DFD_SMC_MAGIC_SETUP (0x99716150)
-#define DFD_CACHE_DUMP_ENABLE	1
-#define DFD_PARITY_ERR_TRIGGER	2
 
 struct dfd_drv {
 	u64 base_addr;
@@ -16,9 +14,6 @@ struct dfd_drv {
 	unsigned long chain_length;
 	unsigned long rg_dfd_timeout;
 	unsigned int enabled;
-	unsigned int cachedump_en;
-	unsigned int mem_reserve;
-	unsigned int l2c_trigger;
 };
 
 extern int mtk_dbgtop_dfd_count_en(int value);

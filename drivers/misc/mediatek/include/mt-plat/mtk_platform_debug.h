@@ -20,10 +20,7 @@ extern int set_sram_flag_etb_user(unsigned int etb_id, unsigned int user_id);
 #endif
 
 #ifdef CONFIG_MTK_DFD_INTERNAL_DUMP
-#define DFD_BASIC_DUMP          0
-#define DFD_EXTENDED_DUMP       1
-
-extern int dfd_setup(int version);
+extern int dfd_setup(void);
 #endif
 
 #endif /* __MTK_PLATFORM_DEBUG_H__ */
