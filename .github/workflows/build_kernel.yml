@@ -1,0 +1,159 @@
+name: Kernel Build
+
+on:
+  push:
+    branches:
+      - blooming
+  workflow_dispatch:
+
+env:
+  ARCH: arm64
+  CC: clang
+  CLANG_TRIPLE: aarch64-linux-gnu-
+  CCACHE_DIR: /tmp/ccache
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v3
+
+      - name: Setup ccache
+        uses: actions/cache@v3
+        with:
+          path: /tmp/ccache
+          key: ${{ runner.os }}-ccache-${{ hashFiles('**/Makefile') }}
+          restore-keys: |
+            ${{ runner.os }}-ccache-
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq --no-install-recommends \
+            git build-essential bc bison flex \
+            libssl-dev libelf-dev zlib1g-dev \
+            clang lld llvm gcc-aarch64-linux-gnu gcc-arm-linux-gnueabi \
+            python3 python3-pip ninja-build zip ccache
+          sudo ln -sf /usr/bin/ld.lld /usr/bin/ld || true
+
+      - name: Notify start on Telegram
+        run: |
+          curl -s -X POST https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage \
+            -d chat_id=${{ secrets.TELEGRAM_CHAT_ID }} \
+            --data-urlencode "text=☢️ *Kernel Build Started!*
+            *Device:* blossom
+            *Arch:* arm64
+            *Commit:* [${GITHUB_SHA::7}](${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/commit/${GITHUB_SHA})" \
+            -d parse_mode=Markdown
+
+      - name: Build the kernel and log output
+        run: |
+          mkdir -p out
+          START=$(date +%s)
+
+          {
+            echo "### Kernel Build Started: $(date)"
+            make O=out ARCH=$ARCH CC="ccache clang" nethunter_defconfig
+            make -j$(nproc) O=out ARCH=$ARCH CC="ccache clang" \
+              CROSS_COMPILE=aarch64-linux-gnu- \
+              CROSS_COMPILE_ARM32=arm-linux-gnueabi- \
+              AR=llvm-ar NM=llvm-nm OBJCOPY=llvm-objcopy \
+              OBJDUMP=llvm-objdump STRIP=llvm-strip \
+              LD=ld.lld LLVM_IAS=1
+          } 2>&1 | tee build.log
+
+          END=$(date +%s)
+          echo "BUILD_DATE=$(date +'%Y-%m-%d')" >> $GITHUB_ENV
+          echo "BUILD_TIME=$((END - START))" >> $GITHUB_ENV
+          ls -l out/arch/arm64/boot/Image.gz-dtb
+          echo "MD5_CHECKSUM=$(md5sum out/arch/arm64/boot/Image.gz-dtb | cut -d ' ' -f1)" >> $GITHUB_ENV
+          echo "MD5 checksum is: $(md5sum out/arch/arm64/boot/Image.gz-dtb | cut -d ' ' -f1)"
+
+      - name: Set build info (time, md5)
+        run: |
+          END=$(date +%s)
+          echo "BUILD_DATE=$(date +'%Y-%m-%d')" >> $GITHUB_ENV
+          echo "BUILD_TIME=$((END - START))" >> $GITHUB_ENV
+          if [ -f out/arch/arm64/boot/Image.gz-dtb ]; then
+            MD5=$(md5sum out/arch/arm64/boot/Image.gz-dtb | cut -d ' ' -f1)
+            echo "MD5_CHECKSUM=$MD5" >> $GITHUB_ENV
+            echo "ZIP_NAME=Image.gz-dtb" >> $GITHUB_ENV
+          else
+            echo "MD5_CHECKSUM=not_found" >> $GITHUB_ENV
+          fi
+
+      - name: Append build log with summary
+        if: always()
+        run: |
+          echo -e "\n\n### 🧵 Last 50 lines:\n" >> build.log
+          tail -n 50 build.log >> build.log
+          echo -e "\n### 🧠 CCACHE Stats:\n" >> build.log
+          ccache --show-stats >> build.log
+
+      - name: Zip kernel modules
+        if: success()
+        run: |
+          find out -name '*.ko' > module_list.txt
+          zip -@ out/kernel-modules.zip < module_list.txt
+
+      - name: Upload kernel image as artifact
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kernel-${{ env.ZIP_NAME }}-${{ github.run_number }}
+          path: out/arch/arm64/boot/Image.gz-dtb
+          retention-days: 14
+
+      - name: Upload modiles zip as artifact
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: modules-${{ env.ZIP_NAME }}-${{ github.run_number }}
+          path: out/kernel-modules.zip
+          retention-days: 14
+
+      - name: Upload build log as artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-log-${{ github.run_number }}
+          path: build.log
+          retention-days: 14
+
+      - name: Send build artifacts to Telegram
+        if: success()
+        run: |
+          curl -s -F document=@out/kernel-modules.zip \
+            "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendDocument?chat_id=${{ secrets.TELEGRAM_CHAT_ID }}" \
+            -F caption="Kernel Modules ZIP"
+
+      - name: Notify success on Telegram
+        if: success()
+        run: |
+          CAPTION="✅ *Build Successful!*
+          📅 *Date:* $BUILD_DATE
+          ⏱ *Time:* ${BUILD_TIME}s
+          🔐 *MD5:* \`${MD5_CHECKSUM}\`"
+          curl -s -F chat_id=${{ secrets.TELEGRAM_CHAT_ID }} \
+            -F document=@out/arch/arm64/boot/Image.gz-dtb \
+            -F caption="$CAPTION" \
+            -F parse_mode=Markdown \
+            https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendDocument
+
+      - name: Notify failure on Telegram
+        if: failure()
+        run: |
+          curl -s -X POST https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage \
+            -d chat_id=${{ secrets.TELEGRAM_CHAT_ID }} \
+            --data-urlencode "text=❌ *Kernel build failed!*
+            *Commit:* [${GITHUB_SHA::7}](${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/commit/${GITHUB_SHA})" \
+            -d parse_mode=Markdown
+
+      - name: Send build log to Telegram
+        if: always()
+        run: |
+          curl -s -F document=@build.log \
+            "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendDocument?chat_id=${{ secrets.TELEGRAM_CHAT_ID }}" \
+            -F caption="📄 Kernel build log"
