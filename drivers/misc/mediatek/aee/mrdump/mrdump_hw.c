@@ -45,12 +45,6 @@ int __init mrdump_hw_init(bool drm_ready)
 	mrdump_wd_dram_reserved_mode(drm_ready);
 #endif
 
-#if IS_ENABLED(CONFIG_MTK_DFD_INTERNAL_DUMP)
-	if (dfd_setup() == -1)
-		pr_notice("%s: DFD disabled\n", __func__);
-	else
-		pr_notice("%s: DFD enabled\n", __func__);
-#endif
 
 	return 0;
 }
