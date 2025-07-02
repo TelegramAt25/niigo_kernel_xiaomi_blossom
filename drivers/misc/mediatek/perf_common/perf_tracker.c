@@ -33,13 +33,12 @@ int __attribute__((weak)) mtk_btag_mictx_get_data(
 }
 #endif
 
-int perf_tracker_enable(int on)
+int perf_tracer_enable(int on)
 {
 	perf_tracker_on = on;
 
 	return (perf_tracker_on == on) ? 0 : -1;
 }
-EXPORT_SYMBOL(perf_tracker_enable);
 
 unsigned int __attribute__((weak)) get_dram_data_rate(void)
 {

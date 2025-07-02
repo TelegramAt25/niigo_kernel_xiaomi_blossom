@@ -9,6 +9,10 @@
 #include "mtk_ftrace.h"
 #include "trace.h"
 
+#ifdef CONFIG_MTK_PERF_TRACKER
+#include <mt-plat/perf_tracker.h>
+#endif
+
 
 #ifdef CONFIG_MTK_FTRACER
 static unsigned long buf_size = 25165824UL;
@@ -144,9 +148,6 @@ static void ftrace_events_enable(int enable)
 	}
 }
 
-#ifdef CONFIG_MTK_PERF_TRACKER
-extern int perf_tracker_enable(int on);
-#endif
 static __init int boot_ftrace(void)
 {
 	struct trace_array *tr;
