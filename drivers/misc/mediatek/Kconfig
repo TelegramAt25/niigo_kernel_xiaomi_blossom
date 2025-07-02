@@ -445,14 +445,6 @@ config MTK_AMMS
 	  or it won't work. If you are not sure
 	  Please select "N"
 
-config MTK_ICE_DEBUG
-	bool "ICE_DEBUG"
-	default y if ARCH_MEDIATEK
-	help
-	  For Mediatek InCircuit Emulator Debug features.
-	  Select "y" if you want to use.
-	  Select "n" if you are not sure.
-
 config MTK_SPMTWAM
 	tristate "Mediatek Signal profiling tool"
 	depends on ARCH_MEDIATEK && OF
