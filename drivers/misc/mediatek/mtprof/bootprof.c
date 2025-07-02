@@ -43,12 +43,6 @@ static int bootprof_lk_t, bootprof_pl_t, bootprof_logo_t;
 static u64 timestamp_on, timestamp_off;
 static bool boot_finish;
 
-#ifdef CONFIG_BOOTPROF_THRESHOLD_MS
-#define BOOTPROF_THRESHOLD (CONFIG_BOOTPROF_THRESHOLD_MS*1000000)
-#else
-#define BOOTPROF_THRESHOLD 15000000
-#endif
-
 #ifdef MODULE
 static unsigned long long start_time;
 
@@ -163,18 +157,15 @@ static void bootprof_bootloader(void)
 
 void bootprof_initcall(initcall_t fn, unsigned long long ts)
 {
-	/* log more than threshold initcalls */
+#define INITCALL_THRESHOLD 15000000
+	/* log more than 15ms initcalls */
 	unsigned long msec_rem;
 	char msgbuf[MSG_SIZE];
-	int len;
 
-	if (ts > BOOTPROF_THRESHOLD) {
+	if (ts > INITCALL_THRESHOLD) {
 		msec_rem = do_div(ts, NSEC_PER_MSEC);
-		len = scnprintf(msgbuf, sizeof(msgbuf),
-			"initcall: %ps %5llu.%06lums",
-			fn, ts, msec_rem);
-		if (len < 0)
-			pr_info("BOOTPROF: initcall - Invalid argument.\n");
+		snprintf(msgbuf, sizeof(msgbuf), "initcall: %ps %5llu.%06lums",
+			 fn, ts, msec_rem);
 		bootprof_log_boot(msgbuf);
 	}
 }
@@ -184,56 +175,42 @@ void bootprof_initcall(initcall_t fn, unsigned long long ts)
 void bootprof_probe(unsigned long long ts, struct device *dev,
 			   struct device_driver *drv, unsigned long probe)
 {
-	/* log more than threshold probes*/
+#define PROBE_THRESHOLD 15000000
+	/* log more than 15ms probes*/
 	unsigned long msec_rem;
 	char msgbuf[MSG_SIZE];
-	int pos, len;
+	int pos;
 
-	if (ts <= BOOTPROF_THRESHOLD)
+	if (ts <= PROBE_THRESHOLD)
 		return;
 	msec_rem = do_div(ts, NSEC_PER_MSEC);
 
-	pos = scnprintf(msgbuf, sizeof(msgbuf), "probe: probe=%ps",
+	pos = snprintf(msgbuf, sizeof(msgbuf), "probe: probe=%ps",
 					(void *)probe);
-	if (pos < 0)
-		pos = 0;
-
-	if (drv) {
-		len = scnprintf(msgbuf + pos, sizeof(msgbuf) - pos,
+	if (drv)
+		pos += snprintf(msgbuf + pos, sizeof(msgbuf) - pos,
 				" drv=%s(%ps)", drv->name ? drv->name : "",
 				(void *)drv);
-		if (len >= 0)
-			pos += len;
-	}
-
-	if (dev && dev->init_name) {
-		len = scnprintf(msgbuf + pos, sizeof(msgbuf) - pos,
+	if (dev && dev->init_name)
+		pos += snprintf(msgbuf + pos, sizeof(msgbuf) - pos,
 				" dev=%s(%ps)", dev->init_name, (void *)dev);
-		if (len >= 0)
-			pos += len;
-	}
-
-	scnprintf(msgbuf + pos, sizeof(msgbuf) - pos,
-			" %5llu.%06lums", ts, msec_rem);
+	pos += snprintf(msgbuf + pos, sizeof(msgbuf) - pos,
+				" %5llu.%06lums", ts, msec_rem);
 	bootprof_log_boot(msgbuf);
 }
 
 void bootprof_pdev_register(unsigned long long ts, struct platform_device *pdev)
 {
-	/* log more than threshold register*/
+#define PROBE_THRESHOLD 15000000
+	/* log more than 15ms probes*/
 	unsigned long msec_rem;
 	char msgbuf[MSG_SIZE];
-	int len;
 
-	if (ts <= BOOTPROF_THRESHOLD || !pdev)
+	if (ts <= PROBE_THRESHOLD || !pdev)
 		return;
 	msec_rem = do_div(ts, NSEC_PER_MSEC);
-	len = scnprintf(msgbuf, sizeof(msgbuf),
-			"probe: pdev=%s(%ps) %5llu.%06lums",
-			pdev->name, (void *)pdev, ts, msec_rem);
-	if (len < 0)
-		pr_info("BOOTPROF: pdev - Invalid argument.\n");
-
+	snprintf(msgbuf, sizeof(msgbuf), "probe: pdev=%s(%ps) %5llu.%06lums",
+		 pdev->name, (void *)pdev, ts, msec_rem);
 	bootprof_log_boot(msgbuf);
 }
 
@@ -321,9 +298,8 @@ static int mt_bootprof_show(struct seq_file *m, void *v)
 		seq_puts(m, "----------------------------------------\n");
 	}
 
-	seq_printf(m, "%10lld.%06ld : ON (Threshold:%5lldms)\n",
-		   msec_high(timestamp_on), msec_low(timestamp_on),
-		   msec_high(BOOTPROF_THRESHOLD));
+	seq_printf(m, "%10lld.%06ld : ON\n",
+		   msec_high(timestamp_on), msec_low(timestamp_on));
 
 	for (i = 0; i < log_count; i++) {
 		p = &bootprof[i / LOGS_PER_BUF][i % LOGS_PER_BUF];
