@@ -36,8 +36,8 @@
 
 #include "../base.h"
 #include "power.h"
-#ifdef CONFIG_MTK_AEE_IPANIC
-#include <mt-plat/mboot_params.h>
+#ifdef CONFIG_MTK_RAM_CONSOLE
+#include <mt-plat/mtk_ram_console.h>
 #endif
 
 typedef int (*pm_callback_t)(struct device *);
@@ -706,7 +706,7 @@ static int device_resume_noirq(struct device *dev, pm_message_t state, bool asyn
 	}
 
 Run:
-#ifdef CONFIG_MTK_AEE_IPANIC
+#ifdef CONFIG_MTK_RAM_CONSOLE
 	if (async)
 		aee_rr_rec_last_async_func((unsigned long)callback);
 	else
@@ -797,7 +797,7 @@ void dpm_noirq_resume_devices(pm_message_t state)
 	}
 	mutex_unlock(&dpm_list_mtx);
 	async_synchronize_full();
-#ifdef CONFIG_MTK_AEE_IPANIC
+#ifdef CONFIG_MTK_RAM_CONSOLE
 	aee_rr_rec_last_async_func(0);
 	aee_rr_rec_last_sync_func(0);
 #endif
@@ -886,7 +886,7 @@ static int device_resume_early(struct device *dev, pm_message_t state, bool asyn
 		callback = pm_late_early_op(dev->driver->pm, state);
 	}
 
-#ifdef CONFIG_MTK_AEE_IPANIC
+#ifdef CONFIG_MTK_RAM_CONSOLE
 	if (async)
 		aee_rr_rec_last_async_func((unsigned long)callback);
 	else
@@ -964,7 +964,7 @@ void dpm_resume_early(pm_message_t state)
 	}
 	mutex_unlock(&dpm_list_mtx);
 	async_synchronize_full();
-#ifdef CONFIG_MTK_AEE_IPANIC
+#ifdef CONFIG_MTK_RAM_CONSOLE
 	aee_rr_rec_last_async_func(0);
 	aee_rr_rec_last_sync_func(0);
 #endif
@@ -1059,7 +1059,7 @@ static int device_resume(struct device *dev, pm_message_t state, bool async)
 	}
 
  End:
-#ifdef CONFIG_MTK_AEE_IPANIC
+#ifdef CONFIG_MTK_RAM_CONSOLE
 	if (async)
 		aee_rr_rec_last_async_func((unsigned long)callback);
 	else
@@ -1142,7 +1142,7 @@ void dpm_resume(pm_message_t state)
 	}
 	mutex_unlock(&dpm_list_mtx);
 	async_synchronize_full();
-#ifdef CONFIG_MTK_AEE_IPANIC
+#ifdef CONFIG_MTK_RAM_CONSOLE
 	aee_rr_rec_last_async_func(0);
 	aee_rr_rec_last_sync_func(0);
 #endif
@@ -1391,7 +1391,7 @@ static int __device_suspend_noirq(struct device *dev, pm_message_t state, bool a
 	}
 
 Run:
-#ifdef CONFIG_MTK_AEE_IPANIC
+#ifdef CONFIG_MTK_RAM_CONSOLE
 	if (async)
 		aee_rr_rec_last_async_func((unsigned long)callback);
 	else
@@ -1491,7 +1491,7 @@ int dpm_noirq_suspend_devices(pm_message_t state)
 	}
 	mutex_unlock(&dpm_list_mtx);
 	async_synchronize_full();
-#ifdef CONFIG_MTK_AEE_IPANIC
+#ifdef CONFIG_MTK_RAM_CONSOLE
 	aee_rr_rec_last_async_func(0);
 	aee_rr_rec_last_sync_func(0);
 #endif
@@ -1616,7 +1616,7 @@ static int __device_suspend_late(struct device *dev, pm_message_t state, bool as
 	}
 
 Run:
-#ifdef CONFIG_MTK_AEE_IPANIC
+#ifdef CONFIG_MTK_RAM_CONSOLE
 	if (async)
 		aee_rr_rec_last_async_func((unsigned long)callback);
 	else
@@ -1705,7 +1705,7 @@ int dpm_suspend_late(pm_message_t state)
 	}
 	mutex_unlock(&dpm_list_mtx);
 	async_synchronize_full();
-#ifdef CONFIG_MTK_AEE_IPANIC
+#ifdef CONFIG_MTK_RAM_CONSOLE
 	aee_rr_rec_last_async_func(0);
 	aee_rr_rec_last_sync_func(0);
 #endif
@@ -1890,7 +1890,7 @@ static int __device_suspend(struct device *dev, pm_message_t state, bool async)
 		info = "driver ";
 		callback = pm_op(dev->driver->pm, state);
 	}
-#ifdef CONFIG_MTK_AEE_IPANIC
+#ifdef CONFIG_MTK_RAM_CONSOLE
 	if (async)
 		aee_rr_rec_last_async_func((unsigned long)callback);
 	else
@@ -1990,7 +1990,7 @@ int dpm_suspend(pm_message_t state)
 	}
 	mutex_unlock(&dpm_list_mtx);
 	async_synchronize_full();
-#ifdef CONFIG_MTK_AEE_IPANIC
+#ifdef CONFIG_MTK_RAM_CONSOLE
 	aee_rr_rec_last_async_func(0);
 	aee_rr_rec_last_sync_func(0);
 #endif
