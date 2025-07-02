@@ -119,6 +119,11 @@ mmstat_trace_print_arrayset_seq(struct trace_seq *p,
 	return ret;
 }
 
+size_t __weak ion_mm_heap_total_memory(void)
+{
+	return 0;
+}
+
 /* only consider the case of 1 node */
 static struct zone *mmstat_next_zone(struct zone *zone)
 {
@@ -140,7 +145,6 @@ static void mmstat_trace_meminfo(void)
 	unsigned long meminfo[NR_MEMINFO_ITEMS] = {0};
 	size_t num_entries = 0;
 	unsigned int gpuuse = 0;
-	unsigned long ionuse = 0;
 
 	/* available memory */
 	meminfo[num_entries++] = P2K(global_zone_page_state(NR_FREE_PAGES));
@@ -168,10 +172,7 @@ static void mmstat_trace_meminfo(void)
 		gpuuse = B2K(gpuuse);
 #endif
 	meminfo[num_entries++] = gpuuse;
-#if IS_ENABLED(CONFIG_MTK_ION)
-	ionuse = B2K((unsigned long)ion_mm_heap_total_memory());
-#endif
-	meminfo[num_entries++] = ionuse;
+	meminfo[num_entries++] = B2K((unsigned long)ion_mm_heap_total_memory());
 
 	/* misc */
 #if IS_ENABLED(CONFIG_ZSMALLOC)
