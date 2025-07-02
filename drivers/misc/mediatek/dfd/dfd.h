@@ -19,16 +19,13 @@ struct dfd_drv {
 	unsigned int cachedump_en;
 	unsigned int mem_reserve;
 	unsigned int l2c_trigger;
-	unsigned int check_dfd_support;
-	unsigned long dfd_infra_base;
-	unsigned int dfd_ap_addr_offset;
 };
 
 extern int mtk_dbgtop_dfd_count_en(int value);
 extern int mtk_dbgtop_dfd_therm1_dis(int value);
 extern int mtk_dbgtop_dfd_therm2_dis(int value);
 extern int mtk_dbgtop_dfd_timeout(int value);
-extern void get_dfd_base(void __iomem *dfd_base, unsigned int latch_offset);
+extern void get_dfd_base(void __iomem *dfd_base);
 extern unsigned int check_dfd_support(void);
 extern unsigned int dfd_infra_base(void);
 extern unsigned int dfd_ap_addr_offset(void);
