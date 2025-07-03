@@ -94,10 +94,6 @@ struct unwind_info_rms {
 	unsigned char *Userthread_maps __packed __aligned(8);
 };
 
-#ifdef CONFIG_CONSOLE_LOCK_DURATION_DETECT
-extern char *mtk8250_uart_dump(void);
-#endif
-
 #define AEE_MTK_CPU_NUMS	16
 /* powerkey press,modules use bits */
 #define AE_WDT_Powerkey_DEVICE_PATH		"/dev/kick_powerkey"
