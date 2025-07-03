@@ -127,6 +127,16 @@ static void aee_wdt_dump_stack_bin(unsigned int cpu, unsigned long bottom,
 	stacks_buffer_bin[cpu].top = top;
 	stacks_buffer_bin[cpu].bottom = bottom;
 }
+#ifndef CONFIG_ARM64
+static inline int in_exception_text(unsigned long ptr)
+{
+	char *die_ptr = NULL;
+
+	pr_notice("FIXME!!!\n");
+	*die_ptr = 5;
+	return 0;
+}
+#endif
 
 /* dump the backtrace into per CPU buffer */
 static void aee_wdt_dump_backtrace(unsigned int cpu, struct pt_regs *regs)
@@ -134,6 +144,7 @@ static void aee_wdt_dump_backtrace(unsigned int cpu, struct pt_regs *regs)
 	int i;
 	unsigned long high, bottom, fp;
 	struct stackframe cur_frame;
+	struct pt_regs *excp_regs;
 
 	bottom = regs->reg_sp;
 	if (!mrdump_virt_addr_valid(bottom)) {

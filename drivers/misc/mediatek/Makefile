@@ -99,6 +99,7 @@ obj-$(CONFIG_MTK_FLASHLIGHT) += flashlight/
 obj-$(CONFIG_RT_FLASHLIGHT)     += flashlight/richtek/
 obj-$(CONFIG_USB) += usb_boost/
 obj-$(CONFIG_USB_MTK_HDRC) += usb20/
+<<<<<<< HEAD
 obj-$(CONFIG_EXTCON_MTK_USB) += extcon/
 obj-$(CONFIG_MTK_DRAM_LOG_STORE) += log_store/
 obj-$(CONFIG_MTK_ECCCI_C2K) += c2k_usb/
@@ -116,3 +117,6 @@ obj-$(CONFIG_MTK_SYS_CIRQ) += cirq/
 obj-$(CONFIG_MTK_SECURITY_SW_SUPPORT) += masp/
 obj-y += rps/
 obj-$(CONFIG_MTK_FPSGO_V3) += fpsgo_cus/
+=======
+obj-$(CONFIG_MTK_USB_TYPEC) += typec/
+>>>>>>> parent of 557876c99286 ([ALPS04975618] aee: fix monitor_hang issue)
