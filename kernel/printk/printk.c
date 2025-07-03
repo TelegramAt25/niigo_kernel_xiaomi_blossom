@@ -2763,7 +2763,7 @@ skip:
 			memset(conwrite_stat_struct.con_write_statbuf, 0x0,
 				sizeof(conwrite_stat_struct.con_write_statbuf)
 				- 1);
-			if (snprintf(conwrite_stat_struct.con_write_statbuf,
+			snprintf(conwrite_stat_struct.con_write_statbuf,
 				sizeof(conwrite_stat_struct.con_write_statbuf)
 				- 1,
 "cpu%d [%lu.%06lu]--[%lu.%06lu] 'ttyS' %lubytes %lu.%06lus, 'pstore' %lubytes %lu.%06lus\n",
@@ -2777,11 +2777,7 @@ skip:
 				rem_nsec_con_write_ttyS/1000,
 				(unsigned long)len_con_write_pstore,
 				(unsigned long)time_con_write_pstore,
-				rem_nsec_con_write_pstore/1000) < 0) {
-			conwrite_stat_struct.con_write_statbuf[0] = 'N';
-			conwrite_stat_struct.con_write_statbuf[1] = 'A';
-			conwrite_stat_struct.con_write_statbuf[2] = '\0';
-				}
+				rem_nsec_con_write_pstore/1000);
 			break;
 		}
 		/* print the uart status next time enter the console_unlock */
