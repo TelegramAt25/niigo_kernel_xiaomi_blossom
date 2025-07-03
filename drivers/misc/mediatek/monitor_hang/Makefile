@@ -14,8 +14,6 @@
 subdir-ccflags-y += -I$(srctree)/drivers/misc/mediatek/aee
 subdir-ccflags-y += -I$(srctree)/drivers/misc/mediatek/include
 subdir-ccflags-y += -I$(srctree)/drivers/misc/mediatek/include/mt-plat/
-ifeq ($(CONFIG_MTK_ION),y)
-subdir-ccflags-y += -I$(srctree)/drivers/staging/android/mtk_ion/
-endif
+
 
 obj-y	+= monitor_hang.o
