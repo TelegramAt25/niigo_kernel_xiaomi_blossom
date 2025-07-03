@@ -68,7 +68,6 @@ obj-$(CONFIG_MTK_PERF_COMMON) += perf_common/
 ifneq ($(CONFIG_MTK_SYSTRACKER_DISABLE),y)
 obj-$(CONFIG_MTK_SYSTRACKER_V2) += systracker/
 endif
-obj-$(CONFIG_MTK_HANG_DETECT) += monitor_hang/
 obj-$(CONFIG_MTK_POWER_THROTTLING_COMMON) += power_throttling/
 
 obj-$(CONFIG_MTK_LEGACY_THERMAL) += thermal/
@@ -99,7 +98,6 @@ obj-$(CONFIG_MTK_FLASHLIGHT) += flashlight/
 obj-$(CONFIG_RT_FLASHLIGHT)     += flashlight/richtek/
 obj-$(CONFIG_USB) += usb_boost/
 obj-$(CONFIG_USB_MTK_HDRC) += usb20/
-<<<<<<< HEAD
 obj-$(CONFIG_EXTCON_MTK_USB) += extcon/
 obj-$(CONFIG_MTK_DRAM_LOG_STORE) += log_store/
 obj-$(CONFIG_MTK_ECCCI_C2K) += c2k_usb/
@@ -117,6 +115,3 @@ obj-$(CONFIG_MTK_SYS_CIRQ) += cirq/
 obj-$(CONFIG_MTK_SECURITY_SW_SUPPORT) += masp/
 obj-y += rps/
 obj-$(CONFIG_MTK_FPSGO_V3) += fpsgo_cus/
-=======
-obj-$(CONFIG_MTK_USB_TYPEC) += typec/
->>>>>>> parent of 557876c99286 ([ALPS04975618] aee: fix monitor_hang issue)
