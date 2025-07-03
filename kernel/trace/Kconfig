@@ -805,8 +805,8 @@ config GCOV_PROFILE_FTRACE
 	  run significantly slower.
 
 config MMSTAT_TRACER
-	tristate "Trace memory status periodically"
-	default m
+	bool "Trace memory status periodically"
+	select DEBUG_FS
 	help
 	  Periodic tracing of memory status.
 
