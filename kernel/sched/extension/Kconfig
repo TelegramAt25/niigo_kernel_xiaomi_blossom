@@ -37,15 +37,6 @@ config MTK_SCHED_LB_ENHANCEMENT
 	   intra-cluster load balance,
 	   and so on.
 
-config MTK_SCHED_TRACERS
-	bool "mtk scheduling trace, output mtk schedule trace into FTRACE"
-	depends on MTK_SCHED_EXTENSION
-	help
-	  Mediatek scheduling trace, output mtk schedule trace into FTRACE,
-	  Mediatek enhancements to vanilla linux kernel. Export scheduling
-	  trace in sched_switch events.
-	  Say Y to enable mtk scheduling trace.If unsure, say N
-
 config MTK_SCHED_CPU_PREFER
 	bool "mtk scheduling boost enhancement"
 	depends on MTK_SCHED_EXTENSION && ENERGY_MODEL && CPU_FREQ_GOV_SCHEDUTIL
