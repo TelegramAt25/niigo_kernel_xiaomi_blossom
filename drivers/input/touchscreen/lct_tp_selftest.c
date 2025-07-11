@@ -17,7 +17,7 @@
 #include <asm/uaccess.h>
 #include <linux/proc_fs.h>
 
-#define TP_SELF_TEST_RETROY_COUNT        3
+#define TP_SELF_TEST_RETRY_COUNT        3
 #define TP_SELF_TEST_CHECK_STATE_COUNT   30
 
 #define TP_SELF_TEST_PROC_FILE           "tp_selftest"
@@ -160,7 +160,7 @@ static void tp_selftest_work_func(void)
 	int i = 0;
 	int val = 0;
 
-	for(i = 0; i < TP_SELF_TEST_RETROY_COUNT; i++) {
+	for(i = 0; i < TP_SELF_TEST_RETRY_COUNT; i++) {
 		TP_LOGW("tp self test count = %d\n", i);
 		val = tp_chip_self_test();
 		if(val == 2) {

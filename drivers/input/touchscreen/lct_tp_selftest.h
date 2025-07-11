@@ -1,7 +1,7 @@
 #ifndef _LCT_CTP_SELFTEST_H
 #define _LCT_CTP_SELFTEST_H
 
-#define TP_FELF_TEST_RETROY_COUNT        3
+#define TP_FELF_TEST_RETRY_COUNT        3
 #define TP_SELF_TEST_CHECK_STATE_COUNT   30
 
 #define TP_SELF_TEST_PROC_FILE           "tp_selftest"
