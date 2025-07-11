@@ -4,6 +4,7 @@
  * policies)
  */
 #include "sched.h"
+#include "features.h"
 
 #include "pelt.h"
 
