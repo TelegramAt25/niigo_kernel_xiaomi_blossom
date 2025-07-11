@@ -126,11 +126,36 @@ static struct attribute_group eas_attr_group = {
 
 static int init_eas_attribs(void)
 {
-	return 0;
+	int err;
+
+	eas_info.attr_group = &eas_attr_group;
+
+	/* Create /sys/devices/system/cpu/eas/... */
+	eas_info.kobj = kobject_create_and_add("eas",
+				&cpu_subsys.dev_root->kobj);
+	if (!eas_info.kobj)
+		return -ENOMEM;
+
+	err = sysfs_create_group(eas_info.kobj, eas_info.attr_group);
+	if (err)
+		kobject_put(eas_info.kobj);
+	else
+		kobject_uevent(eas_info.kobj, KOBJ_ADD);
+
+	return err;
 }
 
 static int __init eas_stats_init(void)
 {
-	return 0;
+	int ret = 0;
+
+	eas_info.init = 0;
+
+	ret = init_eas_attribs();
+
+	if (ret)
+		eas_info.init = 1;
+
+	return ret;
 }
 late_initcall(eas_stats_init);
