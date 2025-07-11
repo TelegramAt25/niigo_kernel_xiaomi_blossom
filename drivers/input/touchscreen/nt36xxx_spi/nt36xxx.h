@@ -125,7 +125,7 @@ extern const uint16_t gesture_key_array[];
 #define LCT_TP_WORK_EN      1
 
 //enable tp grip area feature
-#define LCT_TP_GRIP_AREA_EN 1
+#define LCT_TP_GRIP_AREA_EN 0
 
 /*2019.12.06 longcheer taocheng add for charger mode begin*/
 /*functions description*/
