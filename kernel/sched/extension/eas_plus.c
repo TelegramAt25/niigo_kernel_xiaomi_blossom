@@ -3,7 +3,6 @@
  * Copyright (c) 2019 MediaTek Inc.
  */
 #include "sched.h"
-#include <trace/events/sched.h>
 
 DEFINE_PER_CPU(struct task_struct*, migrate_task);
 static int idle_pull_cpu_stop(void *data)
@@ -32,8 +31,6 @@ migrate_running_task(int dst_cpu, struct task_struct *p, struct rq *src_rq)
 		get_task_struct(p);
 		src_rq->push_cpu = dst_cpu;
 		per_cpu(migrate_task, src_cpu) = p;
-		trace_sched_migrate(p, cpu_of(src_rq), src_rq->push_cpu,
-				MIGR_IDLE_RUNNING);
 		src_rq->active_balance = MIGR_IDLE_RUNNING; /* idle pull */
 		force = 1;
 	}
@@ -796,8 +793,6 @@ unsigned int aggressive_idle_pull(int this_cpu)
 	if (cpu_is_slowest(this_cpu)) {
 		slowest_domain_idle_prefer_pull(this_cpu, &p, &src_rq);
 		if (p) {
-			trace_sched_migrate(p, this_cpu, cpu_of(src_rq),
-							MIGR_IDLE_BALANCE);
 			moved = migrate_runnable_task(p, this_cpu, src_rq);
 			if (moved)
 				goto done;
@@ -805,8 +800,6 @@ unsigned int aggressive_idle_pull(int this_cpu)
 	} else {
 		fastest_domain_idle_prefer_pull(this_cpu, &p, &src_rq);
 		if (p) {
-			trace_sched_migrate(p, this_cpu, cpu_of(src_rq),
-							MIGR_IDLE_BALANCE);
 			moved = migrate_runnable_task(p, this_cpu, src_rq);
 			if (moved)
 				goto done;
@@ -878,10 +871,6 @@ static void task_rotate_work_func(struct work_struct *work)
 		update_eas_uclamp_min(EAS_UCLAMP_KIR_BIG_TASK, CGROUP_TA,
 				scale_to_percent(SCHED_CAPACITY_SCALE));
 		set_uclamp = true;
-		trace_sched_big_task_rotation(wr->src_cpu, wr->dst_cpu,
-						wr->src_task->pid,
-						wr->dst_task->pid,
-						true, set_uclamp);
 	}
 
 	put_task_struct(wr->src_task);
@@ -902,7 +891,6 @@ static void task_rotate_reset_uclamp_work_func(struct work_struct *work)
 {
 	update_eas_uclamp_min(EAS_UCLAMP_KIR_BIG_TASK, CGROUP_TA, 0);
 	set_uclamp = false;
-	trace_sched_big_task_rotation_reset(set_uclamp);
 }
 
 void task_rotate_work_init(void)
@@ -1088,10 +1076,6 @@ int _sched_isolate_cpu(int cpu)
 	struct rq *rq = cpu_rq(cpu);
 	cpumask_t avail_cpus;
 	int ret_code = 0;
-	u64 start_time = 0;
-
-	if (trace_sched_isolate_enabled())
-		start_time = sched_clock();
 
 	cpu_maps_update_begin();
 
@@ -1128,8 +1112,6 @@ int _sched_isolate_cpu(int cpu)
 
 out:
 	cpu_maps_update_done();
-	trace_sched_isolate(cpu, cpumask_bits(cpu_isolated_mask)[0],
-			    start_time, 1);
 	printk_deferred("%s:cpu=%d, isolation_cpus=0x%lx\n",
 			__func__, cpu, cpu_isolated_mask->bits[0]);
 	return ret_code;
@@ -1144,10 +1126,6 @@ out:
 int __sched_deisolate_cpu_unlocked(int cpu)
 {
 	int ret_code = 0;
-	u64 start_time = 0;
-
-	if (trace_sched_isolate_enabled())
-		start_time = sched_clock();
 
 	if (!cpu_isolation_vote[cpu]) {
 		ret_code = -EINVAL;
@@ -1173,9 +1151,6 @@ int __sched_deisolate_cpu_unlocked(int cpu)
 	}
 
 out:
-	trace_sched_isolate(cpu, cpumask_bits(cpu_isolated_mask)[0],
-			    start_time, 0);
-
 	printk_deferred("%s:cpu=%d, isolation_cpus=0x%lx\n",
 			__func__, cpu, cpu_isolated_mask->bits[0]);
 	return ret_code;
