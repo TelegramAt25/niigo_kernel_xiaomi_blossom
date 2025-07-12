@@ -284,7 +284,6 @@ int fts_ex_mode_recovery(struct fts_ts_data *ts_data)
 int lct_fts_set_charger_mode(bool en)
 {
 	int ret = 0;
-	struct fts_ts_data *ts_data = fts_data;
 	if (en) {
 		FTS_INFO("enter charger mode");
 		ret = fts_ex_mode_switch(MODE_CHARGER, ENABLE);

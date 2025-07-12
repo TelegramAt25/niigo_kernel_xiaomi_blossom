@@ -158,8 +158,6 @@ static void fts_gesture_report(struct input_dev *input_dev, int gesture_id)
 int fts_gesture_readdata(struct fts_ts_data *ts_data, u8 *data)
 {
     int ret = 0;
-    int i = 0;
-    int index = 0;
     u8 buf[FTS_GESTURE_DATA_LEN] = { 0 };
     struct input_dev *input_dev = ts_data->input_dev;
 
