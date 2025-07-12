@@ -514,11 +514,13 @@ static VOID consys_hw_reset_bit_set(MTK_WCN_BOOL enable)
 			if (cnt > 10)
 				break;
 			consys_ver_id = CONSYS_REG_READ(conn_reg.mcu_base + 0x600);
+#if 0
 			WMT_PLAT_PR_INFO("0x18002600(0x%x)\n", consys_ver_id);
 			WMT_PLAT_PR_INFO("0x1800216c(0x%x)\n",
 					CONSYS_REG_READ(conn_reg.mcu_base + 0x16c));
 			WMT_PLAT_PR_INFO("0x18007104(0x%x)\n",
 					CONSYS_REG_READ(conn_reg.mcu_conn_hif_on_base + CONSYS_CPUPCR_OFFSET));
+#endif
 			msleep(20);
 			cnt++;
 		}
