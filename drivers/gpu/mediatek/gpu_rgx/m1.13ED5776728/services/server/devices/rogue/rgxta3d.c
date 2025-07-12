@@ -4182,6 +4182,8 @@ PVRSRV_ERROR PVRSRVRGXKickTA3DKM(RGX_SERVER_RENDER_CONTEXT	*psRenderContext,
 						   __func__, iUpdateTAFence,
 						   (void*)psTAFenceTimelineUpdateSync,
 						   ui32TAFenceTimelineUpdateValue));
+
+				SyncCheckpointGetRGXFWIFUFOAddr(psUpdateTASyncCheckpoint);
 			}
 
 			/* Append the sync prim update for the TA timeline (if required) */
@@ -4245,6 +4247,8 @@ PVRSRV_ERROR PVRSRVRGXKickTA3DKM(RGX_SERVER_RENDER_CONTEXT	*psRenderContext,
 						   __func__, iUpdate3DFence,
 						   (void*)ps3DFenceTimelineUpdateSync,
 						   ui323DFenceTimelineUpdateValue));
+
+				SyncCheckpointGetRGXFWIFUFOAddr(psUpdate3DSyncCheckpoint);
 			}
 
 			/* Append the sync prim update for the 3D timeline (if required) */

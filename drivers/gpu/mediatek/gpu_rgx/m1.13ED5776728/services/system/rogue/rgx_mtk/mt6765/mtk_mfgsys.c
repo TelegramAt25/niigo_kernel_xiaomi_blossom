@@ -213,8 +213,6 @@ static void MTKEnableMfgClock(IMG_BOOL bForce)
 
 static void MTKDisableMfgClock(IMG_BOOL bForce)
 {
-	int buck_state;
-
 	mtk_notify_gpu_power_change(0);
 	ged_dvfs_gpu_clock_switch_notify(0);
 
@@ -227,7 +225,7 @@ static void MTKDisableMfgClock(IMG_BOOL bForce)
 #endif
 
 #ifdef MTK_GPU_DVFS
-	buck_state = mt_gpufreq_voltage_enable_set(BUCK_OFF);
+	mt_gpufreq_voltage_enable_set(BUCK_OFF);
 #endif
 	ged_log_buf_print2(_mtk_ged_log, GED_LOG_ATTR_TIME, "BUCK_OFF");
 
