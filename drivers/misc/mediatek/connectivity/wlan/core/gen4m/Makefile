@@ -191,16 +191,9 @@ endif
 
 ccflags-y += -DCFG_DRIVER_INITIAL_RUNNING_MODE=3
 
-# Moto disable dual sta feature
-CONFIG_MOT_DISABLE_DUAL_STA := y
-# Moto remove 2.4GHz ch12/13
-ccflags-y += -DCFG_MOT_REM_CH12_CH13
-
 ifneq ($(filter 6765, $(WLAN_CHIP_ID)),)
     ccflags-y += -DCFG_SUPPORT_DUAL_STA=0
 else ifeq ($(CONFIG_MTK_TC10_FEATURE), y)
-    ccflags-y += -DCFG_SUPPORT_DUAL_STA=0
-else ifeq($(CONFIG_MOT_DISABLE_DUAL_STA), y)
     ccflags-y += -DCFG_SUPPORT_DUAL_STA=0
 else
     ccflags-y += -DCFG_SUPPORT_DUAL_STA=1

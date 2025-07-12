@@ -6825,11 +6825,6 @@ void p2pFunProcessAcsReport(IN struct ADAPTER *prAdapter,
 		 * to 1~11 per customer's request
 		 */
 		prAcsReqInfo->u4LteSafeChnMask_2G &= 0x0FFE;
-#elif CFG_MOT_REM_CH12_CH13
-		/* Restrict 2.4G band channel selection range
-		 * to 1~11 per customer's request
-		 */
-		prAcsReqInfo->u4LteSafeChnMask_2G &= 0x0FFE;
 #endif
 	} else if (prLteSafeChnInfo && (eBand == BAND_5G)) {
 		/* Add support for 5G FW mask */
