@@ -1,3 +1,0 @@
-MET_PLF := $(MTK_PLATFORM)
-
-met-y +=

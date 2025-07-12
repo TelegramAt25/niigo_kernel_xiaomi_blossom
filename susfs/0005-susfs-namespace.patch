@@ -1,0 +1,14 @@
+--- fs/namespace.orig.c	2025-07-10 22:55:00.649321053 +0000
++++ fs/namespace.c	2025-07-10 22:55:31.711737315 +0000
+@@ -3797,4 +3797,11 @@
+ 	}
+ 	return false;
+ }
++
++#ifdef CONFIG_KSU_SUSFS
++int path_umount(struct path *path, int flags)
++{
++	return do_umount(real_mount(path->mnt), flags);
++}
++EXPORT_SYMBOL_GPL(path_umount);
+ #endif
