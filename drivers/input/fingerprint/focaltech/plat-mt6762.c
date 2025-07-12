@@ -198,8 +198,6 @@ int ff_ctl_init_pins(int *irq_num)
     if (!pdev) {
         FF_LOGE("of_find_device_by_node(..) failed.");
         return (-ENODEV);
-    } else {
-        FF_LOGI("spi controller(#%d) name: %s.", pdev->id, pdev->name);
     }
 
     /* 3-3: Retrieve the SPI clk handler. */
@@ -208,7 +206,6 @@ int ff_ctl_init_pins(int *irq_num)
         FF_LOGE("devm_clk_get(..) failed.");
         return (-ENODEV);
     }
-	FF_LOGI("spi controller clock is: %lu HZ.", clk_get_rate(g_context->spiclk));
 
     ff_ctl_enable_power(true);
 
@@ -228,8 +225,6 @@ int ff_ctl_free_pins(void)
 	//if(!is_fpc)
     gpio_free(gpio_int_pin);
 		
-	
-    pr_info("'%s' leave.", __func__);
     return err;
 }
 
@@ -271,15 +266,12 @@ int ff_ctl_enable_spiclk(bool on)
         g_context->b_spiclk_enabled = false;
     }
 
-    pr_info("'%s' leave.", __func__);
     return err;
 }
 
 int ff_ctl_enable_power(bool on)
 {
     int err = 0;
-    
-    FF_LOGI("power: '%s'.", on ? "on" : "off");
 
     if (unlikely(!g_context->pinctrl)) {
         return (-ENOSYS);
@@ -292,7 +284,6 @@ int ff_ctl_enable_power(bool on)
 int ff_ctl_reset_device(void)
 {
     int err = 0;
-    pr_info("'%s' enter.", __func__);
 
     if (unlikely(!g_context->pinctrl)) {
         return (-ENOSYS);
@@ -309,7 +300,6 @@ int ff_ctl_reset_device(void)
     /* Pull up RST pin. */
     err = pinctrl_select_state(g_context->pinctrl, g_context->pin_states[FF_PINCTRL_STATE_RST_ACT]);
 
-    pr_info("'%s' leave.", __func__);
     return err;
 }
 
