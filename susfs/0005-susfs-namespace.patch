@@ -5,7 +5,6 @@
  	return false;
  }
 +
-+#ifdef CONFIG_KSU_SUSFS
 +int path_umount(struct path *path, int flags)
 +{
 +	return do_umount(real_mount(path->mnt), flags);
