@@ -7,7 +7,6 @@
  * This package is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
  * published by the Free Software Foundation.
-
  * THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
  * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -37,7 +36,7 @@ enum vboost {
 	BOOSTV_4850 = 4850,
 	BOOSTV_5000 = 5000,
 	BOOSTV_5150 = 5150,
-	BOOSTV_5300	= 5300,
+	BOOSTV_5300 = 5300,
 };
 
 enum iboost {
