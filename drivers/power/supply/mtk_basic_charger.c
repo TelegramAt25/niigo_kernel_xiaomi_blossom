@@ -84,6 +84,7 @@ static void select_cv(struct mtk_charger *info)
 
 static bool is_typec_adapter(struct mtk_charger *info)
 {
+#if 0
 	int rp;
 
 	rp = adapter_dev_get_property(info->pd_adapter, TYPEC_RP_LEVEL);
@@ -92,7 +93,7 @@ static bool is_typec_adapter(struct mtk_charger *info)
 			info->chr_type != POWER_SUPPLY_TYPE_USB &&
 			info->chr_type != POWER_SUPPLY_TYPE_USB_CDP)
 		return true;
-
+#endif
 	return false;
 }
 
