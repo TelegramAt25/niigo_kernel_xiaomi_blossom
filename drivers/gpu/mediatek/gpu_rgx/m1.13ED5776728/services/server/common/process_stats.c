@@ -1393,7 +1393,7 @@ PVRSRVStatsAddMemAllocRecord(PVRSRV_MEM_ALLOC_TYPE eAllocType,
 	enum { PVRSRV_PROC_NOTFOUND,
 	       PVRSRV_PROC_FOUND,
 	       PVRSRV_PROC_RESURRECTED
-	     }
+	     };
 #if defined(PVRSRV_DEBUG_LINUX_MEMORY_STATS)
 	eProcSearch = PVRSRV_PROC_FOUND;
 #endif
@@ -1908,7 +1908,7 @@ PVRSRVStatsIncrMemAllocStat(PVRSRV_MEM_ALLOC_TYPE eAllocType,
 	enum { PVRSRV_PROC_NOTFOUND,
 	       PVRSRV_PROC_FOUND,
 	       PVRSRV_PROC_RESURRECTED
-	     }
+	     };
 #if defined(PVRSRV_DEBUG_LINUX_MEMORY_STATS)
 	eProcSearch = PVRSRV_PROC_FOUND;
 #endif /* defined(PVRSRV_DEBUG_LINUX_MEMORY_STATS) */
