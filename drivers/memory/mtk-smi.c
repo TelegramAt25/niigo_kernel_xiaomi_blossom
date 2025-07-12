@@ -708,8 +708,6 @@ static int mtk_smi_dev_probe(struct platform_device *pdev, const u32 id)
 	if (of_address_to_resource(smi_dev[id]->dev->of_node, 0, res))
 		return -EINVAL;
 
-	dev_info(&pdev->dev,
-		"SMI%u base: VA=%p, PA=%pa\n", id, base, &res->start);
 	platform_set_drvdata(pdev, smi_dev[id]);
 	return mtk_smi_clks_get(smi_dev[id]);
 }
@@ -760,7 +758,6 @@ static int mtk_smi_common_probe(struct platform_device *pdev)
 		nr_dev = cnt ? cnt : (id + 1);
 		smi_dev = devm_kcalloc(
 			&pdev->dev, nr_dev, sizeof(*smi_dev), GFP_KERNEL);
-		dev_info(&pdev->dev, "COMMON%u nr_dev:%u\n", id, nr_dev);
 	}
 	if (!smi_dev)
 		return -ENOMEM;
