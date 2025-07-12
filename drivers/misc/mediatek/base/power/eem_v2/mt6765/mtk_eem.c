@@ -2553,10 +2553,6 @@ void eem_init01(void)
 			while (det->real_vboot != det->VBOOT) {
 				det->real_vboot = det->ops->volt_2_eem(det,
 					det->ops->get_volt(det));
-				if (timeout++ % 300 == 0)
-					eem_error
-("@%s():%d, get_volt(%s) = 0x%08X, VBOOT = 0x%08X\n",
-__func__, __LINE__, det->name, det->real_vboot, det->VBOOT);
 			}
 			/* BUG_ON(det->real_vboot != det->VBOOT); */
 			WARN_ON(det->real_vboot != det->VBOOT);
