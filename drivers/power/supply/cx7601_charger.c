@@ -55,8 +55,8 @@ struct cx7601 {
 	int revision;
 	int status;
 	struct mutex i2c_rw_lock;
-	bool charge_enabled;/* Register bit status */
-	struct cx7601_platform_data* platform_data;
+	bool charge_enabled;	/* Register bit status */
+	struct cx7601_platform_data *platform_data;
 	struct charger_device *chg_dev;
 };
 
@@ -64,7 +64,7 @@ static const struct charger_properties cx7601_chg_props = {
 	.alias_name = "cx7601",
 };
 
-static int __cx7601_read_reg(struct cx7601* bq, u8 reg, u8 *data)
+static int __cx7601_read_reg(struct cx7601 *bq, u8 reg, u8 *data)
 {
 	s32 ret;
 
@@ -73,18 +73,20 @@ static int __cx7601_read_reg(struct cx7601* bq, u8 reg, u8 *data)
 		pr_err("i2c read fail: can't read from reg 0x%02X\n", reg);
 		return ret;
 	}
-	*data = (u8)ret;
+
+	*data = (u8) ret;
 
 	return 0;
 }
 
-static int __cx7601_write_reg(struct cx7601* bq, int reg, u8 val)
+static int __cx7601_write_reg(struct cx7601 *bq, int reg, u8 val)
 {
 	s32 ret;
+
 	ret = i2c_smbus_write_byte_data(bq->client, reg, val);
 	if (ret < 0) {
 		pr_err("i2c write fail: can't write 0x%02X to reg 0x%02X: %d\n",
-				val, reg, ret);
+		       val, reg, ret);
 		return ret;
 	}
 	return 0;
@@ -101,7 +103,6 @@ static int cx7601_read_byte(struct cx7601 *bq, u8 *data, u8 reg)
 	return ret;
 }
 
-
 static int cx7601_write_byte(struct cx7601 *bq, u8 reg, u8 data)
 {
 	int ret;
@@ -110,16 +111,14 @@ static int cx7601_write_byte(struct cx7601 *bq, u8 reg, u8 data)
 	ret = __cx7601_write_reg(bq, reg, data);
 	mutex_unlock(&bq->i2c_rw_lock);
 
-	if (ret) {
+	if (ret)
 		pr_err("Failed: reg=%02X, ret=%d\n", reg, ret);
-	}
 
 	return ret;
 }
 
 
-static int cx7601_update_bits(struct cx7601 *bq, u8 reg,
-				u8 mask, u8 data)
+static int cx7601_update_bits(struct cx7601 *bq, u8 reg, u8 mask, u8 data)
 {
 	int ret;
 	u8 tmp;
@@ -130,13 +129,14 @@ static int cx7601_update_bits(struct cx7601 *bq, u8 reg,
 		pr_err("Failed: reg=%02X, ret=%d\n", reg, ret);
 		goto out;
 	}
+
 	tmp &= ~mask;
 	tmp |= data & mask;
 
 	ret = __cx7601_write_reg(bq, reg, tmp);
-	if (ret) {
+	if (ret)
 		pr_err("Failed: reg=%02X, ret=%d\n", reg, ret);
-	}
+
 out:
 	mutex_unlock(&bq->i2c_rw_lock);
 	return ret;
@@ -145,7 +145,6 @@ out:
 static int cx7601_enable_otg(struct cx7601 *bq)
 {
 	u8 val = REG01_OTG_ENABLE << REG01_OTG_CONFIG_SHIFT;
-        pr_info("cx7601_enable_otg enter\n");
 	return cx7601_update_bits(bq, CX7601_REG_01,
 				REG01_OTG_CONFIG_MASK, val);
 
@@ -187,7 +186,7 @@ int cx7601_set_chargecurrent(struct cx7601 *bq, int curr)
 		curr = REG02_ICHG_BASE;
 	}
 
-	ichg = (curr - REG02_ICHG_BASE)/REG02_ICHG_LSB;
+	ichg = (curr - REG02_ICHG_BASE) / REG02_ICHG_LSB;
 	return cx7601_update_bits(bq, CX7601_REG_02, REG02_ICHG_MASK,
 				ichg << REG02_ICHG_SHIFT);
 
@@ -212,13 +211,13 @@ int cx7601_set_prechg_current(struct cx7601 *bq, int curr)
 {
 	u8 iprechg;
 
-	if(curr <= 180)
+	if (curr <= 180)
 		iprechg   = 2;
 	else if (curr <= 256)
 		iprechg = 1;
-	else if(curr <= 384)
+	else if (curr <= 384)
 		iprechg = 3;
-	else if(curr <=512)
+	else if (curr <=512)
 		iprechg = 4;
 	else
 		iprechg = (curr - REG03_IPRECHG_BASE) / REG03_IPRECHG_LSB;
@@ -349,8 +348,7 @@ int cx7601_get_hiz_mode(struct cx7601 *bq, u8 *state)
 }
 EXPORT_SYMBOL_GPL(cx7601_get_hiz_mode);
 
-
-static int cx7601_enable_term(struct cx7601* bq, bool enable)
+static int cx7601_enable_term(struct cx7601 *bq, bool enable)
 {
 	u8 val;
 	int ret;
@@ -593,21 +591,21 @@ static int cx7601_init_device(struct cx7601 *bq)
 }
 
 
-static int cx7601_detect_device(struct cx7601* bq)
+static int cx7601_detect_device(struct cx7601 *bq)
 {
-    int ret;
-    u8 data;
+	int ret;
+	u8 data;
 
 	ret = cx7601_read_byte(bq, &data, CX7601_REG_0A);
-    if(ret == 0){
-        bq->part_no = (data & REG0A_PN_MASK) >> REG0A_PN_SHIFT;
-        bq->revision = (data & REG0A_DEV_REV_MASK) >> REG0A_DEV_REV_SHIFT;
-    }
+	if(ret == 0){
+		bq->part_no = (data & REG0A_PN_MASK) >> REG0A_PN_SHIFT;
+		bq->revision = (data & REG0A_DEV_REV_MASK) >> REG0A_DEV_REV_SHIFT;
+	}
 	ret = cx7601_read_byte(bq, &data, CX7601_REG_0D);
 	if(data==0xff){
 		ret=1;
 	}
-    return ret;
+	return ret;
 }
 
 static void cx7601_dump_regs(struct cx7601 *bq)
@@ -621,8 +619,6 @@ static void cx7601_dump_regs(struct cx7601 *bq)
 		if (ret == 0)
 			pr_err("Reg[%.2x] = 0x%.2x\n", addr, val);
 	}
-
-
 }
 
 static ssize_t registers_show(struct device *dev,
@@ -683,13 +679,10 @@ static int cx7601_set_hizmode(struct charger_device *chg_dev, bool enable)
 	int ret = 0;
 
 	if (enable)
-  	{
 		ret = cx7601_enter_hiz_mode(bq);
-  	 }
 	else
-  	{
 		ret = cx7601_exit_hiz_mode(bq);
-   	}
+
 	pr_err("%s set hizmode %s\n", enable ? "enable" : "disable",
 				  !ret ? "successfully" : "failed");
 
@@ -698,19 +691,14 @@ static int cx7601_set_hizmode(struct charger_device *chg_dev, bool enable)
 
 static int cx7601_charging(struct charger_device *chg_dev, bool enable)
 {
-
 	struct cx7601 *bq = dev_get_drvdata(&chg_dev->dev);
 	int ret = 0;
 	u8 val;
 
 	if (enable)
-  	{
 		ret = cx7601_enable_charger(bq);
-  	 }
 	else
-  	{
 		ret = cx7601_disable_charger(bq);
-   	}
 	cx7601_set_hizmode(chg_dev, !enable);
 	pr_err("%s charger %s\n", enable ? "enable" : "disable",
 				  !ret ? "successfully" : "failed");
@@ -724,7 +712,6 @@ static int cx7601_charging(struct charger_device *chg_dev, bool enable)
 
 static int cx7601_plug_in(struct charger_device *chg_dev)
 {
-
 	int ret;
 
 	ret = cx7601_charging(chg_dev, true);
@@ -788,7 +775,7 @@ static int cx7601_set_ichg(struct charger_device *chg_dev, u32 curr)
 
 	pr_info("[%s] curr=%d\n", __func__, curr);
 
-	return cx7601_set_chargecurrent(bq, curr/1000);
+	return cx7601_set_chargecurrent(bq, curr / 1000);
 }
 
 
@@ -812,7 +799,6 @@ static int cx7601_get_ichg(struct charger_device *chg_dev, u32 *curr)
 
 static int cx7601_get_min_ichg(struct charger_device *chg_dev, u32 *curr)
 {
-
 	*curr = 60 * 1000;
 
 	return 0;
@@ -820,7 +806,6 @@ static int cx7601_get_min_ichg(struct charger_device *chg_dev, u32 *curr)
 
 static int cx7601_set_vchg(struct charger_device *chg_dev, u32 volt)
 {
-
 	struct cx7601 *bq = dev_get_drvdata(&chg_dev->dev);
 
 	return cx7601_set_chargevolt(bq, volt/1000);
@@ -845,19 +830,16 @@ static int cx7601_get_vchg(struct charger_device *chg_dev, u32 *volt)
 
 static int cx7601_set_ivl(struct charger_device *chg_dev, u32 volt)
 {
-
 	struct cx7601 *bq = dev_get_drvdata(&chg_dev->dev);
 
-	return cx7601_set_input_volt_limit(bq, volt/1000);
-
+	return cx7601_set_input_volt_limit(bq, volt / 1000);
 }
 
 static int cx7601_set_icl(struct charger_device *chg_dev, u32 curr)
 {
-
 	struct cx7601 *bq = dev_get_drvdata(&chg_dev->dev);
 
-	return cx7601_set_input_current_limit(bq, curr/1000);
+	return cx7601_set_input_current_limit(bq, curr / 1000);
 }
 
 static int cx7601_get_icl(struct charger_device *chg_dev, u32 *curr)
@@ -900,7 +882,6 @@ static int cx7601_get_icl(struct charger_device *chg_dev, u32 *curr)
 	}
 
 	return ret;
-
 }
 
 static int cx7601_kick_wdt(struct charger_device *chg_dev)
@@ -916,13 +897,10 @@ static int cx7601_set_otg(struct charger_device *chg_dev, bool en)
 	struct cx7601 *bq = dev_get_drvdata(&chg_dev->dev);
 
 	if (en)
-  	{
 		ret = cx7601_enable_otg(bq);
-   	}
 	else
-  	{
 		ret = cx7601_disable_otg(bq);
-   	}
+
 	return ret;
 }
 
@@ -1021,14 +999,11 @@ static struct charger_ops cx7601_chg_ops = {
 	.send_ta_current_pattern = NULL,
 	.set_pe20_efficiency_table = NULL,
 	.send_ta20_current_pattern = NULL,
-//	.set_ta20_reset = NULL,
 	.enable_cable_drop_comp = NULL,
 
 	/* ADC */
 	.get_tchg_adc = NULL,
 };
-
-
 
 static int cx7601_charger_probe(struct i2c_client *client,
 					const struct i2c_device_id *id)
@@ -1092,7 +1067,6 @@ static int cx7601_charger_probe(struct i2c_client *client,
 	return 0;
 
 err_0:
-
 	return ret;
 }
 
@@ -1100,15 +1074,12 @@ static int cx7601_charger_remove(struct i2c_client *client)
 {
 	struct cx7601 *bq = i2c_get_clientdata(client);
 
-
 	mutex_destroy(&bq->i2c_rw_lock);
 
 	sysfs_remove_group(&bq->dev->kobj, &cx7601_attr_group);
 
-
 	return 0;
 }
-
 
 static void cx7601_charger_shutdown(struct i2c_client *client)
 {
@@ -1133,10 +1104,10 @@ static struct i2c_driver cx7601_charger_driver = {
 		.of_match_table = cx7601_charger_match_table,
 	},
 	.id_table	= cx7601_charger_id,
+
 	.probe		= cx7601_charger_probe,
 	.remove		= cx7601_charger_remove,
 	.shutdown	= cx7601_charger_shutdown,
-
 };
 
 module_i2c_driver(cx7601_charger_driver);
