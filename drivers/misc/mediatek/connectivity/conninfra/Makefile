@@ -7,17 +7,14 @@ KBUILD_MODPOST_FAIL_ON_WARNINGS := y
 CONNSYS_PLATFORM := $(TARGET_BOARD_PLATFORM_CONNINFRA)
 
 ifeq ($(CONNSYS_PLATFORM),)
-$(info $$CONFIG_MTK_COMBO_CHIP is [${CONFIG_MTK_COMBO_CHIP}])
 ifneq ($(CONFIG_MTK_COMBO_CHIP),)
 # replace CONSYS_XXXX to mtXXXX
 CONNINFRA_PLATFORM_ID := $(patsubst CONSYS_%,mt%,$(subst ",,$(CONFIG_MTK_COMBO_CHIP)))
-$(info CONNINFRA_PLATFORM_ID is [${CONNINFRA_PLATFORM_ID}])
 CONNSYS_PLATFORM := $(CONNINFRA_PLATFORM_ID)
 else
 CONNSYS_PLATFORM := $(MTK_PLATFORM)
 endif
 endif
-$(info $$CONNSYS_PLATFORM is [${CONNSYS_PLATFORM}])
 
 #ccflags-y += -D MTK_WCN_REMOVE_KERNEL_MODULE
 ifeq ($(CONFIG_ARM64), y)
@@ -57,10 +54,8 @@ ccflags-y += -Wno-error=format-extra-args
 ###############################################################################
 MODULE_NAME := conninfra
 ifeq ($(CONFIG_WLAN_DRV_BUILD_IN),y)
-$(warning $(MODULE_NAME) build-in boot.img)
 obj-y += $(MODULE_NAME).o
 else
-$(warning $(MODULE_NAME) is kernel module)
 obj-m += $(MODULE_NAME).o
 endif
 

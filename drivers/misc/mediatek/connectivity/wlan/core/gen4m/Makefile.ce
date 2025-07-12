@@ -75,10 +75,6 @@ endif
 ifeq "$(CC)" "gcc"
 CC ?= $(CROSS_COMPILE)gcc
 endif
-$(warning =============================================)
-$(warning wifi driver LINUX_SRC=$(LINUX_SRC))
-$(warning CROSS_COMPILE=$(CROSS_COMPILE))
-$(warning =============================================)
 
 DRIVER_DIR=$(LINUX_ROOT)/third_party/source/wlan/mtk/$(WIFI_TARGET)
 

@@ -15,15 +15,12 @@
 ifeq ($(CONFIG_MTK_M4U),y)
 
 #platform code
-$(info M4U platform folder:$(CONFIG_MTK_PLATFORM))
 obj-y += $(subst ",,$(CONFIG_MTK_PLATFORM))/
 
 #version code
 ifneq (,$(filter $(strip $(CONFIG_MTK_PLATFORM)), "mt6761" "mt6765"))
-    $(info M4U version:2.0)
     obj-y += 2.0/
 else ifneq (,$(filter $(strip $(CONFIG_MTK_PLATFORM)), "mt6779"))
-    $(info M4U version:3.2)
     obj-y += 3.2/
 else ifeq (,$(filter $(strip $(CONFIG_MTK_PLATFORM)), "mt8173"))
     $(error M4U error: platform error)

@@ -30,7 +30,6 @@ ccflags-y += -I$(srctree)/drivers/misc/mediatek/smi/
 ccflags-y += -I$(srctree)/drivers/misc/mediatek/mmdvfs/
 
 
-#$(warning $(subdir-ccflags-y))
 
 #obj-$(CONFIG_MTK_VPU) += ccu_drv.o ccu_algo.o ccu_dbg.o
 obj-y += ccu_drv.o ccu_n3d_a.o ccu_i2c.o

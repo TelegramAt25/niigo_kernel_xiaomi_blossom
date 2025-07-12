@@ -21,25 +21,20 @@ ifeq ($(CONFIG_MTK_MET_PLF),m)
     MET_BUILD_KO := y
 endif
 
-$(info ******** Start to build met_drv for $(MTK_PLATFORM) ********)
 ifneq ($(MET_PLF_DIR),)
     ifeq ($(FTRACE_READY),y)
         ifeq ($(MET_BUILD_KO),y)
             include $(MET_COMMON_DIR)/Kbuild
         else
-            $(warning Not building met.ko due to CONFIG_MTK_MET_PLF is not set to m, build met default)
             MET_BUILD_DEFAULT = y
         endif
     else
-        $(warning Not building met.ko due to CONFIG_FTRACE/CONFIG_TRACING is not set, build met default)
         MET_BUILD_DEFAULT = y
     endif
 else
-    $(warning not support "$(MTK_PLATFORM)", build met default)
     MET_BUILD_DEFAULT = y
 endif
 else #CONFIG_MODULES = n
-    $(warning Not building met.ko due to CONFIG_MODULES is not set, build met default)
     MET_BUILD_DEFAULT := y
 endif
 

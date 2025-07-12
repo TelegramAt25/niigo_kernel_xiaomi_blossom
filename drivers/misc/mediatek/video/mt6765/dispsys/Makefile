@@ -19,9 +19,6 @@ ifeq ($(CONFIG_MTK_PLATFORM), "mt6761")
 else
 	MTK_PLATFORM := $(subst ",,$(CONFIG_MTK_PLATFORM))
 endif
-$(info shaohua)
-$(info $(CONFIG_MACH_MT6761))
-$(info $(CONFIG_MTK_SMI_EXT))
 ccflags-y += -I$(srctree)/drivers/misc/mediatek/video/include/ \
              -I$(srctree)/drivers/misc/mediatek/video/common/ \
              -I$(srctree)/drivers/misc/mediatek/video/common/rdma20/ \

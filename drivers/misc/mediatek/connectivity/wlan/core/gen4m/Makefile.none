@@ -195,9 +195,6 @@ CFLAGS += $(PLATFORM_FLAGS)
 OBJS = $($(MODULE_NAME)-objs)
 TARGET = $(MODULES_NAME)_$(hif)
 
-$(info flags: $(CFLAGS))
-$(info CC: $(CC))
-$(info target: $(TARGET))
 
 REBUILDABLES = $(OBJS) $(TARGET)
 

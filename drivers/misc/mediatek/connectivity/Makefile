@@ -42,9 +42,7 @@ ifneq ($(KERNELRELEASE),)
     # export CONFIG_WLAN_DRV_BUILD_IN=y
 
     ifeq ($(CONFIG_WLAN_DRV_BUILD_IN),y)
-        $(info $$CONFIG_MTK_COMBO_CHIP is [${CONFIG_MTK_COMBO_CHIP}])
         MTK_PLATFORM_ID := $(patsubst CONSYS_%,%,$(subst ",,$(CONFIG_MTK_COMBO_CHIP)))
-        $(info MTK_PLATFORM_ID is [${MTK_PLATFORM_ID}])
 
         # for gen4m options
         export CONFIG_MTK_COMBO_WIFI_HIF=axi
