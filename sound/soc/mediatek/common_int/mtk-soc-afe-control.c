@@ -3239,14 +3239,12 @@ void AudDrv_checkDLISRStatus(void)
 {
 	unsigned long flags1;
 	struct afe_dl_abnormal_control_t localctl;
-	bool dumplog = false;
 
 	spin_lock_irqsave(&afe_dl_abnormal_context_lock, flags1);
 	if (AFE_dL_Abnormal_context.IrqDelayCnt ||
 	    AFE_dL_Abnormal_context.u4UnderflowCnt) {
 		memcpy((void *)&localctl, (void *)&AFE_dL_Abnormal_context,
 		       sizeof(struct afe_dl_abnormal_control_t));
-		dumplog = true;
 		if (AFE_dL_Abnormal_context.IrqDelayCnt > 0)
 			AFE_dL_Abnormal_context.IrqDelayCnt = 0;
 
@@ -3254,47 +3252,6 @@ void AudDrv_checkDLISRStatus(void)
 			AFE_dL_Abnormal_context.u4UnderflowCnt = 0;
 	}
 	spin_unlock_irqrestore(&afe_dl_abnormal_context_lock, flags1);
-
-	if (dumplog) {
-		int index = 0;
-
-		if (localctl.IrqDelayCnt) {
-			for (index = 0; index < localctl.IrqDelayCnt &&
-					index < DL_ABNORMAL_CONTROL_MAX;
-			     index++) {
-				pr_warn("AudWarn isr blocked [%d/%d] %llu - %llu = %llu > %d ms\n",
-					index, localctl.IrqDelayCnt,
-					localctl.IrqCurrentTimeNs[index],
-					localctl.IrqLastTimeNs[index],
-					localctl.IrqIntervalNs[index],
-					localctl.IrqIntervalLimitMs[index]);
-			}
-		}
-		if (localctl.u4UnderflowCnt) {
-			for (index = 0; index < localctl.u4UnderflowCnt &&
-					index < DL_ABNORMAL_CONTROL_MAX;
-			     index++) {
-#if 0
-				static DEFINE_RATELIMIT_STATE(_rs, HZ, 5);
-
-				if (__ratelimit(&_rs)) {
-					pr_warn(
-						"AudWarn data underflow [%d/%d] MemType %d, Remain:0x%x, R:0x%x W:0x%x, BufSize:0x%x, consumebyte:0x%x, hw index:0x%x, addr:0x%x\n",
-						index,
-						localctl.u4UnderflowCnt,
-						localctl.MemIfNum[index],
-						localctl.u4DataRemained[index],
-						localctl.u4DMAReadIdx[index],
-						localctl.u4WriteIdx[index],
-						localctl.u4BufferSize[index],
-						localctl.u4ConsumedBytes[index],
-						localctl.u4HwMemoryIndex[index],
-						localctl.pucPhysBufAddr[index]);
-				}
-#endif
-			}
-		}
-	}
 }
 
 static void update_sram_block_valid(enum audio_sram_mode mode)
@@ -4315,8 +4272,8 @@ get_dlmem_frame_index(struct snd_pcm_substream *substream,
 
 		Afe_Block->u4DMAReadIdx += Afe_consumed_bytes;
 		Afe_Block->u4DMAReadIdx %= Afe_Block->u4BufferSize;
-		if (Afe_Block->u4DataRemained < 0) {
 #if 0
+		if (Afe_Block->u4DataRemained < 0) {
 			static DEFINE_RATELIMIT_STATE(_rs, HZ, 5);
 
 			if (__ratelimit(&_rs)) {
@@ -4324,8 +4281,8 @@ get_dlmem_frame_index(struct snd_pcm_substream *substream,
 					"[AudioWarn] u4DataRemained=0x%x, mem_block %d\n",
 					Afe_Block->u4DataRemained, mem_block);
 			}
-#endif
 		};
+#endif
 		Frameidx = bytes_to_frames(substream->runtime,
 					   Afe_Block->u4DMAReadIdx);
 	} else {
