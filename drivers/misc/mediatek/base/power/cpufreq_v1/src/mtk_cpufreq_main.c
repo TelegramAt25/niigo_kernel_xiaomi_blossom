@@ -1236,7 +1236,7 @@ static int mtk_cpufreq_get_cpu_power(unsigned long *power, unsigned long *KHz, i
 	tmp = (u64)cap * mV * mV * MHz;
 	do_div(tmp, 1000000000);
 	*power = (unsigned long)tmp;
-	tag_pr_info("Voltage in mV=%u, Frequency in KHz =%u, Power=%u\n", mV, *KHz, *power);
+	//tag_pr_info("Voltage in mV=%u, Frequency in KHz =%u, Power=%u\n", mV, *KHz, *power);
 	return 0;
 }
 
