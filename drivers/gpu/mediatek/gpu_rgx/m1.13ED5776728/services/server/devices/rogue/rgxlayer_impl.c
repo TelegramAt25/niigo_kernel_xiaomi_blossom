@@ -740,7 +740,6 @@ PVRSRV_ERROR RGXFabricCoherencyTest(const void *hPrivate)
 	IMG_UINT32 ui32OddEvenSeed = 1;
 	PVRSRV_ERROR eError = PVRSRV_OK;
 	IMG_BOOL bFullTestPassed = IMG_TRUE;
-	IMG_BOOL bSubTestPassed = IMG_FALSE;
 	IMG_BOOL bExit = IMG_FALSE;
 
 	PVR_ASSERT(hPrivate != NULL);
@@ -1031,13 +1030,8 @@ PVRSRV_ERROR RGXFabricCoherencyTest(const void *hPrivate)
 				}
 
 				/* Compare to see if sub-test passed */
-				if (pui32FabricCohTestBufferCpuVA[i] == ui32FWValue)
+				if (pui32FabricCohTestBufferCpuVA[i] != ui32FWValue)
 				{
-					bSubTestPassed = IMG_TRUE;
-				}
-				else
-				{
-					bSubTestPassed = IMG_FALSE;
 					bFullTestPassed = IMG_FALSE;
 					eError = PVRSRV_ERROR_INIT_FAILURE;
 					if (ui32LastFWValue != ui32FWValue)
@@ -1071,16 +1065,12 @@ PVRSRV_ERROR RGXFabricCoherencyTest(const void *hPrivate)
 			switch (ui32TestType)
 			{
 			case 0:
-				PVR_LOG(("CPU:Write/GPU:Read Snoop Miss Test: completed [run #%u]: %s", ui32OddEven, bSubTestPassed ? "PASSED" : "FAILED"));
 				break;
 			case 1:
-				PVR_LOG(("GPU:Write/CPU:Read Snoop Miss Test: completed [run #%u]: %s", ui32OddEven, bSubTestPassed ? "PASSED" : "FAILED"));
 				break;
 			case 2:
-				PVR_LOG(("CPU:Write/GPU:Read Snoop Hit  Test: completed [run #%u]: %s", ui32OddEven, bSubTestPassed ? "PASSED" : "FAILED"));
 				break;
 			case 3:
-				PVR_LOG(("GPU:Write/CPU:Read Snoop Hit  Test: completed [run #%u]: %s", ui32OddEven, bSubTestPassed ? "PASSED" : "FAILED"));
 				break;
 			default:
 				PVR_LOG(("Internal error, exiting test"));
