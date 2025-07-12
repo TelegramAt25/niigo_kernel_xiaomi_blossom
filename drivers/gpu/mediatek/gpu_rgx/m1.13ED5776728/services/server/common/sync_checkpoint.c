@@ -2933,10 +2933,12 @@ static IMG_UINT32 _CleanCheckpointPool(_SYNC_CHECKPOINT_CONTEXT *psContext)
 			 * from the list so it's safe to use sListNode here */
 			dllist_add_to_head(&sCleanupList, &psCheckpoint->sListNode);
 		}
+#if (ENABLE_SYNC_CHECKPOINT_POOL_DEBUG == 1)
 		else
 		{
 			ui32NullScpCount++;
 		}
+#endif
 	}
 
 	/* Release sync checkpoint pool lock */
