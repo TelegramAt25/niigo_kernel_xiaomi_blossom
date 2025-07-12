@@ -2477,6 +2477,7 @@ void DumpStalledCCBCommand(PRGXFWIF_FWCOMMONCONTEXT sFWCommonContext,
 				DUMPDEBUG_PRINTF_FUNC *pfnDumpDebugPrintf,
 				void *pvDumpDebugFile)
 {
+#if 0
 	volatile RGXFWIF_CCCB_CTL	*psClientCCBCtrl = psCurrentClientCCB->psClientCCBCtrl;
 	void					*pvClientCCBBuff = psCurrentClientCCB->pvClientCCB;
 	volatile void			*pvPtr;
@@ -2566,10 +2567,12 @@ void DumpStalledCCBCommand(PRGXFWIF_FWCOMMONCONTEXT sFWCommonContext,
 			}
 		}
 	}
+#endif
 }
 
 void DumpStalledContextInfo(PVRSRV_RGXDEV_INFO *psDevInfo)
 {
+#if 0
 	RGX_CLIENT_CCB *psStalledClientCCB;
 
 	PVR_ASSERT(psDevInfo);
@@ -2685,6 +2688,7 @@ void DumpStalledContextInfo(PVRSRV_RGXDEV_INFO *psDevInfo)
 		}
 		psDevInfo->pvEarliestStalledClientCCB = NULL;
 	}
+#endif
 }
 
 /******************************************************************************
