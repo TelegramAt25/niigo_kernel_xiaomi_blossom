@@ -1465,7 +1465,6 @@ bool SetMemoryPathEnable(unsigned int Aud_block, bool bEnable)
 			mAudioMEMIF[Aud_block]->mState = false;
 		if (mAudioMEMIF[Aud_block]->mUserCount < 0) {
 			mAudioMEMIF[Aud_block]->mUserCount = 0;
-			pr_err("[AudioError] , user count < 0\n");
 			return false;
 		}
 	}
