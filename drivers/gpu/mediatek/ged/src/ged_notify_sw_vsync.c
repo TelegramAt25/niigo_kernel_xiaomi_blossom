@@ -55,10 +55,12 @@ static struct hrtimer g_HT_hwvsync_emu;
 #include "ged_global.h"
 
 static struct workqueue_struct *g_psNotifyWorkQueue;
+#if 0
 #if defined(CONFIG_MACH_MT8167) || defined(CONFIG_MACH_MT8173)\
 || defined(CONFIG_MACH_MT6739) || defined(CONFIG_MACH_MT6761)\
 || defined(CONFIG_MACH_MT6765)
 static struct workqueue_struct *g_psDumpFW;
+#endif
 #endif
 
 static struct mutex gsVsyncStampLock;
