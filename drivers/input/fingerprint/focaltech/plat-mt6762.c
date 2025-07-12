@@ -112,8 +112,6 @@ int ff_ctl_init_pins(int *irq_num)
     struct device_node *dev_node = NULL;
     struct platform_device *pdev = NULL;
 
-    pr_info("'%s' enter.", __func__);
-
     /* Find device tree node. */
     dev_node = of_find_compatible_node(NULL, NULL, FF_COMPATIBLE_NODE_1);
     if (!dev_node) {
@@ -214,14 +212,12 @@ int ff_ctl_init_pins(int *irq_num)
 
     ff_ctl_enable_power(true);
 
-    pr_info("'%s' leave.", __func__);
     return err;
 }
 //extern int is_fpc;
 int ff_ctl_free_pins(void)
 {
     int err = 0;
-    pr_info("'%s' enter.", __func__);
 
     // TODO:
 	if (g_context->pinctrl) {
@@ -240,7 +236,6 @@ int ff_ctl_free_pins(void)
 int ff_ctl_enable_spiclk(bool on)
 {
     int err = 0;
-    pr_info("'%s' enter.", __func__);
     FF_LOGD("clock: '%s'.", on ? "enable" : "disabled");
 
     if (unlikely(!g_context->spiclk)) {
@@ -284,21 +279,12 @@ int ff_ctl_enable_power(bool on)
 {
     int err = 0;
     
-	pr_info("'%s' enter.", __func__);
     FF_LOGI("power: '%s'.", on ? "on" : "off");
 
     if (unlikely(!g_context->pinctrl)) {
         return (-ENOSYS);
     }
 
-    if (on) {
-        //err = pinctrl_select_state(g_context->pinctrl, g_context->pin_states[FF_PINCTRL_STATE_PWR_ACT]);
-    } else {
-        //err = pinctrl_select_state(g_context->pinctrl, g_context->pin_states[FF_PINCTRL_STATE_PWR_CLR]);
-    }
-
-    pr_info("'%s' leave.", __func__);
-	
     return err;
 }
 
