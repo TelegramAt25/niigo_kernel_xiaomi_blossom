@@ -13,12 +13,7 @@
 #define MMDVFSMSG(string, args...) \
 	pr_notice("[pid=%d]"string, current->tgid, ##args)
 
-#define MMDVFSDEBUG(level, x...)            \
-	do {                        \
-		if (g_mmdvfs_debug_level \
-		&& (*g_mmdvfs_debug_level) >= (level))    \
-			MMDVFSMSG(x);            \
-	} while (0)
+#define MMDVFSDEBUG(level, x...) ((void)0)
 
 #define MMDVFSMSG2(string, args...) pr_debug(string, ##args)
 
