@@ -916,6 +916,8 @@ static int bq2560x_set_otg(struct charger_device *chg_dev, bool en)
 	int ret;
 	struct bq2560x *bq = dev_get_drvdata(&chg_dev->dev);
 
+	bq2560x_set_hizmode(chg_dev, !en);
+
 	if (en)
 		ret = bq2560x_enable_otg(bq);
 	else
