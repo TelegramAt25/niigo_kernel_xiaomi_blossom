@@ -37,18 +37,6 @@
 #include "bq2560x_reg.h"
 #include "bq2560x.h"
 
-#if 1
-#undef pr_debug
-#define pr_debug pr_err
-#undef pr_info
-#define pr_info pr_err
-#undef dev_dbg
-#define dev_dbg dev_err
-#else
-#undef pr_info
-#define pr_info pr_debug
-#endif
-
 enum bq2560x_part_no {
 	BQ25600 = 0x00,
 	BQ25601 = 0x02,
