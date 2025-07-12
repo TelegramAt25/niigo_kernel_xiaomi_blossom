@@ -989,12 +989,12 @@ static int snd_usb_hw_params(struct snd_pcm_substream *substream,
 	if (pm_qos_request_active(&subs->pm_qos)) {
 		pm_qos_update_request(&subs->pm_qos,
 					US_PER_FRAME * PM_QOS_COUNT);
-		pr_info("%s: (pm_qos @%p) update\n",
+		pr_debug("%s: (pm_qos @%p) update\n",
 			   __func__, &subs->pm_qos);
 	} else {
 		pm_qos_add_request(&subs->pm_qos,
 			   PM_QOS_CPU_DMA_LATENCY, US_PER_FRAME * PM_QOS_COUNT);
-		pr_info("%s: (pm_qos @%p) request\n",
+		pr_debug("%s: (pm_qos @%p) request\n",
 			   __func__, &subs->pm_qos);
 	}
 
@@ -1025,10 +1025,10 @@ static int snd_usb_hw_free(struct snd_pcm_substream *substream)
 	/* remove the qos request */
 	if (pm_qos_request_active(&subs->pm_qos)) {
 		pm_qos_remove_request(&subs->pm_qos);
-		pr_info("%s: (pm_qos @%p) remove\n",
+		pr_debug("%s: (pm_qos @%p) remove\n",
 			   __func__, &subs->pm_qos);
 	} else
-		pr_info("%s: (pm_qos @%p) remove again\n",
+		pr_debug("%s: (pm_qos @%p) remove again\n",
 			   __func__, &subs->pm_qos);
 
 	if (snd_usb_use_vmalloc)
