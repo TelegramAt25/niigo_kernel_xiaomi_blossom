@@ -898,6 +898,8 @@ static int cx7601_set_otg(struct charger_device *chg_dev, bool en)
 	int ret;
 	struct cx7601 *bq = dev_get_drvdata(&chg_dev->dev);
 
+	cx7601_set_hizmode(chg_dev, !en);
+
 	if (en)
 		ret = cx7601_enable_otg(bq);
 	else
