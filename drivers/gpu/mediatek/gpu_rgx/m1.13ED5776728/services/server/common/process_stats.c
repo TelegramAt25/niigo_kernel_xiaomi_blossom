@@ -1393,7 +1393,10 @@ PVRSRVStatsAddMemAllocRecord(PVRSRV_MEM_ALLOC_TYPE eAllocType,
 	enum { PVRSRV_PROC_NOTFOUND,
 	       PVRSRV_PROC_FOUND,
 	       PVRSRV_PROC_RESURRECTED
-	     } eProcSearch = PVRSRV_PROC_FOUND;
+	     }
+#if defined(PVRSRV_DEBUG_LINUX_MEMORY_STATS)
+	eProcSearch = PVRSRV_PROC_FOUND;
+#endif
 
 	/* Don't do anything if we are not initialised or we are shutting down! */
 	if (!bProcessStatsInitialised)
@@ -1449,7 +1452,9 @@ PVRSRVStatsAddMemAllocRecord(PVRSRV_MEM_ALLOC_TYPE eAllocType,
 			if (!psProcessStats)
 			{
 				psProcessStats = _FindProcessStatsInDeadList(currentPid);
+#if defined(PVRSRV_DEBUG_LINUX_MEMORY_STATS)
 				eProcSearch = PVRSRV_PROC_RESURRECTED;
+#endif /* defined(PVRSRV_DEBUG_LINUX_MEMORY_STATS) */
 			}
 		}
 	}
@@ -1459,15 +1464,17 @@ PVRSRVStatsAddMemAllocRecord(PVRSRV_MEM_ALLOC_TYPE eAllocType,
 		if (!psProcessStats)
 		{
 			psProcessStats = _FindProcessStatsInDeadList(currentPid);
+#if defined(PVRSRV_DEBUG_LINUX_MEMORY_STATS)
 			eProcSearch = PVRSRV_PROC_RESURRECTED;
+#endif /* defined(PVRSRV_DEBUG_LINUX_MEMORY_STATS) */
 		}
 	}
 
 	if (psProcessStats == NULL)
 	{
+#if defined(PVRSRV_DEBUG_LINUX_MEMORY_STATS)
 		eProcSearch = PVRSRV_PROC_NOTFOUND;
 
-#if defined(PVRSRV_DEBUG_LINUX_MEMORY_STATS)
 		PVR_DPF((PVR_DBG_WARNING,
 				 "%s: Process stat increment called for 'unknown' process PID(%d)",
 				 __func__, currentPid));
@@ -1901,7 +1908,10 @@ PVRSRVStatsIncrMemAllocStat(PVRSRV_MEM_ALLOC_TYPE eAllocType,
 	enum { PVRSRV_PROC_NOTFOUND,
 	       PVRSRV_PROC_FOUND,
 	       PVRSRV_PROC_RESURRECTED
-	     } eProcSearch = PVRSRV_PROC_FOUND;
+	     }
+#if defined(PVRSRV_DEBUG_LINUX_MEMORY_STATS)
+	eProcSearch = PVRSRV_PROC_FOUND;
+#endif /* defined(PVRSRV_DEBUG_LINUX_MEMORY_STATS) */
 
 	/* Don't do anything if we are not initialised or we are shutting down! */
 	if (!bProcessStatsInitialised)
@@ -1929,7 +1939,9 @@ PVRSRVStatsIncrMemAllocStat(PVRSRV_MEM_ALLOC_TYPE eAllocType,
 			if (!psProcessStats)
 			{
 				psProcessStats = _FindProcessStatsInDeadList(currentPid);
+#if defined(PVRSRV_DEBUG_LINUX_MEMORY_STATS)
 				eProcSearch = PVRSRV_PROC_RESURRECTED;
+#endif /* defined(PVRSRV_DEBUG_LINUX_MEMORY_STATS) */
 			}
 		}
 	}
@@ -1939,15 +1951,17 @@ PVRSRVStatsIncrMemAllocStat(PVRSRV_MEM_ALLOC_TYPE eAllocType,
 		if (!psProcessStats)
 		{
 			psProcessStats = _FindProcessStatsInDeadList(currentPid);
+#if defined(PVRSRV_DEBUG_LINUX_MEMORY_STATS)
 			eProcSearch = PVRSRV_PROC_RESURRECTED;
+#endif /* defined(PVRSRV_DEBUG_LINUX_MEMORY_STATS) */
 		}
 	}
 
 	if (psProcessStats == NULL)
 	{
+#if defined(PVRSRV_DEBUG_LINUX_MEMORY_STATS)
 		eProcSearch = PVRSRV_PROC_NOTFOUND;
 
-#if defined(PVRSRV_DEBUG_LINUX_MEMORY_STATS)
 		PVR_DPF((PVR_DBG_WARNING,
 				 "%s: Process stat increment called for 'unknown' process PID(%d)",
 				 __func__, currentPid));

@@ -1759,7 +1759,6 @@ err_HWRTDataCommonCookieAlloc:
 */
 PVRSRV_ERROR RGXDestroyHWRTDataSet(RGX_KM_HW_RT_DATASET *psKMHWRTDataSet)
 {
-	PVRSRV_RGXDEV_INFO *psDevInfo;
 	PVRSRV_DEVICE_NODE *psDevNode;
 	PVRSRV_ERROR eError;
 	PRGXFWIF_HWRTDATA psHWRTData;
@@ -1768,7 +1767,6 @@ PVRSRV_ERROR RGXDestroyHWRTDataSet(RGX_KM_HW_RT_DATASET *psKMHWRTDataSet)
 	PVR_ASSERT(psKMHWRTDataSet);
 
 	psDevNode = psKMHWRTDataSet->psDeviceNode;
-	psDevInfo = psDevNode->pvDevice;
 
 	eError = RGXSetFirmwareAddress(&psHWRTData,
 				psKMHWRTDataSet->psHWRTDataFwMemDesc, 0,
@@ -4140,9 +4138,6 @@ PVRSRV_ERROR PVRSRVRGXKickTA3DKM(RGX_SERVER_RENDER_CONTEXT	*psRenderContext,
 	if (iCheckTAFence >= 0 || iUpdateTATimeline >= 0 ||
 	    iCheck3DFence >= 0 || iUpdate3DTimeline >= 0)
 	{
-		PRGXFWIF_UFO_ADDR	*pauiClientTAIntUpdateUFOAddress = NULL;
-		PRGXFWIF_UFO_ADDR	*pauiClient3DIntUpdateUFOAddress = NULL;
-
 		CHKPT_DBG((PVR_DBG_ERROR,
 				   "%s: [TA] iCheckFence = %d, iUpdateTimeline = %d",
 				   __func__, iCheckTAFence, iUpdateTATimeline));
@@ -4187,12 +4182,6 @@ PVRSRV_ERROR PVRSRVRGXKickTA3DKM(RGX_SERVER_RENDER_CONTEXT	*psRenderContext,
 						   __func__, iUpdateTAFence,
 						   (void*)psTAFenceTimelineUpdateSync,
 						   ui32TAFenceTimelineUpdateValue));
-
-				/* Store the FW address of the update sync checkpoint in pauiClientTAIntUpdateUFOAddress */
-				pauiClientTAIntUpdateUFOAddress = SyncCheckpointGetRGXFWIFUFOAddr(psUpdateTASyncCheckpoint);
-				CHKPT_DBG((PVR_DBG_ERROR,
-						   "%s: pauiClientIntUpdateUFOAddress[TA]->ui32Addr=0x%x",
-						   __func__, pauiClientTAIntUpdateUFOAddress->ui32Addr));
 			}
 
 			/* Append the sync prim update for the TA timeline (if required) */
@@ -4256,12 +4245,6 @@ PVRSRV_ERROR PVRSRVRGXKickTA3DKM(RGX_SERVER_RENDER_CONTEXT	*psRenderContext,
 						   __func__, iUpdate3DFence,
 						   (void*)ps3DFenceTimelineUpdateSync,
 						   ui323DFenceTimelineUpdateValue));
-
-				/* Store the FW address of the update sync checkpoint in pauiClient3DIntUpdateUFOAddress */
-				pauiClient3DIntUpdateUFOAddress = SyncCheckpointGetRGXFWIFUFOAddr(psUpdate3DSyncCheckpoint);
-				CHKPT_DBG((PVR_DBG_ERROR,
-						   "%s: pauiClientIntUpdateUFOAddress[3D]->ui32Addr=0x%x",
-						   __func__, pauiClient3DIntUpdateUFOAddress->ui32Addr));
 			}
 
 			/* Append the sync prim update for the 3D timeline (if required) */

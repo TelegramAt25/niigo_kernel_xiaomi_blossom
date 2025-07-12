@@ -668,11 +668,15 @@ static PVRSRV_ERROR CreateAllocation(const IMG_CHAR *pszName,
 							IMG_UINT32 *puiAllocationIndex)
 {
 	IMG_UINT32 ui32Alloc;
+#if defined(PDUMP)
 	RECORD_ALLOCATION *psAlloc;
+#endif
 
 	ui32Alloc = GetFreeAllocation();
 
+#if defined(PDUMP)
 	psAlloc = ALLOC_INDEX_TO_PTR(ui32Alloc);
+#endif
 
 	InitialiseAllocation(ALLOC_INDEX_TO_PTR(ui32Alloc),
 						pszName,

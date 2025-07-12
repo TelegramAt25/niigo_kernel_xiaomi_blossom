@@ -1095,9 +1095,6 @@ PVRSRV_ERROR SyncCheckpointContextDestroy(PSYNC_CHECKPOINT_CONTEXT psSyncCheckpo
 	}
 	else
 	{
-		IMG_INT iRf2 = 0;
-
-		iRf2 = OSAtomicRead(&psContext->hRefCount);
 		SyncCheckpointContextUnref(psSyncCheckpointContext);
 	}
 
@@ -2903,14 +2900,19 @@ static IMG_UINT32 _CleanCheckpointPool(_SYNC_CHECKPOINT_CONTEXT *psContext)
 	DECLARE_DLLIST(sCleanupList);
 	DLLIST_NODE *psThis, *psNext;
 	OS_SPINLOCK_FLAGS uiFlags;
-	IMG_UINT32 ui32ItemsFreed = 0, ui32NullScpCount = 0, ui32PoolCount;
+	IMG_UINT32 ui32ItemsFreed = 0;
 	IMG_BOOL bPoolValid;
+#if (ENABLE_SYNC_CHECKPOINT_POOL_DEBUG == 1)
+	IMG_UINT32 ui32NullScpCount = 0, ui32PoolCount;
+#endif
 
 	/* Acquire sync checkpoint pool lock */
 	OSSpinLockAcquire(psCtxCtl->hSyncCheckpointPoolLock, uiFlags);
 
+#if (ENABLE_SYNC_CHECKPOINT_POOL_DEBUG == 1)
 	bPoolValid = psCtxCtl->bSyncCheckpointPoolValid;
 	ui32PoolCount = psCtxCtl->ui32SyncCheckpointPoolCount;
+#endif
 
 	/* While the pool still contains sync checkpoints, free them */
 	while (bPoolValid && psCtxCtl->ui32SyncCheckpointPoolCount > 0)

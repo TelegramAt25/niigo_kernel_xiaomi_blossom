@@ -131,6 +131,7 @@ pvr_fence_context_fences_dump(struct pvr_fence_context *fctx,
 			      DUMPDEBUG_PRINTF_FUNC *pfnDumpDebugPrintf,
 			      void *pvDumpDebugFile)
 {
+#if 0
 	struct pvr_fence *pvr_fence;
 	unsigned long flags;
 	char value[128];
@@ -174,6 +175,7 @@ pvr_fence_context_fences_dump(struct pvr_fence_context *fctx,
 				  " |  @%s (foreign)", value);
 	}
 	spin_unlock_irqrestore(&fctx->list_lock, flags);
+#endif
 }
 
 static inline unsigned int

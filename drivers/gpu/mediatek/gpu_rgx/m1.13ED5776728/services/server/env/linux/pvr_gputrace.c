@@ -852,6 +852,7 @@ err_unsupported:
 static void _GpuTraceProcessPackets(PVRSRV_RGXDEV_INFO *psDevInfo,
 		void *pBuffer, IMG_UINT32 ui32ReadLen)
 {
+#if 0
 	IMG_UINT32			ui32TlPackets = 0;
 	IMG_UINT32			ui32HWPerfPackets = 0;
 	IMG_UINT32			ui32HWPerfPacketsSent = 0;
@@ -916,6 +917,7 @@ static void _GpuTraceProcessPackets(PVRSRV_RGXDEV_INFO *psDevInfo,
 	PVR_DPF((PVR_DBG_VERBOSE, "_GpuTraceProcessPackets: TL "
 			"Packets processed %03d, HWPerf packets %03d, sent %03d",
 			ui32TlPackets, ui32HWPerfPackets, ui32HWPerfPacketsSent));
+#endif
 
 	PVR_DPF_RETURN;
 }
