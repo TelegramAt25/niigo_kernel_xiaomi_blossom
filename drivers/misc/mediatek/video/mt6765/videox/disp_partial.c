@@ -170,15 +170,8 @@ int is_equal_full_lcm(const struct disp_rect *roi)
 void disp_patial_lcm_validate_roi(struct disp_lcm_handle *plcm,
 	struct disp_rect *roi)
 {
-	int x = roi->x;
-	int y = roi->y;
-	int w = roi->width;
-	int h = roi->height;
-
 	disp_lcm_validate_roi(plcm, &roi->x, &roi->y, &roi->width,
 		&roi->height);
-	DISPDBG("lcm verify partial(%d,%d,%dx%d) to (%d,%d,%dx%d)\n",
-		x, y, w, h, roi->x, roi->y, roi->width, roi->height);
 }
 
 int disp_partial_update_roi_to_lcm(disp_path_handle dp_handle,
