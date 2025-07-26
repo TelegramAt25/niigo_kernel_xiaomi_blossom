@@ -94,11 +94,6 @@ void rect_join(const struct disp_rect *in1, const struct disp_rect *in2,
 	int fRight = in2->x + in2->width - 1;
 	int fBottom = in2->y + in2->height - 1;
 
-	int in2_x = in2->x;
-	int in2_y = in2->y;
-	int in2_w = in2->width;
-	int in2_h = in2->height;
-
 	/* do nothing if the params are empty*/
 	if (left > right || top >  bottom) {
 		rect_set(out, fLeft, fTop, fRight, fBottom);
@@ -118,9 +113,6 @@ void rect_join(const struct disp_rect *in1, const struct disp_rect *in2,
 			rect_set(out, fLeft, fTop, fRight, fBottom);
 		}
 	}
-	DISPDBG("rect_join (%d,%d,%d,%d) & (%d,%d,%d,%d) to (%d,%d,%d,%d)\n",
-		in1->x, in1->y, in1->width, in1->height, in2_x, in2_y,
-		in2_w, in2_h, in2->x, in2->y, in2->width, in2->height);
 }
 
 int rect_equal(const struct disp_rect *one, const struct disp_rect *two)
