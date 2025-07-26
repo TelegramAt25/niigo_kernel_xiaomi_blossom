@@ -32,14 +32,6 @@ bool __attribute__((weak)) is_all_cpu_idle_criteria(void)
 	return false;
 }
 
-void __attribute__((weak)) mtk_idle_dump_cnt_in_interval(void)
-{
-}
-
-void __attribute__((weak)) mcdi_heart_beat_log_dump(void)
-{
-}
-
 void __attribute__((weak)) mtk_cpuidle_framework_init(void)
 {
 }
@@ -558,9 +550,6 @@ static void menu_reflect(struct cpuidle_device *dev, int index)
 	data->last_state_idx = index;
 	data->needs_update = 1;
 	data->tick_wakeup = tick_nohz_idle_got_tick();
-
-	mtk_idle_dump_cnt_in_interval();
-	mcdi_heart_beat_log_dump();
 }
 
 /**
