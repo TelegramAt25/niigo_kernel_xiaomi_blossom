@@ -419,8 +419,8 @@ void disp_helper_option_init(void)
 	/* OVL SBCH */
 	disp_helper_set_option(DISP_OPT_OVL_SBCH, 1);
 	disp_helper_set_option(DISP_OPT_GMO_OPTIMIZE, 1);
-	disp_helper_set_option(DISP_OPT_DSI_UNDERRUN_AEE, 1);
-	disp_helper_set_option(DISP_OPT_RDMA_UNDERFLOW_AEE, 1);
+	disp_helper_set_option(DISP_OPT_DSI_UNDERRUN_AEE, 0);
+	disp_helper_set_option(DISP_OPT_RDMA_UNDERFLOW_AEE, 0);
 	disp_helper_set_option(DISP_OPT_TUI_MODE, 0);
 	/*DynFPS*/
 	disp_helper_set_option(DISP_OPT_DYNAMIC_FPS, 1);
