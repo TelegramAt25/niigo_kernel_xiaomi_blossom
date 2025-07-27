@@ -136,7 +136,6 @@ void usb_boost_set_para_and_arg(int id, int *para, int para_range,
 	struct mtk_usb_boost *ptr_inst = &boost_inst[id];
 	int *ptr_para = ptr_inst->para;
 
-	USB_BOOST_NOTICE("para_range:<%d>\n", para_range);
 	if (para_range > _ATTR_PARA_RW_MAXID) {
 		USB_BOOST_NOTICE("ERROR, over range !!!!!\n");
 		USB_BOOST_NOTICE("para_range<%d>, _ATTR_PARA_RW_MAXID<%d>\n",
