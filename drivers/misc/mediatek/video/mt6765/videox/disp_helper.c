@@ -384,7 +384,7 @@ void disp_helper_option_init(void)
 	disp_helper_set_option(DISP_OPT_BYPASS_OVL, 0);
 	disp_helper_set_option(DISP_OPT_FPS_CALC_WND, 10);
 	/* report external fps statistics */
-	disp_helper_set_option(DISP_OPT_FPS_EXT, 1);
+	disp_helper_set_option(DISP_OPT_FPS_EXT, 0);
 	/* set external fps interval (ms) */
 	disp_helper_set_option(DISP_OPT_FPS_EXT_INTERVAL, 1000);
 	disp_helper_set_option(DISP_OPT_SMART_OVL, 0);
