@@ -181,7 +181,7 @@ static inline int c2k_dbg_level(unsigned int level)
 #define C2K_LOG_INFO			6
 #define C2K_LOG_DBG				7
 
-#define C2K_USB_DBG_ON
+//#define C2K_USB_DBG_ON
 #ifdef C2K_USB_DBG_ON
 #define C2K_ERR(format, args...) do {if (c2k_dbg_level(C2K_LOG_ERR)) \
 	pr_notice("C2K_USB_ERR,<%s %d>, " format, __func__, __LINE__, \
