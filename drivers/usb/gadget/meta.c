@@ -1187,42 +1187,6 @@ static struct usb_composite_driver android_usb_driver = {
 #endif
 };
 
-#define USB_STATE_MONITOR_DELAY 3000
-static struct delayed_work android_usb_state_monitor_work;
-static void do_android_usb_state_monitor_work(struct work_struct *work)
-{
-	struct android_dev *dev = _android_dev;
-	char *usb_state = "NO-DEV";
-
-	if (dev && dev->cdev)
-		usb_state = "DISCONNECTED";
-
-	if (dev && dev->cdev && dev->cdev->config)
-		usb_state = "CONFIGURED";
-
-	pr_debug("usb_state<%s>\n", usb_state);
-	schedule_delayed_work(&android_usb_state_monitor_work,
-			msecs_to_jiffies(USB_STATE_MONITOR_DELAY));
-}
-void trigger_android_usb_state_monitor_work(void)
-{
-	static int inited;
-
-#ifdef CONFIG_FPGA_EARLY_PORTING
-	pr_info("SKIP %s\n", __func__);
-	return;
-#endif
-	if (!inited) {
-		/* TIMER_DEFERRABLE for not interfering with deep idle */
-		INIT_DEFERRABLE_WORK(&android_usb_state_monitor_work,
-				do_android_usb_state_monitor_work);
-		inited = 1;
-	}
-	schedule_delayed_work(&android_usb_state_monitor_work,
-			msecs_to_jiffies(USB_STATE_MONITOR_DELAY));
-
-};
-
 static int android_create_device(struct android_dev *dev)
 {
 	struct device_attribute **attrs = android_usb_attributes;
@@ -1243,8 +1207,6 @@ static int android_create_device(struct android_dev *dev)
 			return err;
 		}
 	}
-
-	trigger_android_usb_state_monitor_work();
 
 	return 0;
 }
