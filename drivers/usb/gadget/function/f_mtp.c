@@ -91,17 +91,13 @@ static bool cust_dump;
 static int cust_dump_read = MTP_CONTAINER_HEADER_SIZE;
 static int cust_dump_write = MTP_CONTAINER_HEADER_SIZE;
 static int cust_dump_ioctl = MTP_CONTAINER_HEADER_SIZE;
-static int monitor_work_interval_ms = 1000;
 static bool monitor_time;
 module_param(cust_dump, bool, 0644);
 module_param(cust_dump_read, int, 0644);
 module_param(cust_dump_write, int, 0644);
 module_param(cust_dump_ioctl, int, 0644);
-module_param(monitor_work_interval_ms, int, 0644);
 module_param(monitor_time, bool, 0644);
 
-static struct delayed_work monitor_work;
-static void do_monitor_work(struct work_struct *work);
 static void protocol_dump(char *data, int buf_len, int limit)
 {
 	u32 *len;
@@ -1728,20 +1724,11 @@ out:
 
 static int mtp_open(struct inode *ip, struct file *fp)
 {
-	static bool inited;
-
 	pr_info("%s\n", __func__);
 	if (mtp_lock(&_mtp_dev->open_excl)) {
 		MTP_DBG("BUSY\n");
 		return -EBUSY;
 	}
-
-	if (!inited) {
-		inited = true;
-		INIT_DELAYED_WORK(&monitor_work, do_monitor_work);
-		schedule_delayed_work(&monitor_work, 0);
-	} else
-		schedule_delayed_work(&monitor_work, 0);
 
 	/* clear any error condition */
 	if (_mtp_dev->state != STATE_OFFLINE)
@@ -1754,8 +1741,6 @@ static int mtp_open(struct inode *ip, struct file *fp)
 static int mtp_release(struct inode *ip, struct file *fp)
 {
 	pr_info("%s\n", __func__);
-
-	cancel_delayed_work(&monitor_work);
 
 	_mtp_dev->is_boost = 0;
 
@@ -1803,40 +1788,6 @@ static long monitor_mtp_ioctl(struct file *fp,
 		monitor_out(MTP_IOCTL);
 
 	return r;
-}
-static void do_monitor_work(struct work_struct *work)
-{
-	int i, r;
-	char string_container[128];
-
-	r = sprintf(string_container, "IN <");
-	if (r >= 0 && r < ARRAY_SIZE(string_container))
-		for (i = 0; i < MTP_MAX_MONITOR_TYPE; i++)
-			r += sprintf(string_container + r, "%d ",
-				monitor_in_cnt[i]);
-	MTP_DBG("%s>\n", string_container);
-
-	r = sprintf(string_container, "OUT <");
-	if (r >= 0 && r < ARRAY_SIZE(string_container))
-		for (i = 0; i < MTP_MAX_MONITOR_TYPE; i++)
-			r += sprintf(string_container + r, "%d ",
-				monitor_out_cnt[i]);
-	MTP_DBG("%s>\n", string_container);
-
-	if (likely(!monitor_time))
-		goto monitor_work_exit;
-
-	/* TIME PROFILING */
-	r = sprintf(string_container, "TIME <");
-	if (r >= 0 && r < ARRAY_SIZE(string_container))
-		for (i = 0; i < MTP_MAX_MONITOR_TYPE; i++)
-			r += sprintf(string_container + r, "%lld ",
-				ktime_ns[i]);
-	MTP_DBG("%s>\n", string_container);
-
-monitor_work_exit:
-	schedule_delayed_work(&monitor_work,
-			msecs_to_jiffies(monitor_work_interval_ms));
 }
 
 /* file operations for /dev/mtp_usb */
