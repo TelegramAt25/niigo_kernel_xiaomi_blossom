@@ -12,11 +12,7 @@ obj-$(CONFIG_ANDROID_INTF_ALARM_DEV)	+= alarm-dev.o
 ## CONFIG_ION will always equals to y when use ION
 
 ifeq ($(CONFIG_MTK_ION),y)
-  $(info ION:enable mtk ion)
   obj-$(CONFIG_MTK_ION)             += mtk_ion/
 else ifeq ($(CONFIG_ION),y)
-  $(info ION: enable aosp ion)
   obj-$(CONFIG_ION)                 += aosp_ion/
-else
-  $(info ION: ION disable)
 endif
