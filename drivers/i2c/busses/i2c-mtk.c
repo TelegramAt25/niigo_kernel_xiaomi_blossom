@@ -1142,14 +1142,17 @@ static int mt_i2c_do_transfer(struct mt_i2c *i2c)
 	}
 	if (i2c->irq_stat & (I2C_HS_NACKERR | I2C_ACKERR |
 	    I2C_TIMEOUT | I2C_BUS_ERR | I2C_IBI)) {
+#if 0
 		dev_err(i2c->dev,
 			"error:addr=0x%x,irq_stat=0x%x,ch_offset=0x%x,mask:0x%x\n",
 			i2c->addr, i2c->irq_stat, i2c->ch_offset, int_reg);
+#endif
 
 		/* clear fifo addr:bit2,multi-chn;bit0,normal */
 		i2c_writew(I2C_FIFO_ADDR_CLR_MCH | I2C_FIFO_ADDR_CLR,
 			i2c, OFFSET_FIFO_ADDR_CLR);
 
+#if 0
 		if (i2c->ext_data.isEnable ==  false ||
 			i2c->ext_data.isFilterMsg == false) {
 			i2c_dump_info(i2c);
@@ -1179,6 +1182,7 @@ static int mt_i2c_do_transfer(struct mt_i2c *i2c)
 				i2c_readw(i2c, OFFSET_ERROR),
 				i2c_readw(i2c, OFFSET_DEBUGSTAT));
 		}
+#endif
 
 		if ((i2c->irq_stat & I2C_TRANSAC_COMP) && i2c->ch_offset &&
 		    (!(i2c->irq_stat & I2C_BUS_ERR))) {
