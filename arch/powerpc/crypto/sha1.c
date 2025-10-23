@@ -52,7 +52,7 @@ static int sha1_update(struct shash_desc *desc, const u8 *data,
 	src = data;
 
 	if ((partial + len) > 63) {
-		u32 temp[SHA_WORKSPACE_WORDS];
+		u32 temp[SHA1_WORKSPACE_WORDS];
 
 		if (partial) {
 			done = -partial;
