@@ -587,7 +587,9 @@ static void msdc_dump_clock_sts_core(char **buff, unsigned long *size,
 void msdc_dump_clock_sts(char **buff, unsigned long *size,
 	struct seq_file *m, struct msdc_host *host)
 {
+#if 0
 	msdc_dump_clock_sts_core(buff, size, m, host);
+#endif
 }
 
 void msdc_clk_enable_and_stable(struct msdc_host *host)
