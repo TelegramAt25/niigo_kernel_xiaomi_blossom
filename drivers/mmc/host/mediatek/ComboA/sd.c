@@ -185,6 +185,7 @@ int msdc_rsp[] = {
 void msdc_dump_register_core(char **buff, unsigned long *size,
 	struct seq_file *m, struct msdc_host *host)
 {
+#if 0
 	void __iomem *base = host->base;
 	u32 id = host->id;
 	u32 msg_size = 0;
@@ -259,17 +260,21 @@ skip_dump_dvfs_reg:
 		}
 	}
 	SPREAD_PRINTF(buff, size, m, "%s\n", buffer);
+#endif
 }
 
 void msdc_dump_register(char **buff, unsigned long *size,
 	struct seq_file *m, struct msdc_host *host)
 {
+#if 0
 	msdc_dump_register_core(buff, size, m, host);
+#endif
 }
 
 void msdc_dump_dbg_register(char **buff, unsigned long *size,
 	struct seq_file *m, struct msdc_host *host)
 {
+#if 0
 	void __iomem *base = host->base;
 	u32 msg_size = 0;
 	u16 i;
@@ -316,11 +321,13 @@ void msdc_dump_dbg_register(char **buff, unsigned long *size,
 	SPREAD_PRINTF(buff, size, m, "%s\n", buffer);
 
 	MSDC_WRITE32(MSDC_DBG_SEL, 0);
+#endif
 }
 
 void msdc_dump_info(char **buff, unsigned long *size, struct seq_file *m,
 	u32 id)
 {
+#if 0
 	struct msdc_host *host = mtk_msdc_host[id];
 	struct mmc_host *mmc;
 
@@ -370,6 +377,7 @@ void msdc_dump_info(char **buff, unsigned long *size, struct seq_file *m,
 
 	msdc_dump_dbg_register(buff, size, m, host);
 	mmc_cmd_dump(NULL, NULL, NULL, host->mmc, 100);
+#endif
 }
 EXPORT_SYMBOL(msdc_dump_info);
 /***************************************************************
