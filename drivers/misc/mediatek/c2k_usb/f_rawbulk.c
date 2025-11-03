@@ -45,9 +45,7 @@ int rawbulk_function_setup(struct usb_function *f, const struct
 	struct usb_composite_dev *cdev = f->config->cdev;
 	struct usb_request *req = cdev->req;
 	int value = -EOPNOTSUPP;
-	u16 w_index = le16_to_cpu(ctrl->wIndex);
 	u16 w_value = le16_to_cpu(ctrl->wValue);
-	u16 w_length = le16_to_cpu(ctrl->wLength);
 
 	C2K_NOTE("%s\n", __func__);
 
@@ -120,9 +118,7 @@ int rawbulk_function_setup(struct usb_function *f, const struct
 		}
 		break;
 	default:
-		C2K_NOTE("invalid control req%02x.%02x v%04x i%04x l%d\n",
-			 ctrl->bRequestType, ctrl->bRequest, w_value, w_index,
-			w_length);
+		C2K_NOTE("invalid control req\n");
 	}
 
 	/* respond with data transfer or status phase? */
