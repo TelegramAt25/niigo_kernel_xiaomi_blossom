@@ -347,6 +347,7 @@ static const char *_dsi_vdo_mode_parse_state(unsigned int state)
 
 enum DSI_STATUS DSI_DumpRegisters(enum DISP_MODULE_ENUM module, int level)
 {
+#if 0
 	u32 i = 0, module_num;
 	u32 k = 0;
 
@@ -438,11 +439,13 @@ enum DSI_STATUS DSI_DumpRegisters(enum DISP_MODULE_ENUM module, int level)
 		}
 	}
 
+#endif
 	return DSI_STATUS_OK;
 }
 
 void _dump_dsi_params(struct LCM_DSI_PARAMS *dsi_config)
 {
+#if 0
 	if (dsi_config) {
 		switch (dsi_config->mode) {
 		case CMD_MODE:
@@ -493,6 +496,7 @@ void _dump_dsi_params(struct LCM_DSI_PARAMS *dsi_config)
 		DISPDBG("[DSI] noncont_clock_period:%d\n",
 			dsi_config->noncont_clock_period);
 	}
+#endif
 }
 
 static void _DSI_INTERNAL_IRQ_Handler(enum DISP_MODULE_ENUM module,
