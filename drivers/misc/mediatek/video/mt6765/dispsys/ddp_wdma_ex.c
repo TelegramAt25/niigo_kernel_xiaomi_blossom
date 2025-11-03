@@ -288,6 +288,7 @@ static int wdma_clock_off(enum DISP_MODULE_ENUM module, void *handle)
 
 void wdma_dump_golden_setting(enum DISP_MODULE_ENUM module)
 {
+#if 0
 	unsigned int index = wdma_index(module);
 	unsigned int idx_offst = index * DISP_WDMA_INDEX_OFFSET;
 
@@ -414,10 +415,12 @@ void wdma_dump_golden_setting(enum DISP_MODULE_ENUM module)
 	DDPDUMP("WDMA_BUF_CON4:\n[8:0]:%d\n",
 		DISP_REG_GET_FIELD(BUF_CON4_FLD_ISSUE_REQ_TH_V,
 			idx_offst + DISP_REG_WDMA_BUF_CON4));
+#endif
 }
 
 void wdma_dump_analysis(enum DISP_MODULE_ENUM module)
 {
+#if 0
 	unsigned int index = wdma_index(module);
 	unsigned int idx_offst = index * DISP_WDMA_INDEX_OFFSET;
 
@@ -461,10 +464,12 @@ void wdma_dump_analysis(enum DISP_MODULE_ENUM module)
 
 	wdma_dump_golden_setting(module);
 
+#endif
 }
 
 void wdma_dump_reg(enum DISP_MODULE_ENUM module)
 {
+#if 0
 	if (disp_helper_get_option(DISP_OPT_REG_PARSER_RAW_DUMP)) {
 		unsigned int idx = wdma_index(module);
 		unsigned long module_base = DISPSYS_WDMA0_BASE +
@@ -604,13 +609,16 @@ void wdma_dump_reg(enum DISP_MODULE_ENUM module)
 			DISP_REG_GET(DISP_REG_WDMA_DST_ADDR1 + off_sft),
 			DISP_REG_GET(DISP_REG_WDMA_DST_ADDR2 + off_sft));
 	}
+#endif
 }
 
 static int wdma_dump(enum DISP_MODULE_ENUM module, int level)
 {
+#if 0
 	wdma_dump_analysis(module);
 	wdma_dump_golden_setting(module);
 	wdma_dump_reg(module);
+#endif
 
 	return 0;
 }
