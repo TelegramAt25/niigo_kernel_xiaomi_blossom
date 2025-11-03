@@ -1048,6 +1048,7 @@ void rdma_dump_golden_setting_context(enum DISP_MODULE_ENUM module)
 
 void rdma_dump_reg(enum DISP_MODULE_ENUM module)
 {
+#if 0
 	unsigned int idx = rdma_index(module);
 	unsigned int offset = DISP_RDMA_INDEX_OFFSET * idx;
 
@@ -1134,10 +1135,12 @@ void rdma_dump_reg(enum DISP_MODULE_ENUM module)
 		DISP_REG_GET(DISP_REG_RDMA_OUT_P_CNT + offset));
 	DDPDUMP("(0x0fc)R_OUT_LINE_CNT=0x%x\n",
 		DISP_REG_GET(DISP_REG_RDMA_OUT_LINE_CNT + offset));
+#endif
 }
 
 void rdma_dump_analysis(enum DISP_MODULE_ENUM module)
 {
+#if 0
 	unsigned int idx = rdma_index(module);
 	unsigned int offset = idx * DISP_RDMA_INDEX_OFFSET;
 	unsigned int global_ctrl;
@@ -1179,13 +1182,16 @@ void rdma_dump_analysis(enum DISP_MODULE_ENUM module)
 		rdma_underflow_irq_cnt[idx], rdma_targetline_irq_cnt[idx]);
 
 	rdma_dump_golden_setting_context(module);
+#endif
 }
 
 static int rdma_dump(enum DISP_MODULE_ENUM module, int level)
 {
+#if 0
 	rdma_dump_analysis(module);
 	rdma_dump_reg(module);
 
+#endif
 	return 0;
 }
 
