@@ -197,13 +197,6 @@ static unsigned int ovl_throughput_freq_req;
 static atomic_t delayed_trigger_kick = ATOMIC_INIT(0);
 static atomic_t od_trigger_kick = ATOMIC_INIT(0);
 
-/* record take mutex time */
-static unsigned long long mutex_time_start;
-static unsigned long long mutex_time_end;
-static unsigned long long mutex_time_end1;
-static long long mutex_time_period;
-static long long mutex_time_period1;
-
 unsigned int round_corner_offset_enable;
 #ifdef CONFIG_MTK_ROUND_CORNER_SUPPORT
 unsigned int lcm_corner_en;
