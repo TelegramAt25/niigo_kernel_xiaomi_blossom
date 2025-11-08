@@ -1133,8 +1133,6 @@ int m4u_pgtable_init(struct m4u_device *m4u_dev, struct m4u_domain *m4u_domain)
 #if 0
 	debugfs_create_file("pgtable", 0644, m4u_dev->debug_root,
 			    m4u_domain, &m4u_debug_pgtable_fops);
-#endif
-#if IS_ENABLED(CONFIG_PROC_FS)
 	proc_create_data("pgtable", S_IFREG | 0644, m4u_dev->proc_root,
 			 &m4u_proc_pgtable_fops, m4u_domain);
 #endif
