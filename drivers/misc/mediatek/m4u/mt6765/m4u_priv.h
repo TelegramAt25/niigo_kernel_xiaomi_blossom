@@ -38,12 +38,8 @@ extern int gM4U_log_level;
 extern int gM4U_log_to_uart;
 #define __M4ULOG(level, string, args...) \
 	do {\
-		if (level > gM4U_log_level) {\
-			if (level > gM4U_log_to_uart)\
-				pr_info("[M4U] "string, ##args);\
-			else\
-				pr_debug("[M4U] "string, ##args);\
-		} \
+		if (0)\
+			pr_debug("[M4U] "string, ##args);\
 	} while (0)
 
 #define M4U_LOW(string, args...)   __M4ULOG(M4U_LOG_LEVEL_LOW, string, ##args)
