@@ -1816,6 +1816,6 @@ int m4u_debug_init(struct m4u_device *m4u_dev)
 #else
 int m4u_debug_init(struct m4u_device *m4u_dev)
 {
-	/* do nothing */
+	return 0;
 }
 #endif
