@@ -3,6 +3,7 @@
  * Copyright (c) 2019 MediaTek Inc.
  */
 
+#ifdef ION_HISTORY_RECORD
 #include <asm/page.h>
 #include <linux/dma-mapping.h>
 #include <linux/err.h>
@@ -837,4 +838,5 @@ void ion_history_count_kick(bool allc, size_t len)
 {
 	/*do nothing */
 }
+#endif
 #endif
