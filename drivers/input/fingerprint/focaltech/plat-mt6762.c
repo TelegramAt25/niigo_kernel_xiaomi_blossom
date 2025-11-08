@@ -237,8 +237,6 @@ int ff_ctl_enable_spiclk(bool on)
         return (-ENOSYS);
     }
 	
-	pr_info("focal '%s' b_spiclk_enabled = %d. \n", __func__, g_context->b_spiclk_enabled);
-
 #if !defined(CONFIG_MTK_CLKMGR)
     /* Prepare the clock source. */
     //err = clk_prepare(g_context->spiclk);
