@@ -27,7 +27,7 @@
 int gM4U_log_to_uart = 0;
 int gM4U_log_level = 0;
 
-#if IS_ENABLED(CONFIG_DEBUG_FS) || IS_ENABLED(CONFIG_PROC_FS)
+#if 0
 unsigned int gM4U_seed_mva;
 
 int m4u_test_alloc_dealloc(int id, unsigned int size)
@@ -824,7 +824,7 @@ static int m4u_debug_get(void *data, u64 *val)
 	return 0;
 }
 
-#if IS_ENABLED(CONFIG_DEBUG_FS)
+#if 0
 DEFINE_SIMPLE_ATTRIBUTE(m4u_debug_fops,
 	m4u_debug_get,
 	m4u_debug_set,
@@ -1412,7 +1412,7 @@ static int m4u_test_get(void *data, u64 *val)
 	return 0;
 }
 
-#if IS_ENABLED(CONFIG_DEBUG_FS)
+#if 0
 DEFINE_SIMPLE_ATTRIBUTE(m4u_debug_test_fops,
 	m4u_test_get,
 	m4u_test_set,
@@ -1444,7 +1444,7 @@ static int m4u_log_level_get(void *data, u64 *val)
 	return 0;
 }
 
-#if IS_ENABLED(CONFIG_DEBUG_FS)
+#if 0
 DEFINE_SIMPLE_ATTRIBUTE(m4u_debug_log_level_fops,
 	m4u_log_level_get,
 	m4u_log_level_set,
@@ -1478,7 +1478,7 @@ static int m4u_debug_freemva_get(void *data, u64 *val)
 	return 0;
 }
 
-#if IS_ENABLED(CONFIG_DEBUG_FS)
+#if 0
 DEFINE_SIMPLE_ATTRIBUTE(m4u_debug_freemva_fops,
 	m4u_debug_freemva_get,
 	m4u_debug_freemva_set,
@@ -1499,7 +1499,7 @@ int m4u_debug_port_show(struct seq_file *s, void *unused)
 	return 0;
 }
 
-#if IS_ENABLED(CONFIG_DEBUG_FS)
+#if 0
 int m4u_debug_port_open(struct inode *inode, struct file *file)
 {
 	return single_open(file, m4u_debug_port_show, inode->i_private);
@@ -1533,7 +1533,7 @@ int m4u_debug_mva_show(struct seq_file *s, void *unused)
 	return 0;
 }
 
-#if IS_ENABLED(CONFIG_DEBUG_FS)
+#if 0
 int m4u_debug_mva_open(struct inode *inode, struct file *file)
 {
 	return single_open(file, m4u_debug_mva_show, inode->i_private);
@@ -1567,7 +1567,7 @@ int m4u_debug_buf_show(struct seq_file *s, void *unused)
 	return 0;
 }
 
-#if IS_ENABLED(CONFIG_DEBUG_FS)
+#if 0
 int m4u_debug_buf_open(struct inode *inode, struct file *file)
 {
 	return single_open(file, m4u_debug_buf_show, inode->i_private);
@@ -1601,7 +1601,7 @@ int m4u_debug_monitor_show(struct seq_file *s, void *unused)
 	return 0;
 }
 
-#if IS_ENABLED(CONFIG_DEBUG_FS)
+#if 0
 int m4u_debug_monitor_open(struct inode *inode, struct file *file)
 {
 	return single_open(file, m4u_debug_monitor_show, inode->i_private);
@@ -1635,7 +1635,7 @@ int m4u_debug_register_show(struct seq_file *s, void *unused)
 	return 0;
 }
 
-#if IS_ENABLED(CONFIG_DEBUG_FS)
+#if 0
 int m4u_debug_register_open(struct inode *inode, struct file *file)
 {
 	return single_open(file, m4u_debug_register_show, inode->i_private);
@@ -1665,7 +1665,7 @@ const struct file_operations m4u_proc_register_fops = {
 
 int m4u_debug_init(struct m4u_device *m4u_dev)
 {
-#if IS_ENABLED(CONFIG_DEBUG_FS)
+#if 0
 	struct dentry *debug_file;
 #endif
 #if IS_ENABLED(CONFIG_PROC_FS)
@@ -1674,7 +1674,7 @@ int m4u_debug_init(struct m4u_device *m4u_dev)
 
 	struct m4u_domain *domain = m4u_get_domain_by_id(0);
 
-#if IS_ENABLED(CONFIG_DEBUG_FS)
+#if 0
 	m4u_dev->debug_root = debugfs_create_dir("m4u", NULL);
 
 	if (IS_ERR_OR_NULL(m4u_dev->debug_root))
