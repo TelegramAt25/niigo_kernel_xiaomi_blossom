@@ -10,7 +10,7 @@
 #ifdef CONFIG_MTK_AEE_FEATURE
 #include <aee.h>
 #endif
-#if IS_ENABLED(CONFIG_DEBUG_FS)
+#if 0
 #include <linux/debugfs.h>
 #endif
 #if IS_ENABLED(CONFIG_PROC_FS)
@@ -163,7 +163,7 @@ struct m4u_device {
 	struct miscdevice dev;
 	struct proc_dir_entry *m4u_dev_proc_entry;
 	struct device *pDev[TOTAL_M4U_NUM];
-#if IS_ENABLED(CONFIG_DEBUG_FS)
+#if 0
 		struct dentry *debug_root;
 #endif
 #if IS_ENABLED(CONFIG_PROC_FS)

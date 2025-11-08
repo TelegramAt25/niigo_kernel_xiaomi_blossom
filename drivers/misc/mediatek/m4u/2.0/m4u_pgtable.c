@@ -1068,14 +1068,14 @@ int m4u_unmap(struct m4u_domain *domain, unsigned int mva, unsigned int size)
 	return 0;
 }
 
-#if IS_ENABLED(CONFIG_DEBUG_FS) || IS_ENABLED(CONFIG_PROC_FS)
+#if 0
 int m4u_debug_pgtable_show(struct seq_file *s, void *unused)
 {
 	m4u_dump_pgtable(s->private, s);
 	return 0;
 }
 
-#if IS_ENABLED(CONFIG_DEBUG_FS)
+#if 0
 int m4u_debug_pgtable_open(struct inode *inode, struct file *file)
 {
 	return single_open(file, m4u_debug_pgtable_show, inode->i_private);
@@ -1130,7 +1130,7 @@ int m4u_pgtable_init(struct m4u_device *m4u_dev, struct m4u_domain *m4u_domain)
 	if (m4u_pte_allocator_init() != 0)
 		return -1;
 
-#if IS_ENABLED(CONFIG_DEBUG_FS)
+#if 0
 	debugfs_create_file("pgtable", 0644, m4u_dev->debug_root,
 			    m4u_domain, &m4u_debug_pgtable_fops);
 #endif
