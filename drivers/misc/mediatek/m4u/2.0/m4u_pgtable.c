@@ -564,11 +564,6 @@ int m4u_map_16M(struct m4u_domain *m4u_domain, unsigned int mva, phys_addr_t pa,
 
 	pgd = imu_pgd_offset(m4u_domain, mva);
 
-	m4u_low_info("%s: mva:0x%x,pgd:0x%lx(0x%lx+0x%x),pa:0x%pa,val:0x%x\n",
-		     __func__, mva, (unsigned long)pgd,
-		     (unsigned long)((m4u_domain)->pgd),
-		     imu_pgd_index(mva), &pa, padscpt | pgprot);
-
 	for (i = 0; i < 16; i++) {
 		if (unlikely(imu_pgd_val(*pgd))) {
 			m4u_aee_err("%s: mva=0x%x, pgd=0x%x, i=%d\n",
@@ -633,11 +628,6 @@ int m4u_map_1M(struct m4u_domain *m4u_domain, unsigned int mva, phys_addr_t pa,
 
 	write_unlock_domain(m4u_domain);
 
-	m4u_low_info("%s: mva:0x%x,pgd:0x%lx(0x%lx+0x%x),pa:0x%pa,val:0x%x\n",
-		     __func__, mva, (unsigned long)pgd,
-		     (unsigned long)((m4u_domain)->pgd),
-		     imu_pgd_index(mva), &pa, padscpt | pgprot);
-
 	return 0;
 }
 
@@ -686,11 +676,6 @@ int m4u_map_64K(struct m4u_domain *m4u_domain, unsigned int mva,
 	pgprot = __m4u_get_pte_attr_64K(prot);
 
 	pte = imu_pte_offset_map(pgd, mva);
-
-	m4u_low_info("%s:mva:0x%x,pte:0x%p(0x%lx+0x%x),pa:0x%pa,val:0x%x\n",
-		     __func__, mva, &imu_pte_val(*pte),
-		     (unsigned long)imu_pte_map(pgd),
-		     imu_pte_index(mva), &pa, padscpt | pgprot);
 
 	for (i = 0; i < 16; i++) {
 		if (unlikely(imu_pte_val(pte[i]))) {
@@ -770,11 +755,6 @@ int m4u_map_4K(struct m4u_domain *m4u_domain, unsigned int mva, phys_addr_t pa,
 	}
 
 	imu_pte_val(*pte) = padscpt | pgprot;
-
-	m4u_low_info("%s:mva:0x%x,pte:0x%p(0x%lx+0x%x),pa:0x%pa,val:0x%x\n",
-		     __func__, mva, &imu_pte_val(*pte),
-		     (unsigned long)imu_pte_map(pgd), imu_pte_index(mva),
-		     &pa, padscpt | imu_pte_val(*pte));
 
 	imu_pte_unmap(pte);
 
@@ -938,12 +918,7 @@ int m4u_map_sgtable(struct m4u_domain *m4u_domain,
 			len = sg->length;
 #endif
 
-		m4u_low_info("%s: for_each_sg i: %d, len: %d, mva: %llu\n",
-			     __func__, i, len, map_mva);
-
 		if (map_mva + len > map_end) {
-			m4u_err("%s: map_mva(%llu)+len(0x%x)>end(%llu)\n",
-				__func__, map_mva, len, map_end);
 			break;
 		}
 
@@ -955,10 +930,6 @@ int m4u_map_sgtable(struct m4u_domain *m4u_domain,
 					map_mva, pa, len, prot);
 
 		if (ret) {
-			m4u_err("%s: ret: %d, i: %d, sg->dma: 0x%lx, sg->phy: 0x%lx, sg->offset: 0x%x\n",
-				__func__, ret, i,
-				(unsigned long)sg_dma_address(sg),
-				(unsigned long)sg_phys(sg), sg->offset);
 			goto err_out;
 		} else {
 			map_mva += len;
