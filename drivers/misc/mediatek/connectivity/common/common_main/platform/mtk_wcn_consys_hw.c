@@ -73,8 +73,10 @@
 */
 static INT32 mtk_wmt_probe(struct platform_device *pdev);
 static INT32 mtk_wmt_remove(struct platform_device *pdev);
+#ifdef CONFIG_MTK_ENG_BUILD
 static INT32 mtk_wmt_suspend(struct device *dev);
 static INT32 mtk_wmt_resume(struct device *dev);
+#endif
 
 /*******************************************************************************
 *                            P U B L I C   D A T A
@@ -138,10 +140,12 @@ const struct of_device_id apwmt_of_ids[] = {
 struct CONSYS_BASE_ADDRESS conn_reg;
 #endif
 
+#ifdef CONFIG_MTK_ENG_BUILD
 static const struct dev_pm_ops wmt_drv_pm_ops = {
 	.suspend_noirq = mtk_wmt_suspend,
 	.resume_noirq = mtk_wmt_resume,
 };
+#endif
 
 static struct platform_driver mtk_wmt_dev_drv = {
 	.probe = mtk_wmt_probe,
@@ -159,8 +163,10 @@ static struct platform_driver mtk_wmt_dev_drv = {
 /* GPIO part */
 struct pinctrl *consys_pinctrl;
 
+#ifdef CONFIG_MTK_ENG_BUILD
 struct work_struct plt_resume_worker;
 static void plat_resume_handler(struct work_struct *work);
+#endif
 
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(4, 15, 0))
 struct regmap *g_regmap;
@@ -407,7 +413,9 @@ static INT32 mtk_wmt_probe(struct platform_device *pdev)
 	osal_unsleepable_lock_init(&g_sleep_counter_spinlock);
 	osal_sleepable_lock_init(&g_adie_chipid_lock);
 
+#ifdef CONFIG_MTK_ENG_BUILD
 	INIT_WORK(&plt_resume_worker, plat_resume_handler);
+#endif
 
 	atomic_set(&g_probe_called, 1);
 
@@ -438,6 +446,7 @@ static INT32 mtk_wmt_remove(struct platform_device *pdev)
 	return 0;
 }
 
+#ifdef CONFIG_MTK_ENG_BUILD
 static INT32 mtk_wmt_suspend(struct device *dev)
 {
 	WMT_PLAT_PR_INFO(" mtk_wmt_suspend !!");
@@ -499,6 +508,7 @@ static INT32 mtk_wmt_resume(struct device *dev)
 
 	return 0;
 }
+#endif
 
 INT32 mtk_wcn_consys_sleep_info_read_all_ctrl(P_CONSYS_STATE state)
 {
