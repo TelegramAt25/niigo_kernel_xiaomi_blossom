@@ -24,6 +24,4 @@ ccflags-y += -DCMDQ_SECURE_PATH_SUPPORT
 endif
 # Enable MET
 ccflags-y += -DMET_USER_EVENT_SUPPORT
-# Enable AEE
-ccflags-y += -DCMDQ_AEE_READY
 obj-y += cmdq_mdp.o
