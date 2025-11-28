@@ -60,7 +60,6 @@ static DEFINE_MUTEX(cmdq_inst_check_mutex);
 
 static DEFINE_SPINLOCK(cmdq_write_addr_lock);
 static DEFINE_SPINLOCK(cmdq_record_lock);
-static DEFINE_SPINLOCK(cmdq_first_err_lock);
 
 static struct dma_pool *mdp_rb_pool;
 static atomic_t mdp_rb_pool_cnt;
@@ -1569,6 +1568,7 @@ EXPORT_SYMBOL(cmdq_core_reset_first_dump);
 
 s32 cmdq_core_save_first_dump(const char *string, ...)
 {
+#if 0
 	int logLen;
 	va_list argptr;
 	char *buffer;
@@ -1606,6 +1606,7 @@ s32 cmdq_core_save_first_dump(const char *string, ...)
 		CMDQ_LOG("[ERR] Error0 dump saving buffer is full\n");
 	}
 	va_end(argptr);
+#endif
 	return 0;
 }
 EXPORT_SYMBOL(cmdq_core_save_first_dump);
