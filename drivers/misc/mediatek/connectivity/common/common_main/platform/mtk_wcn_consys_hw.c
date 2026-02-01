@@ -156,7 +156,9 @@ static struct platform_driver mtk_wmt_dev_drv = {
 #ifdef CONFIG_OF
 		   .of_match_table = apwmt_of_ids,
 #endif
+#ifdef CONFIG_MTK_ENG_BUILD
 		   .pm = &wmt_drv_pm_ops,
+#endif
 		   },
 };
 
