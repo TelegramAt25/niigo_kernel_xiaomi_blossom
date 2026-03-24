@@ -1,0 +1,179 @@
+name: Build
+
+on:
+  push:
+    branches:
+      - perf
+  workflow_dispatch:
+
+env:
+  CCACHE_DIR: /tmp/ccache
+  DEFCONFIG: blossom
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v3
+      - name: Notify start on Telegram
+        run: |
+          VERSION=$(awk -F'=' '
+          /^VERSION[[:space:]]*=/ {v=$2}
+          /^PATCHLEVEL[[:space:]]*=/ {p=$2}
+          /^SUBLEVEL[[:space:]]*=/ {s=$2}
+          END {
+            gsub(/^[ \t]+|[ \t]+$/,"",v); gsub(/^[ \t]+|[ \t]+$/,"",p); gsub(/^[ \t]+|[ \t]+$/,"",s);
+            if (v=="") v="0"; if (p=="") p="0"; if (s=="") s="0";
+            printf "%s.%s.%s", v, p, s
+          }' Makefile)
+          curl -s -X POST https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage \
+            -d chat_id=${{ secrets.TELEGRAM_CHAT_ID }} \
+            --data-urlencode "text=☢️ *Kernel Build Started!*
+            *Device:* Blossom
+            *Version:* beta 0.3
+            *Arch:* arm64
+            *Defconfig:* $DEFCONFIG
+            *Kernel Version:* $VERSION
+            *Commit:* [${GITHUB_SHA::7}](${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/commit/${GITHUB_SHA})" \
+            -d parse_mode=Markdown
+
+          
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq --no-install-recommends \
+            git build-essential bc bison flex \
+            libssl-dev libelf-dev zlib1g-dev \
+            lld llvm gcc g++ \
+            python2 ninja-build zip ccache
+          sudo ln -sf /usr/bin/ld.lld /usr/bin/ld || true
+          sudo ln -sf "/usr/bin/python2" /usr/bin/python
+          git clone --depth=1 https://github.com/kdrag0n/proton-clang -b master clang
+          git clone --depth=1 https://github.com/Sakurajima07/aarch64-linux-android-4.9 gcc64
+          git clone --depth=1 https://github.com/Sakurajima07/arm-linux-androideabi-4.9 gcc
+          
+      - name: Build the kernel and log output
+        run: |
+          mkdir -p out
+          START=$(date +%s)
+          export ARCH=arm64
+          export CLANG_PATH="$PWD/clang/bin"
+          export GCC32_PATH="$PWD/gcc/bin"
+          export GCC64_PATH="$PWD/gcc64/bin"
+          export PATH="$CLANG_PATH:$GCC64_PATH:$GCC32_PATH:$PATH"
+          find . -name "Makefile*" -type f -exec sed -i 's/-Werror//g' {} +
+          find . -name "Makefile*" -type f -exec sed -i 's/-implicit-function-declaration//g' {} +
+          find . -name "Makefile*" -type f -exec sed -i 's/=return-type//g' {} +
+          find . -name "Makefile*" -type f -exec sed -i 's/=unknown-warning-option//g' {} +
+          make O=out ${DEFCONFIG}_defconfig
+          sed -i 's/CONFIG_FRAME_WARN=[0-9]*/CONFIG_FRAME_WARN=8192/g' out/.config
+          make -j$(nproc --all) O=out \
+            CC=clang \
+            HOSTCC=gcc \
+            HOSTCXX=g++ \
+            CLANG_TRIPLE=aarch64-linux-gnu- \
+            CROSS_COMPILE_ARM32=arm-linux-androideabi- \
+            CROSS_COMPILE=aarch64-linux-android- \
+            KBUILD_WERROR=0 2>&1 | tee build.log || (echo "❌ СБОРКА УПАЛА. ПОСЛЕДНИЕ СТРОКИ:" && tail -n 100 build.log && exit 1)
+          END=$(date +%s)
+          echo "BUILD_DATE=$(date +'%Y-%m-%d')" >> $GITHUB_ENV
+          echo "BUILD_TIME=$((END - START))" >> $GITHUB_ENV
+          ls -l out/arch/arm64/boot/Image.gz
+          echo "MD5_CHECKSUM=$(md5sum out/arch/arm64/boot/Image.gz | cut -d ' ' -f1)" >> $GITHUB_ENV
+          echo "MD5 checksum is: $(md5sum out/arch/arm64/boot/Image.gz | cut -d ' ' -f1)"
+
+      - name: Notify complite build Telegram
+        run: |
+          VERSION=$(awk -F'=' '
+          /^VERSION[[:space:]]*=/ {v=$2}
+          /^PATCHLEVEL[[:space:]]*=/ {p=$2}
+          /^SUBLEVEL[[:space:]]*=/ {s=$2}
+          END {
+            gsub(/^[ \t]+|[ \t]+$/,"",v); gsub(/^[ \t]+|[ \t]+$/,"",p); gsub(/^[ \t]+|[ \t]+$/,"",s);
+            if (v=="") v="0"; if (p=="") p="0"; if (s=="") s="0";
+            printf "%s.%s.%s", v, p, s
+          }' Makefile)
+          curl -s -X POST https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage \
+            -d chat_id=${{ secrets.TELEGRAM_CHAT_ID }} \
+            --data-urlencode "text=☢️ *Complite the Build. Great!*
+            *Device:* Blossom
+            *Version:* beta 0.3
+            *Arch:* arm64
+            *Defconfig:* $DEFCONFIG
+            *Kernel Version:* $VERSION
+            *Commit:* [${GITHUB_SHA::7}](${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/commit/${GITHUB_SHA})" \
+            -d parse_mode=Markdown
+      
+      - name: Set build info (time, md5)
+        run: |
+          IMAGE_PATH=$(find out -name "Image.gz" | head -n 1)
+          if [ -f "$IMAGE_PATH" ]; then
+            echo "IMAGE_FOUND=$IMAGE_PATH" >> $GITHUB_ENV
+            MD5=$(md5sum "$IMAGE_PATH" | cut -d ' ' -f1)
+            echo "MD5_CHECKSUM=$MD5" >> $GITHUB_ENV
+            echo "ZIP_NAME=blossom-kernel" >> $GITHUB_ENV
+            echo "✅ Ядро найдено: $IMAGE_PATH"
+          else
+            echo "❌ Ядро НЕ НАЙДЕНО в папке out!"
+            exit 1
+          fi
+
+      - name: Create AnyKernel3 Zip
+        if: success()
+        run: |
+          git clone --depth=1 https://github.com/MrGadget84/AnyKernel3_blossom ak3
+          
+          IMAGE=$(find out/arch/arm64/boot -name "Image.gz" | head -n 1)
+          
+          if [ -z "$IMAGE" ]; then
+            echo "❌ ОШИБКА: Image.gz не найден в out/arch/arm64/boot!"
+            ls -R out/
+            exit 1
+          fi
+          
+          cp "$IMAGE" ak3/Image.gz
+          echo "✅ Image.gz скопирован из $IMAGE"
+          cd ak3
+          sed -i 's/device.name1=maguro/device.name1=blossom/g' anykernel.sh
+          sed -i 's|block=/dev/block/platform/omap/omap_hsmmc.0/by-name/boot|block=/dev/block/by-name/boot|g' anykernel.sh
+          
+          zip -r9 ../WhiteKernel-0.3-Blossom.zip * -x .git* README.md
+          cd ..
+          
+          echo "ZIP_MD5=$(md5sum WhiteKernel-0.3-Blossom.zip | cut -d ' ' -f1)" >> $GITHUB_ENV
+
+      - name: Upload Flashable ZIP Artifact
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: WhiteKernel-0.3-Blossom-Zip
+          path: WhiteKernel-0.3-Blossom.zip
+
+      - name: Notify success on Telegram
+        if: success()
+        run: |
+          curl -s -F chat_id=${{ secrets.TELEGRAM_CHAT_ID }} \
+            -F document=@WhiteKernel-Blossom.zip \
+            -F caption="✅ *Build Successful!*
+            ⏱ *Time:* ${BUILD_TIME}s
+            🔐 *MD5:* \`${ZIP_MD5}\`
+            📱 *Device:* Blossom" \
+            -F parse_mode=Markdown \
+            https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendDocument
+
+      - name: Notify failure on Telegram
+        if: failure()
+        run: |
+          curl -s -X POST https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage \
+            -d chat_id=${{ secrets.TELEGRAM_CHAT_ID }} \
+            --data-urlencode "text=❌ *Kernel build failed!*
+            *Commit:* [${GITHUB_SHA::7}](${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/commit/${GITHUB_SHA})" \
+            -d parse_mode=Markdown
+      - name: Send build log to Telegram
+        if: always()
+        run: |
+          curl -s -F document=@build.log \
+            "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendDocument?chat_id=${{ secrets.TELEGRAM_CHAT_ID }}" \
+            -F caption="📄 Kernel build log"
