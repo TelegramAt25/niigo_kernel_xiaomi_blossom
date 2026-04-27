@@ -582,13 +582,13 @@
 /*charger start*/
 &i2c5 {
     status = "okay";
-    charger@1a {
+	/*charger1@1A {
         compatible = "sgm,sgm41513_charger";
-        reg = <0x1a>;
+        reg = <0x1A>;
         sgm,sgm41513,usb-vlim = <4600>;
-        sgm,sgm41513,usb-ilim = <2000>;
+        sgm,sgm41513,usb-ilim = <500>;
         sgm,sgm41513,usb-vreg = <0x1130>;
-        sgm,sgm41513,usb-ichg = <2000>;
+        sgm,sgm41513,usb-ichg = <500>;
         sgm,sgm41513,precharge-current = <180>;
         sgm,sgm41513,termination-current = <240>;
         sgm,sgm41513,boost-voltage = <5150>;
@@ -596,9 +596,48 @@
         sgm,sgm41513,enable_term;
         sgm,sgm41513,stat-pin-ctrl = <3>;
         sgm,sgm41513,vac-ovp-threshold = <6500>;
-        status = "okay";
-    };
-    charger@6b { status = "disabled"; };
+		};
+*/
+	charger@6B {
+        compatible = "ti,bq2560x_charger","eta,eta6963_charger","cx,cx7601_charger";
+        reg = <0x6B>;
+        ti,bq2560x,usb-vlim = <4600>;
+        ti,bq2560x,usb-ilim = <2000>;
+        ti,bq2560x,usb-vreg = <4400>;
+        ti,bq2560x,usb-ichg = <2000>;
+        ti,bq2560x,precharge-current = <180>;
+        ti,bq2560x,termination-current = <240>;
+        ti,bq2560x,boost-voltage = <5150>;
+        ti,bq2560x,boost-current = <1200>;
+        ti,bq2560x,enable_term;
+        ti,bq2560x,stat-pin-ctrl = <3>;
+        ti,bq2560x,vac-ovp-threshold = <6500>;
+
+        cx,cx7601,usb-vlim = <4600>;
+        cx,cx7601,usb-ilim = <2000>;
+        cx,cx7601,usb-vreg = <4400>;
+        cx,cx7601,usb-ichg = <2000>;
+        cx,cx7601,precharge-current = <180>;
+        cx,cx7601,termination-current = <320>;
+        cx,cx7601,boost-voltage = <5150>;
+        cx,cx7601,boost-current = <1200>;
+        cx,cx7601,enable_term;
+        cx,cx7601,stat-pin-ctrl = <3>;
+        cx,cx7601,vac-ovp-threshold = <6500>;
+
+        eta,eta6963,usb-vlim = <4600>;
+        eta,eta6963,usb-ilim = <2000>;
+        eta,eta6963,usb-vreg = <4400>;
+        eta,eta6963,usb-ichg = <2000>;
+        eta,eta6963,precharge-current = <180>;
+        eta,eta6963,termination-current = <240>;
+        eta,eta6963,boost-voltage = <5150>;
+        eta,eta6963,boost-current = <1200>;
+        eta,eta6963,enable_term;
+        eta,eta6963,stat-pin-ctrl = <3>;
+        eta,eta6963,vac-ovp-threshold = <6500>;
+		};
+
 };
 /*charger end*/
 

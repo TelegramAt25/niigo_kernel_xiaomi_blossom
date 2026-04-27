@@ -198,7 +198,7 @@
 	switching_charger_mtk:switching_charger@6b {
 		compatible = "mediatek,switching_charger";
 		reg = <0x6b>;
-		status = "okay";
+		status = "disabled";
 	};
 
 };
