@@ -190,18 +190,13 @@
 
 };
 
-&i2c5 {
-	#address-cells = <1>;
-	#size-cells = <0>;
-	clock-frequency = <400000>;
-	mediatek,use-open-drain;
-	switching_charger_mtk:switching_charger@6b {
-		compatible = "mediatek,switching_charger";
-		reg = <0x6b>;
-		status = "disabled";
-	};
-
+/* УБИВАЕМ ПОЛНОСТЬЮ
+switching_charger_mtk:switching_charger@6b {
+    compatible = "mediatek,switching_charger";
+    reg = <0x6b>;
+    status = "disabled";
 };
+*/
 
 &i2c6 {
 	#address-cells = <1>;

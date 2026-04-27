@@ -599,7 +599,7 @@
 		};
 */
 	charger@6B {
-        compatible = "ti,bq2560x_charger","eta,eta6963_charger","cx,cx7601_charger";
+        compatible = "ti,bq2560x_charger";
         reg = <0x6B>;
         ti,bq2560x,usb-vlim = <4600>;
         ti,bq2560x,usb-ilim = <2000>;
