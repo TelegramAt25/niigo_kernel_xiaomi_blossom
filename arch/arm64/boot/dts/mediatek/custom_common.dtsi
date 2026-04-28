@@ -580,37 +580,40 @@
 /* AUDIO end */
 
 /*charger start*/
-/* Переопределяем существующий узел через его метку, чтобы избежать ошибки -16*/
-&switching_charger_mtk {
-    compatible = "ti,bq2560x_charger";
-    status = "okay";
-
-    /* Параметры для bq2560x */
-    ti,bq2560x,usb-vlim = <4600>;
-    ti,bq2560x,usb-ilim = <2000>;
-    ti,bq2560x,usb-vreg = <4400>;
-    ti,bq2560x,usb-ichg = <2000>;
-    ti,bq2560x,precharge-current = <180>;
-    ti,bq2560x,termination-current = <240>;
-    ti,bq2560x,boost-voltage = <5150>;
-    ti,bq2560x,boost-current = <1200>;
-    ti,bq2560x,enable_term;
-    ti,bq2560x,stat-pin-ctrl = <3>;
-    ti,bq2560x,vac-ovp-threshold = <6500>;
-
-    /* Дополнительные параметры для совместимости (если драйвер их ищет) */
-    cx,cx7601,usb-vlim = <4600>;
-    cx,cx7601,usb-ilim = <2000>;
-    cx,cx7601,usb-ichg = <2000>;
-    
-    eta,eta6963,usb-vlim = <4600>;
-    eta,eta6963,usb-ilim = <2000>;
-    eta,eta6963,usb-ichg = <2000>;
-};
-
-/* Убеждаемся, что сама шина включена */
 &i2c5 {
     status = "okay";
+
+    /* 1. Удаляем старые определения, чтобы они не мешали регистрации */
+    /delete-node/ charger1@1A;
+    /delete-node/ charger@6B;
+
+    /* 2. Сажаем драйвер bq2560x на физический адрес SGM (0x1A) */
+    charger@1A {
+        compatible = "ti,bq2560x_charger";
+        reg = <0x1A>;
+        status = "okay";
+
+        /* Основные лимиты для быстрой зарядки (2А) */
+        ti,bq2560x,usb-vlim = <4600>;
+        ti,bq2560x,usb-ilim = <2000>;  /* Входной лимит тока */
+        ti,bq2560x,usb-vreg = <4400>;
+        ti,bq2560x,usb-ichg = <2000>;  /* Ток заряда аккумулятора */
+        
+        /* Вспомогательные параметры */
+        ti,bq2560x,precharge-current = <180>;
+        ti,bq2560x,termination-current = <240>;
+        ti,bq2560x,boost-voltage = <5150>;
+        ti,bq2560x,boost-current = <1200>;
+        ti,bq2560x,enable_term;
+        ti,bq2560x,stat-pin-ctrl = <3>;
+        ti,bq2560x,vac-ovp-threshold = <6500>;
+
+        /* Дублируем для совместимости с другими вариантами драйвера */
+        cx,cx7601,usb-ilim = <2000>;
+        cx,cx7601,usb-ichg = <2000>;
+        eta,eta6963,usb-ilim = <2000>;
+        eta,eta6963,usb-ichg = <2000>;
+    };
 };
 /*charger end*/
 
