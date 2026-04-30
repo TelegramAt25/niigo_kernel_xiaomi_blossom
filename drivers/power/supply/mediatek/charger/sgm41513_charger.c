@@ -1812,7 +1812,7 @@ static int sgm41513_charger_probe(struct i2c_client *client,
             sgm->part_no);
 
     /* hs14 code for SR-AL6528A-01-258 by shanxinkai at 2022/09/13 start */
-    chg_info = SGM41513;
+    //chg_info = SGM41513;
     /* hs14 code for SR-AL6528A-01-258 by shanxinkai at 2022/09/13 end */
 
     return ret;
