@@ -817,6 +817,16 @@ config CHARGER_BQ2560X
 	  It depends on
 	  the config MTK_CHARGER.
 
+config CHARGER_SGM41513
+	bool "CHARGER_SGM41513"
+	depends on MTK_CHARGER
+	help
+	  Say Yes to enable
+	  SGM SGM41513 battery charger driver.
+	  It depends on
+	  the config MTK_CHARGER.
+
+
 config CHARGER_CX7601
     bool "CHARGER_CX7601"
 	depends on MTK_CHARGER

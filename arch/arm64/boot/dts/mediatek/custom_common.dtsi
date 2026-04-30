@@ -585,17 +585,17 @@
 	charger1@1A {
         compatible = "sgm,sgm41513_charger";
         reg = <0x1A>;
-        sgm,sgm41513,usb-vlim = <4600>;
-        sgm,sgm41513,usb-ilim = <2000>;
-        sgm,sgm41513,usb-vreg = <0x1130>;
-        sgm,sgm41513,usb-ichg = <2000>;
-        sgm,sgm41513,precharge-current = <180>;
-        sgm,sgm41513,termination-current = <240>;
-        sgm,sgm41513,boost-voltage = <5150>;
-        sgm,sgm41513,boost-current = <1200>;
-        sgm,sgm41513,enable_term;
-        sgm,sgm41513,stat-pin-ctrl = <3>;
-        sgm,sgm41513,vac-ovp-threshold = <6500>;
+        sgm41513,usb-vlim = <4600>;
+        sgm41513,usb-ilim = <2000>;
+        sgm41513,usb-vreg = <0x1130>;
+        sgm41513,usb-ichg = <2000>;
+        sgm41513,precharge-current = <180>;
+        sgm41513,termination-current = <240>;
+        sgm41513,boost-voltage = <5150>;
+        sgm41513,boost-current = <1200>;
+        sgm41513,enable_term;
+        sgm41513,stat-pin-ctrl = <3>;
+        sgm41513,vac-ovp-threshold = <6500>;
 		};
 
 	charger@6B {

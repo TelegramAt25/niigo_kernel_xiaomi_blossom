@@ -90,6 +90,7 @@ obj-$(CONFIG_AXP288_CHARGER)	+= axp288_charger.o
 obj-$(CONFIG_CHARGER_CROS_USBPD)	+= cros_usbpd-charger.o
 obj-$(CONFIG_CHARGER_BQ25601) += bq25601.o
 obj-$(CONFIG_CHARGER_BQ2560X) += bq2560x_charger.o
+obj-$(CONFIG_CHARGER_SGM41513) += sgm41513_charger.o
 obj-$(CONFIG_CHARGER_CX7601)  += cx7601_charger.o
 obj-$(CONFIG_CHARGER_RT9458) += rt9458.o
 obj-$(CONFIG_CHARGER_RT9465) += rt9465.o

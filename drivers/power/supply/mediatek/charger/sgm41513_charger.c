@@ -1707,7 +1707,7 @@ static struct charger_ops sgm41513_chg_ops = {
 
 static struct of_device_id sgm41513_charger_match_table[] = {
     {
-     .compatible = "sgm41513",
+     .compatible = "sgm,sgm41513_charger",
      },
     {},
 };
