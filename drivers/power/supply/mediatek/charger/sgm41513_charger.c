@@ -1747,12 +1747,13 @@ static int sgm41513_charger_probe(struct i2c_client *client,
         return -EINVAL;
     }
 
-    pr_info("SGM41513 part_no read: 0x%02x (expected 0x01, check skipped - chip confirmed)\n",
-            sgm->part_no);
-    if (sgm->part_no == 0x01) {
+    if (sgm->part_no == 0x00)
+    {
         pr_info("SGM41513 part number match success\n");
     } else {
-        pr_info("SGM41513 part number mismatch, but continuing (chip confirmed from working kernel)\n");
+        pr_err("SGM41513 part number match fail, part_no=0x%02x\n", sgm->part_no);
+        sgm41513_charger_remove(client);
+        return -EINVAL;
     }
 
     /* hs14 code for SR-AL6528A-01-306 by gaozhengwei at 2022/09/06 start */
