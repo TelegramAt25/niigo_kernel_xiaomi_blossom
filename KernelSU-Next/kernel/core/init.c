@@ -12,28 +12,29 @@
 #include "klog.h" // IWYU pragma: keep
 #include "manager/manager_observer.h"
 #include "manager/throne_tracker.h"
-#include "hook/syscall_hook_manager.h"
+#include "hook/hook_manager.h"
 #include "runtime/ksud.h"
 #include "runtime/ksud_boot.h"
 #include "supercall/supercall.h"
 #include "ksu.h"
 #include "infra/file_wrapper.h"
-#include "selinux/selinux.h"
-#include "hook/syscall_hook.h"
-
 #ifdef CONFIG_KSU_SUSFS
 #include <linux/susfs.h>
-#include "hook/setuid_hook.h"
-#include "feature/sucompat.h"
-#endif
+#endif // #ifdef CONFIG_KSU_SUSFS
+#include "selinux/selinux.h"
 
-#if defined(__x86_64__)
-#include <asm/cpufeature.h>
-#include <linux/version.h>
-#ifndef X86_FEATURE_INDIRECT_SAFE
-#error "FATAL: Your kernel is missing the indirect syscall bypass patches!"
-#endif
-#endif
+extern void __init ksu_lsm_hook_init(void);
+extern int ksu_handle_execveat_sucompat(int *fd, struct filename **filename_ptr,
+					void *argv, void *envp, int *flags);
+extern int ksu_handle_execveat_ksud(int *fd, struct filename **filename_ptr,
+				    void *argv, void *envp, int *flags);
+int ksu_handle_execveat(int *fd, struct filename **filename_ptr, void *argv,
+			void *envp, int *flags)
+{
+	ksu_handle_execveat_ksud(fd, filename_ptr, argv, envp, flags);
+	return ksu_handle_execveat_sucompat(fd, filename_ptr, argv, envp,
+					    flags);
+}
 
 // workaround for A12-5.10 kernel
 // Some third-party kernel (e.g. linegaeOS) uses wrong toolchain, which supports
@@ -77,26 +78,6 @@ bool ksu_late_loaded;
 
 int __init kernelsu_init(void)
 {
-#ifdef CONFIG_KSU_SUSFS
-	susfs_init();
-#endif // #ifdef KSU_SUSFS
-
-#if defined(__x86_64__)
-    // If the kernel has the hardening patch, X86_FEATURE_INDIRECT_SAFE must be set 
-    if (!boot_cpu_has(X86_FEATURE_INDIRECT_SAFE)) {
-        pr_alert("*************************************************************");
-        pr_alert("**     NOTICE NOTICE NOTICE NOTICE NOTICE NOTICE NOTICE    **");
-        pr_alert("**                                                         **");
-        pr_alert("**        X86_FEATURE_INDIRECT_SAFE is not enabled!        **");
-        pr_alert("**      KernelSU will abort initialization to prevent      **");
-        pr_alert("**                     kernel panic.                       **");
-        pr_alert("**                                                         **");
-        pr_alert("**     NOTICE NOTICE NOTICE NOTICE NOTICE NOTICE NOTICE    **");
-        pr_alert("*************************************************************");
-        return -ENOSYS;
-    }
-#endif
-
 #ifdef MODULE
 	ksu_late_loaded = (current->pid != 1);
 #else
@@ -118,19 +99,11 @@ int __init kernelsu_init(void)
         pr_err("prepare cred failed!\n");
     }
 
-#if !defined(CONFIG_KSU_SUSFS) && defined(CONFIG_KPROBES)
-	ksu_syscall_hook_init();
-#endif
-
 	ksu_feature_init();
 
 	ksu_supercalls_init();
 
-#ifdef CONFIG_KSU_SUSFS
-	ksu_sucompat_init();
-	ksu_setuid_hook_init();
-	ksu_avc_spoof_init();
-#endif
+	
 
 	if (ksu_late_loaded) {
 		pr_info("late load mode, skipping kprobe hooks\n");
@@ -147,9 +120,7 @@ int __init kernelsu_init(void)
 		ksu_allowlist_init();
 		ksu_load_allow_list();
 
-#if !defined(CONFIG_KSU_SUSFS) && defined(CONFIG_KPROBES)
 		ksu_syscall_hook_manager_init();
-#endif
 
 		ksu_throne_tracker_init();
 		ksu_observer_init();
@@ -164,13 +135,17 @@ int __init kernelsu_init(void)
 		}
 
 	} else {
-#if !defined(CONFIG_KSU_SUSFS) && defined(CONFIG_KPROBES)
 		ksu_syscall_hook_manager_init();
-#endif
+		
+		ksu_lsm_hook_init();
 
 		ksu_allowlist_init();
 
 		ksu_throne_tracker_init();
+
+#ifdef CONFIG_KSU_SUSFS
+    	susfs_init();
+#endif // #ifdef CONFIG_KSU_SUSFS
 
 		ksu_ksud_init();
 
@@ -188,9 +163,7 @@ int __init kernelsu_init(void)
 void __exit kernelsu_exit(void)
 {
 	// Phase 1: Stop all hooks first to prevent new callbacks
-#if !defined(CONFIG_KSU_SUSFS) && defined(CONFIG_KPROBES)
 	ksu_syscall_hook_manager_exit();
-#endif
 
 	ksu_supercalls_exit();
 
@@ -206,12 +179,6 @@ void __exit kernelsu_exit(void)
 	ksu_throne_tracker_exit();
 
 	ksu_allowlist_exit();
-
-#ifdef CONFIG_KSU_SUSFS
-	ksu_avc_spoof_exit();
-	ksu_sucompat_exit();
-	ksu_setuid_hook_exit();
-#endif
 
 	ksu_feature_exit();
 

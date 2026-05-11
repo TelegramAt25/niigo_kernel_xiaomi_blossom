@@ -10,76 +10,56 @@
 #include "manager/manager_observer.h"
 #include "manager/throne_tracker.h"
 
-#include "linux/jump_label.h"
-
 bool ksu_module_mounted __read_mostly = false;
 bool ksu_boot_completed __read_mostly = false;
+extern void stop_input_hook();
 
-#ifdef CONFIG_KSU_SUSFS
-extern struct static_key_true ksu_is_input_hook_enabled;
-#endif
-
-extern void ksu_avc_spoof_late_init(void);
+extern void ksu_avc_spoof_late_init();
 
 void on_post_fs_data(void)
 {
-    static bool done = false;
+	static bool done = false;
+	if (done) {
+		pr_info("on_post_fs_data already done\n");
+		return;
+	}
+	done = true;
+	pr_info("on_post_fs_data!\n");
 
-    if (done) {
-        pr_info("on_post_fs_data already done\n");
-        return;
-    }
-
-    done = true;
-    pr_info("on_post_fs_data!\n");
-
-    ksu_load_allow_list();
-    ksu_observer_init();
-    // Sanity check for safe mode only needs early-boot input samples.
-#ifdef CONFIG_KSU_SUSFS
-    if (static_key_enabled(&ksu_is_input_hook_enabled)) {
-        static_branch_disable(&ksu_is_input_hook_enabled);
-        pr_info("ksu_is_input_hook is disabled\n");
-    }
-#else
-    ksu_stop_input_hook_runtime();
-#endif
+	ksu_load_allow_list();
+	ksu_observer_init();
+	// sanity check, this may influence the performance
+	stop_input_hook();
 }
 
-#ifdef CONFIG_EXT4_FS
 extern void ext4_unregister_sysfs(struct super_block *sb);
 
 int nuke_ext4_sysfs(const char *mnt)
 {
-    struct path path;
-    int err = kern_path(mnt, 0, &path);
+	struct path path;
+	int err = kern_path(mnt, 0, &path);
+	if (err) {
+		pr_err("nuke path err: %d\n", err);
+		return err;
+	}
 
-    if (err) {
-        pr_err("nuke path err: %d\n", err);
-        return err;
-    }
+	struct super_block *sb = path.dentry->d_inode->i_sb;
+	const char *name = sb->s_type->name;
+	if (strcmp(name, "ext4") != 0) {
+		pr_info("nuke but module aren't mounted\n");
+		path_put(&path);
+		return -EINVAL;
+	}
 
-    if (strcmp(path.dentry->d_inode->i_sb->s_type->name, "ext4") != 0) {
-        pr_info("nuke but module aren't mounted\n");
-        path_put(&path);
-        return -EINVAL;
-    }
-
-    ext4_unregister_sysfs(path.dentry->d_inode->i_sb);
-    path_put(&path);
-    return 0;
+	ext4_unregister_sysfs(sb);
+	path_put(&path);
+	return 0;
 }
-#else
-int nuke_ext4_sysfs(const char *mnt)
-{
-    return -EOPNOTSUPP;
-}
-#endif
 
 void on_module_mounted(void)
 {
-    pr_info("on_module_mounted!\n");
-    ksu_module_mounted = true;
+	pr_info("on_module_mounted!\n");
+	ksu_module_mounted = true;
 }
 
 void on_boot_completed(void)

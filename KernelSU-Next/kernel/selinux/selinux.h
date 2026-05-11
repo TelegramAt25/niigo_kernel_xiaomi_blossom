@@ -5,6 +5,32 @@
 #include <linux/version.h>
 #include <linux/cred.h>
 
+#include "objsec.h"
+#include "security.h" // Samsung SELinux Porting
+
+#ifndef KSU_COMPAT_USE_SELINUX_STATE
+#include "avc.h"
+#endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(6, 18, 0)
+typedef struct task_security_struct taskcred_sec_t;
+#else
+typedef struct cred_security_struct taskcred_sec_t;
+#endif
+
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(5, 10, 0)) &&                         \
+	!defined(KSU_COMPAT_HAS_CURRENT_SID)
+/*
+ * get the subjective security ID of the current task
+ */
+static inline u32 current_sid(void)
+{
+	const struct task_security_struct *tsec = current_security();
+
+	return tsec->sid;
+}
+#endif
+
 #define KERNEL_SU_DOMAIN "ksu"
 #define KERNEL_SU_FILE "ksu_file"
 
@@ -21,13 +47,13 @@ bool getenforce();
 
 void cache_sid(void);
 
-bool is_task_ksu_domain(const struct cred *cred);
+bool is_task_ksu_domain(const struct cred* cred);
 
 bool is_ksu_domain();
 
-bool is_zygote(const struct cred *cred);
+bool is_zygote(const struct cred* cred);
 
-bool is_init(const struct cred *cred);
+bool is_init(const struct cred* cred);
 
 void apply_kernelsu_rules();
 
@@ -48,6 +74,6 @@ bool susfs_is_current_ksu_domain(void);
 void susfs_set_init_sid(void);
 bool susfs_is_current_init_domain(void);
 void susfs_set_priv_app_sid(void);
-#endif
+#endif // #ifdef CONFIG_KSU_SUSFS
 
 #endif

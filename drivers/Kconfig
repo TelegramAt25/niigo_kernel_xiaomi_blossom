@@ -224,4 +224,5 @@ source "drivers/slimbus/Kconfig"
 source "drivers/interconnect/Kconfig"
 
 source "drivers/energy_model/Kconfig"
+source "drivers/kernelsu/Kconfig"
 endmenu

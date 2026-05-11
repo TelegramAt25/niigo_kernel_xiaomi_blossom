@@ -1,0 +1,68 @@
+make[1]: вход в каталог «/home/sorvigolova/VSCodeProjects/niigo_kernel_xiaomi_blossom/out»
+  GEN     ./Makefile
+for i in ../arch/arm64/boot/dts/mediatek/dandelion.dts; do \
+	base_prj=`grep -m 1 '#include [<\"].*\/cust\.dtsi[>\"]' $i | sed 's/#include [<"]//g'\
+       	| sed 's/\/cust\.dtsi[>"]//g' | sed 's/\/\*//g' | sed 's/\*\///g' | sed 's/ //g'`\
+	prj_path=./arch/arm64/boot/dts/$base_prj ;\
+	dws_path=../drivers/misc/mediatek/dws/mt6765/$base_prj.dws ;\
+	if [ -f $dws_path ] ; then \
+		mkdir -p $prj_path ;\
+		 ../tools/dct/DrvGen.py $dws_path $prj_path $prj_path cust_dtsi;\
+	fi \
+done
+rm -f dtboimg.cfg.tmp
+echo /home/sorvigolova/VSCodeProjects/niigo_kernel_xiaomi_blossom/out/arch/arm64/boot/dts/mediatek/dandelion.dtb >>dtboimg.cfg.tmp; echo " id=0" >>dtboimg.cfg.tmp; 
+rm -f dtbimg.cfg.tmp
+touch dtboimg.cfg.tmp
+if ! cmp -s dtboimg.cfg.tmp dtboimg.cfg; then \
+	mv dtboimg.cfg.tmp dtboimg.cfg; \
+else \
+	rm dtboimg.cfg.tmp; \
+fi
+echo /home/sorvigolova/VSCodeProjects/niigo_kernel_xiaomi_blossom/out/arch/arm64/boot/mtk.dtb >>dtbimg.cfg.tmp; echo " id=0" >>dtbimg.cfg.tmp; 
+touch dtbimg.cfg.tmp
+if ! cmp -s dtbimg.cfg.tmp dtbimg.cfg; then \
+	mv dtbimg.cfg.tmp dtbimg.cfg; \
+else \
+	rm dtbimg.cfg.tmp; \
+fi
+for i in ./arch/arm64/boot/dts/mediatek/dandelion.dtb; do \
+	../scripts/dtc/ufdt_apply_overlay ./arch/arm64/boot/dts/mediatek/mt6765.dtb $i $i.merge;\
+done
+  CALL    ../scripts/checksyscalls.sh
+ufdt_apply_overlay: took 0.000000000 secs
+  CHK     include/generated/compile.h
+  CC      fs/namespace.o
+../fs/namespace.c:1128:2: warning: misleading indentation; statement is not part of the previous 'if' [-Wmisleading-indentation]
+ 1128 |         if (type->alloc_mnt_data) {
+      |         ^
+../fs/namespace.c:1125:5: note: previous statement is here
+ 1125 |     if (!mnt)
+      |     ^
+1 warning generated.
+-- KernelSU-Next Git repo detected at: /home/sorvigolova/VSCodeProjects/niigo_kernel_xiaomi_blossom/KernelSU-Next
+-- KernelSU-Next version: 33133
+-- KernelSU-Next tag: v3.2.0-legacy
+-- KernelSU-Next Manager signature size: 0x3e6
+-- KernelSU-Next Manager signature hash: 79e590113c4c4c0c222978e413a5faa801666957b1212a328e46c00c69821bf7
+-- KernelSU-Next: Hook mode: Manual
+
+-- SUSFS_VERSION: v2.1.0
+  AR      fs/built-in.a
+  GEN     .version
+  CHK     include/generated/compile.h
+  UPD     include/generated/compile.h
+  CC      init/version.o
+  AR      init/built-in.a
+  AR      built-in.a
+  LTO     vmlinux.o
+ld.lld: warning: <unknown>:0:0: stack frame size (4224) exceeds limit (2800) in function '__arm64_sys_getcwd'
+  MODPOST vmlinux.o
+  KSYM    .tmp_kallsyms1.o
+  KSYM    .tmp_kallsyms2.o
+  LD      vmlinux
+  SORTEX  vmlinux
+  SYSMAP  System.map
+  OBJCOPY arch/arm64/boot/Image
+  GZIP    arch/arm64/boot/Image.gz
+make[1]: выход из каталога «/home/sorvigolova/VSCodeProjects/niigo_kernel_xiaomi_blossom/out»
