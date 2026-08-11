@@ -1,0 +1,156 @@
+```yaml
+name: Build Saiguu Kernel
+
+on:
+  push:
+    branches:
+      - saiguu_v1
+  workflow_dispatch:
+
+env:
+  KERNEL_DEFCONFIG: "blossom_defconfig"
+  KERNEL_ARCH: "arm64"
+  KBUILD_BUILD_USER: "Saiguu-CI"
+  KBUILD_BUILD_HOST: "github-actions"
+
+jobs:
+  build:
+    name: Build Saiguu Kernel
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Install build dependencies
+        run: |
+          export DEBIAN_FRONTEND=noninteractive
+
+          sudo apt-get update
+
+          sudo apt-get install -y \
+            bc \
+            bison \
+            flex \
+            build-essential \
+            libssl-dev \
+            libelf-dev \
+            cpio \
+            kmod \
+            git \
+            zip \
+            curl \
+            ca-certificates \
+            wget \
+            python3 \
+            rsync
+
+      - name: Configure Git
+        run: |
+          git config --global url."https://".insteadOf git://
+
+      - name: Clone Clang r383902
+        run: |
+          git clone --depth=1 \
+            https://github.com/kdrag0n/proton-clang.git \
+            /tmp/clang
+
+      - name: Clone Android GCC ARM64
+        run: |
+          git clone --depth=1 \
+            https://github.com/LineageOS/android_prebuilts_gcc_linux-x86_aarch64_aarch64-linux-android-4.9.git \
+            /tmp/gcc-aarch64
+
+      - name: Clone Android GCC ARM32
+        run: |
+          git clone --depth=1 \
+            https://github.com/LineageOS/android_prebuilts_gcc_linux-x86_arm_arm-linux-androideabi-4.9.git \
+            /tmp/gcc-arm
+
+      - name: Verify toolchains
+        run: |
+          echo "=== Clang ==="
+          /tmp/clang/bin/clang --version || true
+
+          echo "=== GCC ARM64 ==="
+          /tmp/gcc-aarch64/bin/aarch64-linux-android-gcc --version
+
+          echo "=== GCC ARM32 ==="
+          /tmp/gcc-arm/bin/arm-linux-androideabi-gcc --version
+
+      - name: Configure kernel
+        run: |
+          export PATH="/tmp/clang/bin:/tmp/gcc-aarch64/bin:/tmp/gcc-arm/bin:${PATH}"
+
+          export ARCH="${KERNEL_ARCH}"
+          export CROSS_COMPILE="aarch64-linux-android-"
+          export CROSS_COMPILE_ARM32="arm-linux-androideabi-"
+          export CC="clang"
+          export CLANG_TRIPLE="aarch64-linux-gnu-"
+
+          make O=out \
+            ARCH="${ARCH}" \
+            "${KERNEL_DEFCONFIG}"
+
+      - name: Show important USB configuration
+        run: |
+          echo "=== USB / MUSB configuration ==="
+
+          grep -E \
+            'CONFIG_USB|CONFIG_MUSB|CONFIG_USB_PHY|CONFIG_USB_ROLE' \
+            out/.config || true
+
+      - name: Build kernel
+        run: |
+          export PATH="/tmp/clang/bin:/tmp/gcc-aarch64/bin:/tmp/gcc-arm/bin:${PATH}"
+
+          export ARCH="${KERNEL_ARCH}"
+          export CROSS_COMPILE="aarch64-linux-android-"
+          export CROSS_COMPILE_ARM32="arm-linux-androideabi-"
+          export CC="clang"
+          export CLANG_TRIPLE="aarch64-linux-gnu-"
+
+          make -j"$(nproc)" \
+            O=out \
+            ARCH="${ARCH}" \
+            CC=clang \
+            CLANG_TRIPLE="${CLANG_TRIPLE}" \
+            CROSS_COMPILE="${CROSS_COMPILE}" \
+            CROSS_COMPILE_ARM32="${CROSS_COMPILE_ARM32}" \
+            2>&1 | tee build.log
+
+      - name: Show kernel output
+        if: always()
+        run: |
+          echo "=== Kernel output ==="
+          ls -lah out/arch/arm64/boot/ || true
+
+      - name: Upload kernel image
+        uses: actions/upload-artifact@v4
+        with:
+          name: Saiguu-kernel-${{ github.sha }}
+          path: |
+            out/arch/arm64/boot/Image
+            out/arch/arm64/boot/Image.gz
+            out/arch/arm64/boot/Image.gz-dtb
+            out/arch/arm64/boot/dts/
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Upload build configuration
+        uses: actions/upload-artifact@v4
+        with:
+          name: Saiguu-config-${{ github.sha }}
+          path: out/.config
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Upload build log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Saiguu-build-log-${{ github.sha }}
+          path: build.log
+          if-no-files-found: warn
+          retention-days: 14
+```
